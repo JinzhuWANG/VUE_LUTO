@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue Learn</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/vue-router@4.5.1/dist/vue-router.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+    <!-- Data -->
+    <script src="./data/area_1_total_area_wide_data.js" defer></script>
+
+    <!-- Components -->
+    <script src="./components/chart_container.js" defer></script>
+    <script src="./components/sidebar.js" defer></script>
+
+    <!-- Views -->
+    <script src="./views/Home.js" defer></script>
+    <script src="./views/Area.js" defer></script>
+
+    <!-- Main app -->
+    <script src="./index.js" defer></script>
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="flex">
+        <!-- Sidebar -->
+        <side-bar></side-bar>
+
+        <!-- Main content -->
+        <div class="flex-1">
+          <router-view></router-view>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
