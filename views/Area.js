@@ -5,10 +5,28 @@ window.AreaView = {
     const chartOptions = ref(null);
     const chartData = ref(null);
 
-    // Dynamically load the script when component is created
+    // Dynamically load the script only if not already loaded
     const loadScript = () => {
+      // Check if script is already loaded
+      const scriptId = "area_1_total_area_wide";
+      const existingScript = document.getElementById(scriptId);
+
+      // If script exists and globals are available, use them immediately
+      if (
+        existingScript &&
+        window.area_1_total_area_wide_option &&
+        window.area_1_total_area_wide_data
+      ) {
+        chartOptions.value = window.area_1_total_area_wide_option;
+        chartData.value = window.area_1_total_area_wide_data;
+        isLoading.value = false;
+        return Promise.resolve();
+      }
+
+      // Otherwise load the script
       return new Promise((resolve, reject) => {
         const script = document.createElement("script");
+        script.id = scriptId; // Add an ID to identify this script
         script.src = "./data/area_1_total_area_wide_data.js";
         script.onload = () => {
           chartOptions.value = window.area_1_total_area_wide_option;
