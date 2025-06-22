@@ -3,6 +3,7 @@ window.area_1_total_area_wide_option = {
     type: "column",
     marginRight: 300,
     height: 600,
+    backgroundColor: '#f4f3ef',
   },
   title: {
     text: "Landuse Areas",
