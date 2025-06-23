@@ -11,9 +11,12 @@
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 
+    <!-- Load icons.js -->
+    <script src="./resources/icons.js"></script>
+
     <!-- Components -->
-    <script src="./components/chart_container.js" defer></script>
     <script src="./components/sidebar.js" defer></script>
+    <script src="./components/chart_container.js" defer></script>
 
     <!-- Views -->
     <script src="./views/Home.js" defer></script>
@@ -25,18 +28,18 @@
 
     <!-- Main app -->
     <script src="./index.js" defer></script>
-
-    <!-- Dataset scripts -->
   </head>
 
   <body>
     <div id="app">
       <div class="flex">
         <!-- Sidebar -->
-        <side-bar></side-bar>
+        <div class="w-[250px] min-h-screen p-4">
+          <side-bar></side-bar>
+        </div>
 
         <!-- Main content -->
-        <div class="flex-1 bg-[#f4f3ef]">
+        <div class="flex-1">
           <router-view></router-view>
         </div>
       </div>
