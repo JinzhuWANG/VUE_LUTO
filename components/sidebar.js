@@ -32,7 +32,7 @@ window.Sidebar = {
     <aside id="sidebar-multi-level-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
       <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
         <div class="flex items-center ml-1 py-4 mb-4">
-          <img src="https://avatars.githubusercontent.com/u/93893100?s=48&v=4" alt="LUTO 2.0" class="rounded-full w-10 h-10" />
+          <img src="resources/LUTO.png" alt="LUTO 2.0" class="rounded-full w-10 h-10" />
           <span class="ms-3 text-xl font-semibold">LUTO 2.0</span>
         </div>
         <ul class="space-y-2 font-medium">
