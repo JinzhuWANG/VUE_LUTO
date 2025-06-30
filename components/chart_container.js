@@ -42,7 +42,7 @@ window.Highchart = {
 
       // If script exists but data wasn't stored in our datasets object
       if (
-        document.getElementById(`${datasetName}_script`) &&
+        document.getElementById(`${datasetName}_data`) &&
         window[`${datasetName}_option`] &&
         window[`${datasetName}_data`]
       ) {
@@ -55,11 +55,8 @@ window.Highchart = {
 
       // Load both scripts concurrently
       return Promise.all([
-        loadScript(`./data/${datasetName}_data.js`, `${datasetName}_script`),
-        loadScript(
-          `./data/${datasetName}_options.js`,
-          `${datasetName}_options`
-        ),
+        loadScript(`./data/${datasetName}_data.js`, `${datasetName}_data`),
+        loadScript(`./data/${datasetName}_options.js`, `${datasetName}_options`),
       ])
         .then(() => {
           // Store data once both scripts are loaded
