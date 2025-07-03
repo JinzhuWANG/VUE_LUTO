@@ -34,18 +34,14 @@ window.Highchart = {
     };
 
     // Load a specific dataset by name
-    const loadDataset = (datasetName) => {
+    const loadDataset = async (datasetName) => {
       // If already loaded, use from cache
       if (datasets[datasetName]) {
         return Promise.resolve(datasets[datasetName]);
       }
 
-      // If script exists but data wasn't stored in our datasets object
-      if (
-        document.getElementById(`${datasetName}_data`) &&
-        window[`${datasetName}_option`] &&
-        window[`${datasetName}_data`]
-      ) {
+      // If script exists in window, use it directly
+      if (window[`${datasetName}_option`] && window[`${datasetName}_data`]) {
         datasets[datasetName] = {
           options: window[`${datasetName}_option`],
           data: window[`${datasetName}_data`],
@@ -54,88 +50,79 @@ window.Highchart = {
       }
 
       // Load both scripts concurrently
-      return Promise.all([
-        loadScript(`./data/${datasetName}_data.js`, `${datasetName}_data`),
-        loadScript(`./data/${datasetName}_options.js`, `${datasetName}_options`),
-      ])
-        .then(() => {
-          // Store data once both scripts are loaded
-          datasets[datasetName] = {
-            options: window[`${datasetName}_option`],
-            data: window[`${datasetName}_data`],
-          };
-          return datasets[datasetName];
+      try {
+        await Promise.all([
+          loadScript(`./data/${datasetName}_data.js`, `${datasetName}_data`),
+          loadScript(
+            `./data/${datasetName}_options.js`,
+            `${datasetName}_options`
+          ),
+        ]);
+        // Store data once both scripts are loaded
+        datasets[datasetName] = {
+          options: window[`${datasetName}_option`],
+          data: window[`${datasetName}_data`],
+        };
+        return datasets[datasetName];
+      } catch (error) {
+        console.error(`Error loading dataset ${datasetName}:`, error);
+        throw error;
+      }
+    };
+
+    // Function to handle dataset loading and chart creation
+    const createOrUpdataChart = (datasetName) => {
+      isLoading.value = true;
+      loadDataset(datasetName)
+        .then((dataset) => {
+          if (!dataset) return;
+
+          // First set loading to false to ensure the div is rendered
+          isLoading.value = false;
+
+          // Then wait for the DOM to update before creating the chart
+          nextTick(() => {
+            if (chartInstance.value) {
+              chartInstance.value.destroy();
+              chartInstance.value = null;
+            }
+
+            if (chartElement.value) {
+              try {
+                chartInstance.value = Highcharts.chart(chartElement.value, {
+                  ...dataset.options,
+                  series: dataset.data,
+                });
+              } catch (error) {
+                console.error("Error creating chart:", error);
+              }
+            } else {
+              console.error("Chart element not found in DOM");
+            }
+          });
         })
         .catch((error) => {
           console.error(`Error loading dataset ${datasetName}:`, error);
-          throw error;
+          isLoading.value = false;
         });
     };
-
-    // Create or update chart
-    const createOrUpdateChart = () => {
-      const dataset = datasets[props.datasetName];
-      if (!dataset) return;
-
-      // First set loading to false to ensure the div is rendered
-      isLoading.value = false;
-
-      // Then wait for the DOM to update before creating the chart
-      nextTick(() => {
-        if (chartInstance.value) {
-          chartInstance.value.destroy();
-          chartInstance.value = null;
-        }
-
-        if (chartElement.value) {
-          try {
-            chartInstance.value = Highcharts.chart(chartElement.value, {
-              ...dataset.options,
-              series: dataset.data,
-            });
-          } catch (error) {
-            console.error("Error creating chart:", error);
-          }
-        } else {
-          console.error("Chart element not found in DOM");
-        }
-      });
-    };
-
-    // Watch for dataset name changes
-    watch(
-      () => props.datasetName,
-      (newDatasetName) => {
-        isLoading.value = true;
-        loadDataset(newDatasetName)
-          .then(() => {
-            // Let createOrUpdateChart handle setting isLoading to false
-            createOrUpdateChart();
-          })
-          .catch((error) => {
-            console.error(`Error loading dataset ${newDatasetName}:`, error);
-            isLoading.value = false;
-          });
-      }
-    );
 
     // Load initial dataset
     onMounted(() => {
-      loadDataset(props.datasetName)
-        .then(() => {
-          // Let createOrUpdateChart handle setting isLoading to false
-          createOrUpdateChart();
-        })
-        .catch((error) => {
-          console.error("Initial dataset load failed:", error);
-          isLoading.value = false;
-        });
+      createOrUpdataChart(props.datasetName);
     });
+
+    // Watch for dataset name changes and handle chart updates
+    watch(
+      () => props.datasetName,
+      (newDatasetName) => {
+        createOrUpdataChart(newDatasetName);
+      }
+    );
 
     return {
       isLoading,
       chartElement,
-      datasetName: props.datasetName, // Add this if you need it in the template
     };
   },
   template: `

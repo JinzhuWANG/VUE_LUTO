@@ -8,14 +8,27 @@ window.area_1_total_area_wide_option = {
         text: "Landuse Areas",
         align: "left",
     },
+    yAxis: {
+        title: {
+            text: "Area (million km2)",
+        },
+    },
     legend: {
+        itemStyle: {
+            fontSize: "10.5px",
+        },
         align: "right",
-        verticalAlign: "middle",
         layout: "vertical",
-        x: 50,
+        x: -10,
+        verticalAlign: "middle",
+        itemMarginTop: 0,
+        itemMarginBottom: 0.75,
     },
     tooltip: {
-        pointFormat: "{point.y:.2f}",
+        formatter: function () {
+            return `<b>Year:</b> ${this.x}<br><b>${this.series.name
+                }:</b>${this.y.toFixed(2)}<br/>`;
+        },
     },
     plotOptions: {
         column: {
