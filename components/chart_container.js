@@ -1,4 +1,4 @@
-const { ref, reactive, onMounted, watch, nextTick } = Vue;
+
 
 window.Highchart = {
   props: {
@@ -8,6 +8,8 @@ window.Highchart = {
     },
   },
   setup(props) {
+    const { ref, reactive, onMounted, watch, nextTick } = Vue
+
     // Reactive state for loading status and datasets
     const isLoading = ref(true);
     const datasets = reactive({});
