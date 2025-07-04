@@ -180,6 +180,11 @@ window.HomeView = {
       }
     );
 
+    // Function to toggle map visibility manually
+    const toggleMapVisibility = () => {
+      isMapVisible.value = !isMapVisible.value;
+    };
+
     // Watch to change Chart 
     watch(
       [activeRegionName, activeDataset, activeDatatype],
@@ -195,6 +200,8 @@ window.HomeView = {
       activeDataset,
       activeDatatype,
       chartOptions,
+      windowWidth,
+      toggleMapVisibility,
     };
   },
 
@@ -205,32 +212,32 @@ window.HomeView = {
         <div>
           <p class="text-black text-xl font-bold p-2">Overall Ranking</p>
         </div>
-        <div class="flex justify-start items-start ">
-          <div class="flex flex-1 items-center mr-7 h-[150px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4]">
+        <div class="flex flex-col md:flex-row justify-start items-start space-y-4 md:space-y-0">
+          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4] w-full w-[1/4]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
-          <div class="flex flex-1 items-center mr-7 h-[150px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef]">
+          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef] w-full w-[1/4]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
-          <div class="flex flex-1 items-center mr-7 h-[150px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137]">
+          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137] w-full w-[1/4]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
-          <div class="flex flex-1 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d]">
+          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d] w-full w-[1/4]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
         </div>
       </div>
       
       <!-- Map selection and statistics overview -->
-      <div class="flex">
+      <div class="flex flex-col xl:flex-row">
         <!-- Map selection -->
-        <div v-show="isMapVisible" class="rounded-[10px]  bg-white shadow-md mt-7 mr-7">
+        <div v-show="isMapVisible" class="rounded-[10px] bg-white shadow-md mt-7 mr-7 w-[500px]">
           <p class="text-sm h-[50px] p-4">Selected Region: <strong>{{ activeRegionName }}</strong></p>
           <hr class="border-gray-300">
-          <div class="h-[500px] w-[500px]" ref="mapElement" style="background: transparent;"></div>
+          <div class="h-[500px]" ref="mapElement" style="background: transparent;"></div>
         </div>
         <!-- Statistics overview -->
-        <div class="flex-1 h-[550px] rounded-[10px] bg-white shadow-md mt-7">
+        <div class="flex-1 h-[550px] rounded-[10px] bg-white shadow-md mt-7 w-full w-[calc(100%-500px)]">
           <p class="h-[50px] text-sm p-4">Statistics overview for <strong>{{ activeRegionName }}</strong></p>
           <hr class="border-gray-300">
           <div>
