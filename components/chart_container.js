@@ -1,10 +1,12 @@
-
-
 window.Highchart = {
   props: {
     datasetName: {
       type: String,
       required: true,
+    },
+    options: {
+      type: Object,
+      required: false,
     },
   },
   setup(props) {
@@ -79,6 +81,14 @@ window.Highchart = {
         .then((dataset) => {
           if (!dataset) return;
 
+          if (props.options) {
+            // Merge options if provided
+            dataset.options = {
+              ...dataset.options,
+              ...props.options,
+            };
+          }
+
           // First set loading to false to ensure the div is rendered
           isLoading.value = false;
 
@@ -132,7 +142,7 @@ window.Highchart = {
     <div v-if="isLoading" class="flex justify-center items-center h-[400px]">
       <div class="text-lg">Loading data...</div>
     </div>
-    
+
     <div v-else ref="chartElement"></div>
   </div>
 `,
