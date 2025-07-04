@@ -1,11 +1,18 @@
 window.HomeView = {
   setup() {
-    const { ref, onMounted } = Vue;
+    const { ref, onMounted, watch } = Vue;
 
-    const message = ref("Welcome to Home Dashboard");
     const mapElement = ref(null);
-    const tooltip = ref(null);
     const selectedRegion = ref(null);
+    const isMapVisible = ref(window.innerWidth >= 1280);
+    const windowWidth = ref(window.innerWidth);
+    const hoverTooltip = ref(null);
+    const persistentTooltip = ref(null);
+
+    const australiaBounds = L.latLngBounds(
+      [-43, 113], // Southwest corner
+      [-12, 154]  // Northeast corner
+    );
 
     const loadGeoJSONData = () => {
       return new Promise((resolve, reject) => {
@@ -24,21 +31,33 @@ window.HomeView = {
       });
     };
 
+    const updateMapView = (map) => {
+      const zoomLevel = map.getBoundsZoom(australiaBounds);
+      const center = australiaBounds.getCenter();
+      map.setView(center, zoomLevel, { animate: false });
+    };
+
     onMounted(async () => {
       try {
         const geoJSONData = await loadGeoJSONData();
 
         const map = L.map(mapElement.value, {
-          center: [-27, 133],
-          zoom: 4,
-          maxZoom: 6,
-          minZoom: 4,
           zoomControl: false,
           attributionControl: false,
+          zoomSnap: 0.1,
+          dragging: false, // Disable dragging
+          scrollWheelZoom: false, // Disable scroll wheel zoom
+          doubleClickZoom: false, // Disable double-click zoom
         });
 
-        let hoverTooltip = null;
-        let persistentTooltip = null;
+        updateMapView(map);
+
+        window.addEventListener('resize', () => {
+          map.invalidateSize();
+          updateMapView(map);
+        });
+
+
 
         const highlightStyle = {
           color: "#ff0000",
@@ -54,9 +73,10 @@ window.HomeView = {
         };
 
         const defaultStyle = {
-          color: "#ff7800",
-          weight: 1,
-          opacity: 0.65,
+          color: "#fefefe",
+          fillColor: "#acb5bd",
+          fillOpacity: 0.5,
+          weight: 0.5,
         };
 
         L.geoJSON(geoJSONData, {
@@ -70,34 +90,34 @@ window.HomeView = {
                 }
 
                 // Remove existing hover tooltip
-                if (hoverTooltip) {
-                  map.removeLayer(hoverTooltip);
+                if (hoverTooltip.value) {
+                  map.removeLayer(hoverTooltip.value);
                 }
 
                 // Create new hover tooltip only if this isn't the selected region
                 if (selectedRegion.value !== layer) {
-                  hoverTooltip = L.tooltip({
+                  hoverTooltip.value = L.tooltip({
                     permanent: false,
                     direction: "top",
                   });
-                  hoverTooltip.setContent(feature.properties.NHT2NAME);
-                  hoverTooltip.setLatLng(e.latlng);
-                  hoverTooltip.addTo(map);
+                  hoverTooltip.value.setContent(feature.properties.NHT2NAME);
+                  hoverTooltip.value.setLatLng(e.latlng);
+                  hoverTooltip.value.addTo(map);
                 }
               },
               mousemove: (e) => {
                 const layer = e.target;
-                if (selectedRegion.value !== layer && hoverTooltip) {
-                  hoverTooltip.setLatLng(e.latlng);
+                if (selectedRegion.value !== layer && hoverTooltip.value) {
+                  hoverTooltip.value.setLatLng(e.latlng);
                 }
               },
               mouseout: (e) => {
                 const layer = e.target;
                 if (selectedRegion.value !== layer) {
                   layer.setStyle(defaultStyle);
-                  if (hoverTooltip) {
-                    map.removeLayer(hoverTooltip);
-                    hoverTooltip = null;
+                  if (hoverTooltip.value) {
+                    map.removeLayer(hoverTooltip.value);
+                    hoverTooltip.value = null;
                   }
                 }
 
@@ -113,14 +133,14 @@ window.HomeView = {
                 }
 
                 // Remove previous persistent tooltip
-                if (persistentTooltip) {
-                  map.removeLayer(persistentTooltip);
+                if (persistentTooltip.value) {
+                  map.removeLayer(persistentTooltip.value);
                 }
 
                 // Remove hover tooltip if it exists
-                if (hoverTooltip) {
-                  map.removeLayer(hoverTooltip);
-                  hoverTooltip = null;
+                if (hoverTooltip.value) {
+                  map.removeLayer(hoverTooltip.value);
+                  hoverTooltip.value = null;
                 }
 
                 // Set new selection
@@ -128,43 +148,73 @@ window.HomeView = {
                 selectedRegion.value.setStyle(persistentStyle);
 
                 // Create persistent tooltip
-                persistentTooltip = L.tooltip({
+                persistentTooltip.value = L.tooltip({
                   permanent: true,
                   direction: "top",
                 });
-                persistentTooltip.setContent(feature.properties.NHT2NAME);
-                persistentTooltip.setLatLng(e.latlng);
-                persistentTooltip.addTo(map);
+                persistentTooltip.value.setContent(feature.properties.NHT2NAME);
+                persistentTooltip.value.setLatLng(e.latlng);
+                persistentTooltip.value.addTo(map);
               },
             });
           },
         }).addTo(map);
-
 
       } catch (error) {
         console.error("Error initializing map:", error);
       }
     });
 
+    watch(windowWidth, (newWidth, oldWidth) => {
+      isMapVisible.value = newWidth >= 1280;
+    });
+
+    window.addEventListener("resize", () => {
+      windowWidth.value = window.innerWidth;
+    });
+
     return {
-      message,
       mapElement,
+      isMapVisible,
     };
   },
   template: `
-    <div class="p-6">
-      <h1 class="text-2xl font-bold mb-6">Dashboard Home</h1>
-      <div class="bg-blue-500 text-white p-4 rounded">
-        {{ message }}
-      </div>
-      <div class="flex">
-        <div ref="mapElement" class="flex-1" style="height: 500px; background: transparent;">
-          <p class="text-xl">Select a region to view its details.</p>
+    <div class="p-6 bg-[#f8f9fe] h-full">
+      <!-- Cards -->
+      <div>
+        <div>
+          <p class="text-black text-xl font-bold p-2">Overall Ranking</p>
         </div>
-        <div class="flex-3">
-          <p class="text-xl">Detail plots for the map can go here.</p>
+        <div class="flex justify-start items-start ">
+          <div class="flex flex-1 items-center mr-7 h-[150px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4]">
+            <p class="text-white p-2 ">Card Content</p>
+          </div>
+          <div class="flex flex-1 items-center mr-7 h-[150px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef]">
+            <p class="text-white p-2 ">Card Content</p>
+          </div>
+          <div class="flex flex-1 items-center mr-7 h-[150px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137]">
+            <p class="text-white p-2 ">Card Content</p>
+          </div>
+          <div class="flex flex-1 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d]">
+            <p class="text-white p-2 ">Card Content</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Map selection and statistics overview -->
+      <div class="flex">
+        <!-- Map selection -->
+        <div v-show="isMapVisible" class="rounded-[20px]  bg-white shadow-md mt-10">
+          <p class="text-sm h-[50px] p-4">Selected a region</p>
+          <hr class="border-gray-300">
+          <div class="h-[500px] w-[500px]" ref="mapElement" style="background: transparent;"></div>
+        </div>
+        <!-- Statistics overview -->
+        <div class="flex-1 h-[550px] rounded-[20px] bg-white shadow-md mt-10 ml-10">
+          <p class="h-[50px] text-sm p-4">Statistics overview</p>
+          <hr class="border-gray-300">
         </div>
       </div>
     </div>
-  `,
+  `
 };

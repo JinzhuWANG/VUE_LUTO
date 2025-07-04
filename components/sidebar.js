@@ -30,25 +30,23 @@ window.Sidebar = {
   },
 
   template: ` 
-    <aside id="sidebar-multi-level-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
-      <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
-        <div class="flex items-center ml-1 py-4 mb-4">
-          <img src="resources/LUTO.png" alt="LUTO 2.0" class="rounded-full w-10 h-10" />
-          <span class="ms-3 text-xl font-semibold">LUTO 2.0</span>
-        </div>
-        <ul class="space-y-2 font-medium">
-          <!-- Loop through navItems -->
-          <li v-for="item in navItems" :key="item.id">
-            <router-link 
-              :to="item.path" 
-              class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 group">
-              <!-- Dynamically access icons -->
-              <span v-html="JSON.parse(JSON.stringify(item.icon))"></span>
-              <span class="ms-3">{{ item.label }}</span>
-            </router-link>
-          </li>
-        </ul>
+    <div class="h-full px-3 py-4 bg-white">
+      <div class="flex items-center ml-1 py-4 mb-4">
+        <img src="resources/LUTO.png" alt="LUTO 2.0" class="rounded-full w-10 h-10" />
+        <span class="ms-3 text-xl font-semibold">LUTO 2.0</span>
       </div>
-    </aside>
+      <ul class="space-y-3 font-medium">
+        <!-- Loop through navItems -->
+        <li v-for="item in navItems" :key="item.id">
+          <router-link 
+            :to="item.path" 
+            class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100">
+            <!-- Dynamically access icons -->
+            <span v-html="JSON.parse(JSON.stringify(item.icon))"></span>
+            <span class="ms-3">{{ item.label }}</span>
+          </router-link>
+        </li>
+      </ul>
+      </div>
   `,
 };
