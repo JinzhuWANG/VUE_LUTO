@@ -23,6 +23,7 @@ window.AreaView = {
     <div class="p-6">
       <!-- Chart component -->
       <chart-container :dataset-name="activeDataset"></chart-container>
+      <div class="mt-6 bg-white shadow-md rounded-lg p-4" style="height: 550px; width: 100%;"></div>
     </div>
   `
 };

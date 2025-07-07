@@ -1,35 +1,14 @@
 window.HomeView = {
+
   setup() {
     const { ref, onMounted, watch } = Vue;
 
-    windowWidth = ref(window.innerWidth);
-    loadScript = window.loadScript;
+    const windowWidth = ref(window.innerWidth);
+    const loadScript = window.loadScript;
 
     // Map variables
-    const mapElement = ref(null);
     const activeRegionName = ref('Australia');
     const isMapVisible = ref(window.innerWidth >= 1280);
-    const hoverTooltip = ref(null);
-    const geoJSONLayer = ref(null);
-
-    const defaultStyle = {
-      color: "#fefefe",
-      fillColor: "#d2d7dd",
-      fillOpacity: 0.5,
-      weight: 0.5,
-    };
-
-    const highlightStyle = {
-      color: "#0b0b0b",
-      fillColor: "#0b0b0b",
-      fillOpacity: 0.5,
-      weight: 0.1,
-    };
-
-    const australiaBounds = L.latLngBounds(
-      [-43, 113], // Southwest corner
-      [-12, 154] // Northeast corner
-    );
 
     //  Chart variables
     const chartOptions = ref({
@@ -53,111 +32,40 @@ window.HomeView = {
       activeDataset.value = datasetName;
     };
 
+    // Component references
+    const mapGeojsonLoaded = ref(false);
 
-
+    // Event handler for region selection
+    const handleRegionSelected = (event) => {
+      if (event.detail && event.detail.region) {
+        activeRegionName.value = event.detail.region;
+      }
+    };
 
     onMounted(async () => {
       try {
-
+        // Load required data
+        await loadScript("./data/run_logs/model_run_settings.js");
         await loadScript("./data/geo/NRM_AUS.js");
-        const geoJSONData = window.NRM_AUS_data;
 
-        const map = L.map(mapElement.value, {
-          zoomControl: false,
-          attributionControl: false,
-          zoomSnap: 0.1,
-          dragging: false,
-          scrollWheelZoom: false,
-          doubleClickZoom: false,
-        });
+        // Make sure Leaflet is loaded
+        if (window.L) {
+          console.log("Leaflet loaded successfully");
+        } else {
+          console.error("Leaflet not loaded");
+          return;
+        }
 
+        // Wait a moment to ensure DOM is ready
+        await new Promise(resolve => setTimeout(resolve, 300));
 
-        map.setView(
-          australiaBounds.getCenter(),
-          map.getBoundsZoom(australiaBounds),
-          { animate: false }
-        );
+        // Mark map component as loaded
+        mapGeojsonLoaded.value = true;
 
-        window.addEventListener("resize", () => {
-          windowWidth.value = window.innerWidth;
-        });
-
-        // Store GeoJSON layer for later access
-        geoJSONLayer.value = L.geoJSON(geoJSONData, {
-          style: defaultStyle,
-          onEachFeature: (feature, layer) => {
-            // Store region name in layer options for easier access later
-            layer.options.regionName = feature.properties.NHT2NAME;
-            layer.on({
-              mousemove: (e) => {
-                const layer_e = e.target;
-
-                if (layer_e._path) {
-                  layer_e._path.style.cursor = 'default';
-                }
-
-                // Remove previous hover tooltip
-                if (hoverTooltip.value) {
-                  map.removeLayer(hoverTooltip.value);
-                  hoverTooltip.value = null;
-                }
-
-                // Create new hover tooltip
-                hoverTooltip.value = L.tooltip({
-                  permanent: false,
-                  direction: "top",
-                });
-                hoverTooltip.value.setContent(feature.properties.NHT2NAME);
-                hoverTooltip.value.setLatLng(e.latlng);
-                hoverTooltip.value.addTo(map);
-
-
-                // Highlight the hovered region
-                layer_e.setStyle(highlightStyle);
-              },
-              mouseout: (e) => {
-                const layer_e = e.target;
-
-                // Remove hover tooltip if it exists
-                if (hoverTooltip.value) {
-                  map.removeLayer(hoverTooltip.value);
-                  hoverTooltip.value = null;
-                }
-
-                // Ensure the selected region maintains its highlight style
-                if (layer_e.options.regionName === activeRegionName.value) {
-                  layer_e.setStyle(highlightStyle);
-                } else {
-                  layer_e.setStyle(defaultStyle);
-                }
-              },
-              click: (e) => {
-                const layer_e = e.target;
-
-                // Check if the clicked region is already the active region
-                if (layer_e.options.regionName === activeRegionName.value) {
-                  layer_e.setStyle(defaultStyle);
-                  activeRegionName.value = 'Australia';
-                  return;
-                }
-
-                // Remove highlight style from all regions
-                geoJSONLayer.value.eachLayer(function (layer) {
-                  layer.setStyle(defaultStyle);
-                });
-
-                // Set new selection
-                activeRegionName.value = layer_e.options.regionName;
-                layer_e.setStyle(highlightStyle);
-
-
-
-              },
-            });
-          },
-        }).addTo(map);
+        // Listen for custom events from map component
+        window.addEventListener('region-selected', handleRegionSelected);
       } catch (error) {
-        console.error("Error initializing map:", error);
+        console.error("Error loading dependencies:", error);
       }
     });
 
@@ -182,8 +90,15 @@ window.HomeView = {
       }
     );
 
+    // Watch for map loading state
+    watch(
+      mapGeojsonLoaded,
+      (isLoaded) => {
+        console.log("Map loaded state changed to:", isLoaded);
+      }
+    );
+
     return {
-      mapElement,
       isMapVisible,
       activeRegionName,
       activeDataset,
@@ -192,9 +107,11 @@ window.HomeView = {
       windowWidth,
       toggleMapVisibility,
       changeDataset,
+      mapGeojsonLoaded
     };
   },
 
+  // This template is a fallback that will be replaced by the loaded template
   template: `
     <div class="p-6 bg-[#f8f9fe] h-full">
 
@@ -223,10 +140,15 @@ window.HomeView = {
       <div class="flex">
 
         <!-- Map selection -->
-        <div v-show="isMapVisible" class="rounded-[10px] bg-white shadow-md mt-7 mr-7 w-[500px]">
+        <div v-show="isMapVisible" class="rounded-[10px] bg-white shadow-md mt-7 mr-7 w-[500px]" style="min-height: 550px;">
           <p class="text-sm h-[50px] p-4">Selected Region: <strong>{{ activeRegionName }}</strong></p>
           <hr class="border-gray-300">
-          <div class="h-[500px]" ref="mapElement" style="background: transparent;"></div>
+          <div class="h-[500px] w-full">
+            <map-geojson v-if="mapGeojsonLoaded" class="h-[500px] w-full" style="display: block;"></map-geojson>
+            <div v-else class="h-[500px] flex items-center justify-center">
+              <p>Loading map...</p>
+            </div>
+          </div>
         </div>
 
         <!-- Statistics overview -->
