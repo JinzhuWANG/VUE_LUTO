@@ -6,7 +6,7 @@ window.HomeView = {
 
     // Map variables
     const mapElement = ref(null);
-    const activeRegionName = ref(null);
+    const activeRegionName = ref('Australia');
     const isMapVisible = ref(window.innerWidth >= 1280);
     const hoverTooltip = ref(null);
     const geoJSONLayer = ref(null);
@@ -22,7 +22,7 @@ window.HomeView = {
       color: "#0b0b0b",
       fillColor: "#0b0b0b",
       fillOpacity: 0.5,
-      weight: 0.5,
+      weight: 0.1,
     };
 
     const australiaBounds = L.latLngBounds(
@@ -42,9 +42,9 @@ window.HomeView = {
     const activeDataset = ref("area_1_total_area_wide")
     const activeDatatype = ref('Area');
     const datasetNames = [
-      "area_1_total_area_wide",
-      "area_2_forest_coverage",
-      "area_3_agricultural_land",
+      "area_0_grouped_lu_area_wide.js",
+      "economics_0_rev_cost_all_wide.js",
+      "production_5_6_demand_Production_commodity_from_LUTO.js",
     ];
 
     // Functions
@@ -111,6 +111,10 @@ window.HomeView = {
               mousemove: (e) => {
                 const layer_e = e.target;
 
+                if (layer_e._path) {
+                  layer_e._path.style.cursor = 'default';
+                }
+
                 // Remove previous hover tooltip
                 if (hoverTooltip.value) {
                   map.removeLayer(hoverTooltip.value);
@@ -148,20 +152,24 @@ window.HomeView = {
               },
               click: (e) => {
                 const layer_e = e.target;
-                const regionName = layer_e.options.regionName;
 
-                // Reset style on previously selected region
-                if (activeRegionName.value && geoJSONLayer.value) {
-                  geoJSONLayer.value.eachLayer(function (layer) {
-                    if (layer.options.regionName === activeRegionName.value) {
-                      layer.setStyle(defaultStyle);
-                    }
-                  });
+                // Check if the clicked region is already the active region
+                if (layer_e.options.regionName === activeRegionName.value) {
+                  layer_e.setStyle(defaultStyle);
+                  activeRegionName.value = 'Australia';
+                  return;
                 }
 
+                // Remove highlight style from all regions
+                geoJSONLayer.value.eachLayer(function (layer) {
+                  layer.setStyle(defaultStyle);
+                });
+
                 // Set new selection
-                activeRegionName.value = regionName;
+                activeRegionName.value = layer_e.options.regionName;
                 layer_e.setStyle(highlightStyle);
+
+
 
               },
             });
@@ -202,6 +210,7 @@ window.HomeView = {
       chartOptions,
       windowWidth,
       toggleMapVisibility,
+      changeDataset,
     };
   },
 
@@ -213,16 +222,16 @@ window.HomeView = {
           <p class="text-black text-xl font-bold p-2">Overall Ranking</p>
         </div>
         <div class="flex flex-col md:flex-row justify-start items-start space-y-4 md:space-y-0">
-          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4] w-full w-[1/4]">
+          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4] w-[1/4]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
-          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef] w-full w-[1/4]">
+          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef] w-[1/4]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
-          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137] w-full w-[1/4]">
+          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137] w-[1/4]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
-          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d] w-full w-[1/4]">
+          <div class="flex flex-1 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d] w-[1/4]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
         </div>
@@ -237,13 +246,25 @@ window.HomeView = {
           <div class="h-[500px]" ref="mapElement" style="background: transparent;"></div>
         </div>
         <!-- Statistics overview -->
-        <div class="flex-1 h-[550px] rounded-[10px] bg-white shadow-md mt-7 w-full w-[calc(100%-500px)]">
-          <p class="h-[50px] text-sm p-4">Statistics overview for <strong>{{ activeRegionName }}</strong></p>
-          <hr class="border-gray-300">
-          <div>
-            <!-- Chart component -->
-            <chart-container :dataset-name="activeDataset" :options="chartOptions"></chart-container>
+        <div class="flex-1 h-[550px] rounded-[10px] bg-white shadow-md mt-7 w-min-[500px]">
+          <div class="h-[50px] flex items-center">
+            <p class="flex-1 text-sm p-4">Statistics overview for <strong>{{ activeRegionName }}</strong></p>
+            <!-- Button container -->
+            <div class="flex justify-end space-x-2 p-1 mr-[80px]">
+              <button @click="changeDataset('area_1_total_area_wide')" class="justify-end bg-[#5e72e4] text-white text-sm px-3 py-1 rounded">
+                Profit
+              </button>
+              <button @click="changeDataset('economics_0_rev_cost_all_wide')" class="justify-end bg-[#5e72e4] text-white text-sm px-3 py-1 rounded">
+                Revenue
+              </button>
+              <button @click="changeDataset('production_5_6_demand_Production_commodity_from_LUTO')" class="justify-end bg-[#5e72e4] text-white text-sm px-3 py-1 rounded">
+                Water
+              </button>
+            </div>
           </div>
+          <hr class="border-gray-300">
+          <!-- Chart component -->
+          <chart-container :dataset-name="activeDataset" :options="chartOptions"></chart-container>
         </div>
       </div>
     </div>

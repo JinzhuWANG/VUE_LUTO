@@ -45,10 +45,10 @@ window.Highchart = {
       }
 
       // If script exists in window, use it directly
-      if (window[`${datasetName}_option`] && window[`${datasetName}_data`]) {
+      if (window['Chart_default_options'] && window[`${datasetName}`]) {
         datasets[datasetName] = {
-          options: window[`${datasetName}_option`],
-          data: window[`${datasetName}_data`],
+          options: window['Chart_default_options'],
+          data: window[`${datasetName}`],
         };
         return Promise.resolve(datasets[datasetName]);
       }
@@ -56,16 +56,13 @@ window.Highchart = {
       // Load both scripts concurrently
       try {
         await Promise.all([
-          loadScript(`./data/${datasetName}_data.js`, `${datasetName}_data`),
-          loadScript(
-            `./data/${datasetName}_options.js`,
-            `${datasetName}_options`
-          ),
+          loadScript(`./data/${datasetName}.js`, `${datasetName}`),
+          loadScript('data/default_chart_option/Chart_default_options.js', 'Chart_default_options'),
         ]);
         // Store data once both scripts are loaded
         datasets[datasetName] = {
-          options: window[`${datasetName}_option`],
-          data: window[`${datasetName}_data`],
+          options: window.Chart_default_options,
+          data: window[`${datasetName}`],
         };
         return datasets[datasetName];
       } catch (error) {
