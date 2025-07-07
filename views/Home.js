@@ -3,6 +3,7 @@ window.HomeView = {
     const { ref, onMounted, watch } = Vue;
 
     windowWidth = ref(window.innerWidth);
+    loadScript = window.loadScript;
 
     // Map variables
     const mapElement = ref(null);
@@ -52,34 +53,14 @@ window.HomeView = {
       activeDataset.value = datasetName;
     };
 
-    const loadGeoJSONData = () => {
-      return new Promise((resolve, reject) => {
 
-        if (window.NRM_AUS_data) {
-          // If the data is already loaded, resolve immediately
-          resolve(window.NRM_AUS_data);
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.id = "NRM_AUS_data";
-        script.src = "data/geo/NRM_AUS.js";
-        document.head.appendChild(script);
-
-        script.onload = () => {
-          resolve(window.NRM_AUS_data);
-        };
-
-        script.onerror = () => {
-          reject(new Error("Failed to load GeoJSON data"));
-        };
-      });
-    };
 
 
     onMounted(async () => {
       try {
-        const geoJSONData = await loadGeoJSONData();
+
+        await loadScript("./data/geo/NRM_AUS.js");
+        const geoJSONData = window.NRM_AUS_data;
 
         const map = L.map(mapElement.value, {
           zoomControl: false,
@@ -216,7 +197,8 @@ window.HomeView = {
 
   template: `
     <div class="p-6 bg-[#f8f9fe] h-full">
-      <!-- Cards -->
+
+      <!-- Rank cards -->
       <div>
         <div>
           <p class="text-black text-xl font-bold p-2">Overall Ranking</p>
@@ -237,20 +219,22 @@ window.HomeView = {
         </div>
       </div>
       
-      <!-- Map selection and statistics overview -->
-      <div class="flex flex-col xl:flex-row">
+      
+      <div class="flex">
+
         <!-- Map selection -->
         <div v-show="isMapVisible" class="rounded-[10px] bg-white shadow-md mt-7 mr-7 w-[500px]">
           <p class="text-sm h-[50px] p-4">Selected Region: <strong>{{ activeRegionName }}</strong></p>
           <hr class="border-gray-300">
           <div class="h-[500px]" ref="mapElement" style="background: transparent;"></div>
         </div>
+
         <!-- Statistics overview -->
         <div class="flex-1 h-[550px] rounded-[10px] bg-white shadow-md mt-7 w-min-[500px]">
           <div class="h-[50px] flex items-center">
             <p class="flex-1 text-sm p-4">Statistics overview for <strong>{{ activeRegionName }}</strong></p>
             <!-- Button container -->
-            <div class="flex justify-end space-x-2 p-1 mr-[80px]">
+            <div class="flex justify-end space-x-2 p-1 pr-4">
               <button @click="changeDataset('area_1_total_area_wide')" class="justify-end bg-[#5e72e4] text-white text-sm px-3 py-1 rounded">
                 Profit
               </button>
@@ -266,7 +250,22 @@ window.HomeView = {
           <!-- Chart component -->
           <chart-container :dataset-name="activeDataset" :options="chartOptions"></chart-container>
         </div>
+
       </div>
+
+      <!-- Running logs -->
+      <div class="rounded-[10px] bg-white shadow-md mt-7 mr-7 w-[500px]">
+        <div class="mt-4">
+          <p class="text-sm font-bold h-[50px] p-4">Scenarios and Settings</p>
+          <div class="max-h-[200px] overflow-y-auto border border-gray-300 p-2">
+            <p class="text-xs">Log entry 1</p>
+            <p class="text-xs">Log entry 2</p>
+            <p class="text-xs">Log entry 3</p>
+          </div>
+        </div>
+      </div>
+      
+
     </div>
   `,
 };
