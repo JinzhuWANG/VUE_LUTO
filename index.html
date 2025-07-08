@@ -22,7 +22,6 @@
 
     <!-- Components -->
     <script src="./components/helpers.js" defer></script>
-    <script src="./components/debug_helper.js" defer></script>
     <script src="./components/map_geojson.js" defer></script>
     <script src="./components/sidebar.js" defer></script>
     <script src="./components/chart_container.js" defer></script>
@@ -61,24 +60,11 @@
         <div class="w-[250px] min-h-screen p-4">
           <side-bar></side-bar>
         </div>
-
         <!-- Main content -->
         <div class="flex-1">
           <router-view></router-view>
         </div>
       </div>
     </div>
-
-    <script>
-      // Run debugging code after page load
-      window.addEventListener("load", function () {
-        setTimeout(function () {
-          console.log("Running map diagnostics...");
-          window.checkLeafletStatus();
-          window.checkElementDimensions("map-geojson");
-          window.inspectVueComponent("map-geojson");
-        }, 2000);
-      });
-    </script>
   </body>
 </html>

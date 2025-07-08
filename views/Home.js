@@ -60,22 +60,6 @@ window.HomeView = {
       }
     );
 
-    // Watch for map loading state
-    watch(
-      mapGeojsonLoaded,
-      (isLoaded) => {
-        console.log("Map loaded state changed to:", isLoaded);
-      }
-    );
-
-    // Watch for active region name changes
-    watch(
-      selectRegion,
-      (newRegionName) => {
-        console.log("Active region updated to:", newRegionName);
-      }
-    );
-
     return {
       isMapVisible,
       selectRegion,
