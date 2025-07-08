@@ -40,6 +40,7 @@ window.Chart_default_options = {
         enabled: false,
     },
     exporting: {
-        enabled: false,
+        sourceWidth: 1200,
+        sourceHeight: 600,
     },
 };

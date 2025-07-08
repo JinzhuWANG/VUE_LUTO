@@ -1,5 +1,6 @@
 const { createApp } = Vue;
 
+// Initialize app
 const app = createApp({
     setup() {
         return {};

@@ -31,11 +31,9 @@ window.loadScript = (src, name) => {
 
 window.loadDataset = async (datasetName, timeout = 5000) => {
     try {
-        // Load the required scripts simultaneously
-        await Promise.all([
-            loadScript(`./data/${datasetName}.js`, datasetName),
-            loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options'),
-        ]);
+        // Load only the dataset script, not Chart_default_options
+        // This prevents Chart_default_options from being reloaded and potentially overwriting custom options
+        await loadScript(`./data/${datasetName}.js`, datasetName);
 
         // Wait until the dataset is available in the window object or timeout occurs
         const start = Date.now();
