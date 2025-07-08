@@ -1,7 +1,7 @@
 window.HomeView = {
 
   setup() {
-    const { ref, onMounted, watch } = Vue;
+    const { ref, onMounted, watch, onUnmounted } = Vue;
     const windowWidth = ref(window.innerWidth);
     const loadScript = window.loadScript;
 
@@ -26,9 +26,14 @@ window.HomeView = {
       activeDataset.value = datasetName;
     };
 
+    const trackResize = () => {
+      windowWidth.value = window.innerWidth;
+    };
 
     onMounted(async () => {
       try {
+        // Add resize event listener
+        window.addEventListener('resize', trackResize);
 
         // Load required data
         await loadScript("./data/run_logs/model_run_settings.js", 'model_run_settings');
@@ -37,6 +42,11 @@ window.HomeView = {
       } catch (error) {
         console.error("Error loading dependencies:", error);
       }
+    });
+
+    // Clean up event listener when component is unmounted
+    onUnmounted(() => {
+      window.removeEventListener('resize', trackResize);
     });
 
     // Watch for window width changes to control map visibility
@@ -78,20 +88,18 @@ window.HomeView = {
 
       <!-- Rank cards -->
       <div>
-        <div>
-          <p class="text-black text-xl font-bold p-2">Overall Ranking</p>
-        </div>
-        <div class="flex flex-col md:flex-row justify-start items-start space-y-4 md:space-y-0">
-          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4] w-[1/4]">
+        <p class="text-black text-xl font-bold p-2">Overall Ranking</p>
+        <div class="flex flex-wrap justify-start items-start gap-4">
+          <div class="flex flex-1 items-center h-[150px] min-w-[250px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
-          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef] w-[1/4]">
+          <div class="flex flex-1 items-center h-[150px] min-w-[250px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
-          <div class="flex flex-1 mr-7 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137] w-[1/4]">
+          <div class="flex flex-1 items-center h-[150px] min-w-[250px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
-          <div class="flex flex-1 items-center h-[150px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d] w-[1/4]">
+          <div class="flex flex-1 items-center h-[150px] min-w-[250px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d]">
             <p class="text-white p-2 ">Card Content</p>
           </div>
         </div>

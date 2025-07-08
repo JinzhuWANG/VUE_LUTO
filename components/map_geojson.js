@@ -43,7 +43,7 @@ window.map_geojson = {
                 await window.loadScript("./data/geo/NRM_AUS.js", 'NRM_AUS_data');
                 const geoJSONData = window.NRM_AUS_data;
 
-                // Initialize map with explicit container size check
+                // Initialize map
                 const map = L.map(mapElement.value, {
                     zoomControl: false,
                     attributionControl: false,
