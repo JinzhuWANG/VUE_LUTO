@@ -2,15 +2,16 @@ window.HomeView = {
 
   setup() {
     const { ref, onMounted, watch } = Vue;
-
     const windowWidth = ref(window.innerWidth);
     const loadScript = window.loadScript;
 
     // Map variables
-    const activeRegionName = ref('Australia');
+    const mapGeojsonLoaded = ref(false);
+    const selectRegion = ref("Australia");
     const isMapVisible = ref(window.innerWidth >= 1280);
 
     //  Chart variables
+    const activeDataset = ref("area_1_total_area_wide");
     const chartOptions = ref({
       chart: {
         height: 490
@@ -19,51 +20,20 @@ window.HomeView = {
         text: null
       }
     });
-    const activeDataset = ref("area_1_total_area_wide")
-    const activeDatatype = ref('Area');
-    const datasetNames = [
-      "area_0_grouped_lu_area_wide.js",
-      "economics_0_rev_cost_all_wide.js",
-      "production_5_6_demand_Production_commodity_from_LUTO.js",
-    ];
 
     // Functions
     const changeDataset = (datasetName) => {
       activeDataset.value = datasetName;
     };
 
-    // Component references
-    const mapGeojsonLoaded = ref(false);
-
-    // Event handler for region selection
-    const handleRegionSelected = (event) => {
-      if (event.detail && event.detail.region) {
-        activeRegionName.value = event.detail.region;
-      }
-    };
 
     onMounted(async () => {
       try {
+
         // Load required data
-        await loadScript("./data/run_logs/model_run_settings.js");
-        await loadScript("./data/geo/NRM_AUS.js");
-
-        // Make sure Leaflet is loaded
-        if (window.L) {
-          console.log("Leaflet loaded successfully");
-        } else {
-          console.error("Leaflet not loaded");
-          return;
-        }
-
-        // Wait a moment to ensure DOM is ready
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        // Mark map component as loaded
+        await loadScript("./data/run_logs/model_run_settings.js", 'model_run_settings');
         mapGeojsonLoaded.value = true;
 
-        // Listen for custom events from map component
-        window.addEventListener('region-selected', handleRegionSelected);
       } catch (error) {
         console.error("Error loading dependencies:", error);
       }
@@ -84,9 +54,9 @@ window.HomeView = {
 
     // Watch to change Chart 
     watch(
-      [activeRegionName, activeDataset, activeDatatype],
+      [selectRegion, activeDataset],
       (newValues) => {
-        // logic to handle changes in activeRegionName or activeDataset
+        // logic to handle changes in selectRegion or activeDataset
       }
     );
 
@@ -98,11 +68,18 @@ window.HomeView = {
       }
     );
 
+    // Watch for active region name changes
+    watch(
+      selectRegion,
+      (newRegionName) => {
+        console.log("Active region updated to:", newRegionName);
+      }
+    );
+
     return {
       isMapVisible,
-      activeRegionName,
+      selectRegion,
       activeDataset,
-      activeDatatype,
       chartOptions,
       windowWidth,
       toggleMapVisibility,
@@ -141,10 +118,10 @@ window.HomeView = {
 
         <!-- Map selection -->
         <div v-show="isMapVisible" class="rounded-[10px] bg-white shadow-md mt-7 mr-7 w-[500px]" style="min-height: 550px;">
-          <p class="text-sm h-[50px] p-4">Selected Region: <strong>{{ activeRegionName }}</strong></p>
+          <p class="text-sm h-[50px] p-4">Selected Region: <strong>{{ selectRegion }}</strong></p>
           <hr class="border-gray-300">
           <div class="h-[500px] w-full">
-            <map-geojson v-if="mapGeojsonLoaded" class="h-[500px] w-full" style="display: block;"></map-geojson>
+            <map-geojson v-if="mapGeojsonLoaded" :height="'500px'" v-model="selectRegion"></map-geojson>
             <div v-else class="h-[500px] flex items-center justify-center">
               <p>Loading map...</p>
             </div>
@@ -154,7 +131,7 @@ window.HomeView = {
         <!-- Statistics overview -->
         <div class="flex-1 h-[550px] rounded-[10px] bg-white shadow-md mt-7 w-min-[500px]">
           <div class="h-[50px] flex items-center">
-            <p class="flex-1 text-sm p-4">Statistics overview for <strong>{{ activeRegionName }}</strong></p>
+            <p class="flex-1 text-sm p-4">Statistics overview for <strong>{{ selectRegion }}</strong></p>
             <!-- Button container -->
             <div class="flex justify-end space-x-2 p-1 pr-4">
               <button @click="changeDataset('area_1_total_area_wide')" class="justify-end bg-[#5e72e4] text-white text-sm px-3 py-1 rounded">

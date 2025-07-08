@@ -4,11 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LUTO 2 Report</title>
+
+    <!-- Resources -->
     <script src="resources/vue_3.5.17.js"></script>
     <script src="resources/vue_router_4.5.1.js"></script>
     <script src="resources/tailwind_browser_4.js"></script>
     <script src="resources/tailwind_4.1.11_index_global.js"></script>
-
     <script src="resources/highcharts_12.3.0.js"></script>
     <script src="resources/highcharts_12.3.0_accessibility.js"></script>
 
@@ -20,9 +21,9 @@
     <script src="./resources/icons.js"></script>
 
     <!-- Components -->
-    <script src="./components/helpers.js"></script>
-    <script src="./components/debug_helper.js"></script>
-    <script src="./components/map_geojson.js"></script>
+    <script src="./components/helpers.js" defer></script>
+    <script src="./components/debug_helper.js" defer></script>
+    <script src="./components/map_geojson.js" defer></script>
     <script src="./components/sidebar.js" defer></script>
     <script src="./components/chart_container.js" defer></script>
 
@@ -50,7 +51,7 @@
       }
     </style>
 
-    <!-- Data -->
+    <!-- Data (load on demand) -->
   </head>
 
   <body>

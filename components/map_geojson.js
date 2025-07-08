@@ -1,11 +1,21 @@
 window.map_geojson = {
-    setup() {
+    props: {
+        height: {
+            type: String,
+            default: '500px',
+        },
+        modelValue: {
+            type: String,
+        },
+    },
+    setup(props, { emit }) {
         const { ref, onMounted } = Vue;
 
         const mapElement = ref(null);
-        const activeRegionName = ref('Australia');
+        const activeRegionName = ref(props.modelValue);
         const hoverTooltip = ref(null);
         const geoJSONLayer = ref(null);
+        const australiaBounds = L.latLngBounds([-43, 113], [-12, 154]);
 
         const defaultStyle = {
             color: "#fefefe",
@@ -21,38 +31,17 @@ window.map_geojson = {
             weight: 0.1,
         };
 
-        const australiaBounds = L.latLngBounds(
-            [-43, 113], // Southwest corner
-            [-12, 154] // Northeast corner
-        );
+        const updateRegionName = (newRegionName) => {
+            activeRegionName.value = newRegionName;
+            emit('update:modelValue', newRegionName);
+        };
 
         onMounted(async () => {
             try {
-                // Add a longer delay to ensure the DOM is fully rendered and ready
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                if (!mapElement.value) {
-                    console.error("Map element reference is null or undefined");
-                    return;
-                }
-
-                // Log the element to see if it's properly accessible
-                console.log("Map container element:", mapElement.value);
-                console.log("Map container dimensions:", mapElement.value.offsetWidth, "x", mapElement.value.offsetHeight);
 
                 // Load data
-                await window.loadScript("./data/geo/NRM_AUS.js");
-                if (!window.NRM_AUS_data) {
-                    console.error("NRM_AUS_data not loaded correctly");
-                    return;
-                }
+                await window.loadScript("./data/geo/NRM_AUS.js", 'NRM_AUS_data');
                 const geoJSONData = window.NRM_AUS_data;
-
-                // Make sure Leaflet is loaded
-                if (!window.L) {
-                    console.error("Leaflet not loaded properly");
-                    return;
-                }
 
                 // Initialize map with explicit container size check
                 const map = L.map(mapElement.value, {
@@ -127,7 +116,7 @@ window.map_geojson = {
                                 // Check if the clicked region is already the active region
                                 if (layer_e.options.regionName === activeRegionName.value) {
                                     layer_e.setStyle(defaultStyle);
-                                    activeRegionName.value = 'Australia';
+                                    updateRegionName('Australia');
                                     return;
                                 }
 
@@ -137,14 +126,9 @@ window.map_geojson = {
                                 });
 
                                 // Set new selection
-                                activeRegionName.value = layer_e.options.regionName;
+                                updateRegionName(layer_e.options.regionName);
                                 layer_e.setStyle(highlightStyle);
 
-                                // Emit event to parent component
-                                const event = new CustomEvent('region-selected', {
-                                    detail: { region: activeRegionName.value }
-                                });
-                                window.dispatchEvent(event);
                             },
                         });
                     },
@@ -157,10 +141,11 @@ window.map_geojson = {
         return {
             mapElement,
             activeRegionName,
+            props
         };
     },
     template: `
-      <div ref="mapElement" style="background: transparent; height: 500px; width: 100%; position: relative; display: block; min-height: 500px;"></div>
+      <div ref="mapElement" :style="{ background: 'transparent', height: props.height }"></div>
     `,
 };
 

@@ -17,15 +17,14 @@ window.Highchart = {
     const chartInstance = ref(null);
     const chartElement = ref(null);
     const datasets = ref({});
-    const loadDataset = window.loadDataset
-
+    const loadDataset = window.loadDataset;
 
     // Function to handle dataset loading and chart creation
-    const createOrUpdataChart = async (datasetName) => {
+    const createOrUpdateChart = async (datasetName) => {
 
       isLoading.value = false;
 
-      // If the dataset is not already loaded, load it
+      // If the dataset is not already loaded, load it from the global window object
       if (!datasets.value[datasetName]) {
         await loadDataset(datasetName);
         datasets.value[datasetName] = {
@@ -42,7 +41,7 @@ window.Highchart = {
         };
       }
 
-      // Then wait for the DOM to update before creating the chart
+      // Clean up previous chart instance if it exists
       if (chartInstance.value) {
         chartInstance.value.destroy();
         chartInstance.value = null;
@@ -64,14 +63,14 @@ window.Highchart = {
 
     // Load initial dataset
     onMounted(() => {
-      createOrUpdataChart(props.datasetName);
+      createOrUpdateChart(props.datasetName);
     });
 
     // Watch for dataset name changes and handle chart updates
     watch(
       () => props.datasetName,
       (newDatasetName) => {
-        createOrUpdataChart(newDatasetName);
+        createOrUpdateChart(newDatasetName);
       }
     );
 

@@ -1,18 +1,31 @@
-window.loadScript = (src) => {
+
+window.loadScript = (src, name) => {
     return new Promise((resolve, reject) => {
         const existingScript = document.querySelector(`script[src="${src}"]`);
 
-        if (existingScript) {
-            resolve(); // Script already exists
+        if (existingScript && window[name]) {
+            resolve();
             return;
         }
 
         const script = document.createElement("script");
         script.src = src;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
         document.head.appendChild(script);
 
+        script.onload = async () => {
+            const timeout = 5000;
+            const startTime = Date.now();
+            while (!window[name]) {
+                if (Date.now() - startTime > timeout) {
+                    reject(new Error(`Global variable ${name} not available within timeout`));
+                    return;
+                }
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+            resolve();
+        };
+
+        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
     });
 };
 
@@ -20,8 +33,8 @@ window.loadDataset = async (datasetName, timeout = 5000) => {
     try {
         // Load the required scripts simultaneously
         await Promise.all([
-            loadScript(`./data/${datasetName}.js`),
-            loadScript("./data/chart_option/Chart_default_options.js"),
+            loadScript(`./data/${datasetName}.js`, datasetName),
+            loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options'),
         ]);
 
         // Wait until the dataset is available in the window object or timeout occurs

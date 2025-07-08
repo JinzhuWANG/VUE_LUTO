@@ -12,5 +12,5 @@ app.component("side-bar", window.Sidebar);
 app.component('map-geojson', window.map_geojson);
 
 // Use router
-app.use(router);
+app.use(window.router);
 app.mount("#app");
