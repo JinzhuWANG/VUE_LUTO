@@ -40,6 +40,7 @@ window.HomeView = {
     const chartMemLogOptions = ref({
       chart: {
         type: "area",
+        height: 420,
       },
       title: {
         text: null,
@@ -117,7 +118,7 @@ window.HomeView = {
         chartOverviewData.value = {
           ...chartDefaultOptions.value,
           chart: {
-            height: 490,
+            height: 480,
           },
           title: {
             text: `${activeDatasets.value[datasetName]} overview for ${selectRegion.value}`
@@ -184,97 +185,90 @@ window.HomeView = {
 
   // This template is a fallback that will be replaced by the loaded template
   template: `
-    <div class="p-6 bg-[#f8f9fe] h-full">
+    <div class="bg-[#f8f9fe]">
+      <div class="flex flex-col">
 
-      <!-- Rank cards -->
-      <div>
-        <p class="text-black text-xl font-bold p-2">Overall Ranking</p>
-        <div class="flex flex-wrap justify-start items-start gap-4">
-          <div class="flex flex-1 items-center h-[150px] min-w-[250px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4]">
-            <p class="text-white p-2 ">Economics</p>
-          </div>
-          <div class="flex flex-1 items-center h-[150px] min-w-[250px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef]">
-            <p class="text-white p-2 ">Area</p>
-          </div>
-          <div class="flex flex-1 items-center h-[150px] min-w-[250px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137]">
-            <p class="text-white p-2 ">GHG</p>
-          </div>
-          <div class="flex flex-1 items-center h-[150px] min-w-[250px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137]">
-            <p class="text-white p-2 ">Water</p>
-          </div>
-          <div class="flex flex-1 items-center h-[150px] min-w-[250px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d]">
-            <p class="text-white p-2 ">Biodiversity</p>
+        <!-- Rank cards -->
+        <div class="mb-6 flex flex-col">
+          <p class="text-black text-xl font-bold p-2">Overall Ranking</p>
+          <div class="flex flex-wrap justify-start items-start gap-4">
+            <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4]">
+              <p class="text-white p-2 ">Economics</p>
+            </div>
+            <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef]">
+              <p class="text-white p-2 ">Area</p>
+            </div>
+            <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137]">
+              <p class="text-white p-2 ">GHG</p>
+            </div>
+            <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#edde54] to-[#78cc7a]">
+              <p class="text-white p-2 ">Water</p>
+            </div>
+            <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d]">
+              <p class="text-white p-2 ">Biodiversity</p>
+            </div>
           </div>
         </div>
-      </div>
-      
-      
-      <div class="flex">
+        
+        
+        <div class="flex flex-wrap gap-6 mb-6">
 
-        <!-- Map selection -->
-        <div v-show="isMapVisible" class="rounded-[10px] bg-white shadow-md mt-7 mr-7 w-[500px]" style="min-height: 550px;">
-          <p class="text-sm h-[50px] p-4">Selected Region: <strong>{{ selectRegion }}</strong></p>
-          <hr class="border-gray-300">
-          <div class="h-[500px] w-full">
+          <!-- Map selection -->
+          <div v-show="isMapVisible" class="rounded-[10px] bg-white shadow-md w-[500px] shrink">
+            <p class="text-sm h-[50px] p-4">Selected Region: <strong>{{ selectRegion }}</strong></p>
+            <hr class="border-gray-300">
             <map-geojson v-if="mapGeojsonLoaded" :height="'500px'" v-model="selectRegion"></map-geojson>
-            <div v-else class="h-[500px] flex items-center justify-center">
-              <p>Loading map...</p>
-            </div>
           </div>
+
+          <!-- Statistics overview -->
+          <div class="flex-1 rounded-[10px] bg-white shadow-md min-w-[300px]">
+            <div class="h-[50px] flex items-center flex-wrap">
+              <p class="flex-1 text-sm p-4">Statistics overview for <strong>{{ selectRegion }}</strong></p>
+              <!-- Button container -->
+              <div class="flex flex-wrap justify-end space-x-3 mr-4">
+                <button v-for="(label, datasetName) in activeDatasets"
+                 @click="selectDataset = datasetName; changeDataset(datasetName)" 
+                 class="justify-end bg-[#5e72e4] text-white text-sm px-3 py-1 rounded mb-2" 
+                 :class="{'bg-[#3a4db9]': selectDataset === datasetName}">
+                  {{ label }}
+                </button>
+              </div>
+            </div>
+            <hr class="border-gray-300">
+            <!-- Chart component -->
+            <chart-container :chartData="chartOverviewData"></chart-container>
+          </div>
+
         </div>
 
-        <!-- Statistics overview -->
-        <div class="flex-1 h-[550px] rounded-[10px] bg-white shadow-md mt-7 w-min-[500px]">
-          <div class="h-[50px] flex items-center">
-            <p class="flex-1 text-sm p-4">Statistics overview for <strong>{{ selectRegion }}</strong></p>
-            <!-- Button container -->
-            <div class="flex justify-end space-x-2 p-1 pr-4 mr-4">
-              <button v-for="(label, datasetName) in activeDatasets" @click="selectDataset = datasetName; changeDataset(datasetName)" class="justify-end bg-[#5e72e4] text-white text-sm px-3 py-1 rounded" :class="{'bg-[#3a4db9]': selectDataset === datasetName}">
-                {{ label }}
-              </button>
+        
+        <div class="flex flex-wrap gap-6 mb-16 ">
+
+          <!-- Settings -->
+          <div class="flex flex-1 flex-col rounded-[10px] bg-white shadow-md min-w-[300px]">
+            <div class="flex flex-wrap items-center h-auto min-h-[40px]">
+              <p class="flex-1 text-sm font-bold p-4">Scenarios and Settings</p>
+              <input v-model="filterText" type="text" placeholder="Filter parameters..." class="sticky bg-white mr-4 justify-end text-sm border rounded mb-2" />
             </div>
-          </div>
-          <hr class="border-gray-300">
-          <!-- Chart component -->
-          <chart-container :chartData="chartOverviewData"></chart-container>
-        </div>
-
-      </div>
-
-      
-      <div class="flex">
-
-        <!-- Settings -->
-        <div class="rounded-[10px] bg-white shadow-md mt-7 max-w-[800px]">
-          <div class="flex flex-row items-center h-[40px]">
-            <p class="flex-1 text-sm font-bold p-4">Scenarios and Settings</p>
-            <div class="justify-end items-center sticky bg-white mr-4">
-                <input v-model="filterText" type="text" placeholder="Filter parameters..." class="w-full text-sm px-1 py-1 border rounded" />
-            </div>
-          </div>
-          <div class="h-[400px] overflow-y-auto">
-            <div>
-              <table class="w-full text-sm text-left text-gray-500">
+            <div class="h-[400px] overflow-y-auto">
+              <table class="text-left min-w-[300px] ">
                 <tbody>
                   <tr v-for="setting in filteredSettings" :key="setting.parameter" class="bg-white border-b border-gray-200 hover:bg-gray-100">
-                    <td class="px-2 py-1 text-[0.75rem] text-gray-900 ">{{ setting.parameter }}</td>
-                    <td class="px-2 py-1 text-[0.65rem] text-gray-500 max-w-[500px] truncate overflow-hidden">{{ setting.val }}</td>
+                    <td class="px-2 py-1 text-[0.55rem] text-gray-900 whitespace-wrap break-words">{{ setting.parameter }}</td>
+                    <td class="px-2 py-1 text-[0.55rem] text-gray-500 whitespace-wrap break-words">{{ setting.val }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
-        </div>
 
-        <!-- Memory use logs -->
-        <div class="flex-1 rounded-[10px] bg-white shadow-md mt-7 ml-7">
-          <div class="flex flex-row items-center h-[40px]">
-            <p class="flex-1 text-sm font-bold p-4">Memory Use Logs</p>
+          <!-- Memory use logs -->
+          <div class="flex flex-col rounded-[10px] bg-white shadow-md flex-1 min-w-[300px]">
+            <p class="h-[40px] text-sm font-bold p-4">Memory Use Logs</p>
+            <hr class="border-gray-300">
+            <chart-container class="flex-1 rounded-[10px]" :chartData="chartMemLogData"></chart-container>
           </div>
-          <hr class="border-gray-300">
-          <div class="justify-end items-center bg-white mr-4">
-            <chart-container :chartData="chartMemLogData"></chart-container>
-          </div>
+
         </div>
 
       </div>

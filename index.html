@@ -8,7 +8,7 @@
     <!-- Resources -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/vue-router@4.5.1/dist/vue-router.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script src="https://code.highcharts.com/modules/data.js"></script>
@@ -69,13 +69,9 @@
     <div id="app">
       <div class="flex">
         <!-- Sidebar -->
-        <div class="w-[250px] min-h-screen p-4">
-          <side-bar></side-bar>
-        </div>
+        <side-bar class="px-6"></side-bar>
         <!-- Main content -->
-        <div class="flex-1">
-          <router-view></router-view>
-        </div>
+        <router-view class="flex-1 mr-4"></router-view>
       </div>
     </div>
   </body>

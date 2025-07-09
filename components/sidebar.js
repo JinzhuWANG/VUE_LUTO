@@ -30,8 +30,8 @@ window.Sidebar = {
   },
 
   template: ` 
-    <div class="h-full w-[300px] px-3 py-4 bg-white">
-      <div class="flex items-center ml-1 py-4 mb-4">
+    <div class="bg-white">
+      <div class="flex items-center ml-1 py-4 mb-4 mt-6">
         <img src="resources/LUTO.png" alt="LUTO 2.0" class="rounded-full w-10 h-10" />
         <span class="ms-3 text-xl font-semibold">LUTO 2.0</span>
       </div>
@@ -43,7 +43,7 @@ window.Sidebar = {
             class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100">
             <!-- Dynamically access icons -->
             <span v-html="JSON.parse(JSON.stringify(item.icon))"></span>
-            <span class="ms-3">{{ item.label }}</span>
+            <span class="ms-3 w-[200px] whitespace-nowrap">{{ item.label }}</span>
           </router-link>
         </li>
       </ul>
