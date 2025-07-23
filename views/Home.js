@@ -115,7 +115,7 @@ window.HomeView = {
     );
 
     watch(
-      [selectRegion],
+      selectRegion,
       (newValues) => {
           changeDataset(selectDataset.value);
       }
@@ -147,13 +147,13 @@ window.HomeView = {
             <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#6074e4] to-[#825fe4]">
               <p class="text-white p-2">Economics</p>
             </div>
-            <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef]">
+            <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#edde54] to-[#78cc7a]">
               <p class="text-white p-2">Area</p>
             </div>
             <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#f4355c] to-[#f66137]">
               <p class="text-white p-2">GHG</p>
             </div>
-            <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#edde54] to-[#78cc7a]">
+            <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#0dcdef] to-[#1574ef]">
               <p class="text-white p-2">Water</p>
             </div>
             <div class="flex flex-1 min-w-[200px] items-center h-[120px] rounded-lg bg-gradient-to-r from-[#182a4e] to-[#1b174d]">

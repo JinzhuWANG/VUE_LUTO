@@ -116,7 +116,7 @@ window.map_geojson = {
                                 // Check if the clicked region is already the active region
                                 if (layer_e.options.regionName === activeRegionName.value) {
                                     layer_e.setStyle(defaultStyle);
-                                    updateRegionName('Australia');
+                                    updateRegionName('AUSTRALIA');
                                     return;
                                 }
 
