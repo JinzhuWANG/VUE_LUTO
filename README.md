@@ -29,37 +29,38 @@ This dashboard provides an intuitive interface to explore model outputs and unde
 
 ```
 VUE_LUTO/
-├── components/           # Reusable Vue components
-│   ├── chart_container.js   # Highcharts wrapper component
-│   ├── helpers.js          # Utility functions for script/data loading
-│   ├── map_geojson.js      # Interactive map component
-│   └── sidebar.js          # Navigation sidebar
-├── views/               # Page components (routes)
-│   ├── Home.js            # Main dashboard with overview
-│   ├── Area.js            # Area analysis view
-│   └── NotFound.js        # 404 error page
-├── routes/              # Routing configuration
-│   └── route.js           # Vue Router setup
-├── data/                # Data files and model outputs
-│   ├── chart_option/      # Chart configuration templates
-│   │   ├── Chart_default_options.js  # Default chart styles
-│   │   └── chartMemLogOptions.js     # Memory log chart configuration
-│   ├── geo/              # Geographic data (Australian regions)
-│   └── Supporting_info.js # Consolidated model settings and information
-├── lib/                 # Local library dependencies
-│   ├── Highcharts-12.3.0/   # Highcharts library and modules
-│   ├── vue.global.prod_3.5.18.js     # Vue.js library
-│   ├── vue-router.global_4.5.1.js    # Vue Router library
-│   └── tailwind_3.4.16.js            # Tailwind CSS library
-├── assets/              # Raw data assets (JSON format)
-├── dataTransform/       # Data transformation scripts
-│   └── 01_JSON2JS_dataTrans.py  # JSON to JS conversion utility
-├── resources/           # Static assets
-│   ├── icons.js          # SVG icons
-│   ├── LUTO.png          # Logo
-│   └── Roboto-Light.ttf  # Custom font
-├── index.html           # Main HTML entry point
-└── index.js             # Application bootstrap
+├── components/                         # Reusable Vue components
+│   ├── chart_container.js              # Highcharts wrapper component
+│   ├── helpers.js                      # Utility functions for script/data loading
+│   ├── map_geojson.js                  # Interactive map component
+│   └── sidebar.js                      # Navigation sidebar
+├── views/                              # Page components (routes)
+│   ├── Home.js                         # Main dashboard with overview
+│   ├── Area.js                         # Area analysis view
+│   └── NotFound.js                     # 404 error page
+├── routes/                             # Routing configuration
+│   └── route.js                        # Vue Router setup
+├── data/                               # Data files and model outputs
+│   ├── chart_option/                   # Chart configuration templates
+│   │   ├── Chart_default_options.js    # Default chart styles
+│   │   └── chartMemLogOptions.js       # Memory log chart configuration
+│   ├── geo/                            # Geographic data (Australian regions)
+│   └── Supporting_info.js              # Consolidated model settings and information
+├── lib/                                # Local library dependencies
+│   ├── Highcharts-12.3.0/              # Highcharts library and modules
+│   ├── vue.global.prod_3.5.18.js       # Vue.js library
+│   ├── vue-router.global_4.5.1.js      # Vue Router library
+│   └── tailwind_3.4.16.js              # Tailwind CSS library
+├── assets/                             # Raw data assets (JSON format)
+├── dataTransform/                      # Data transformation scripts
+│   └── 01_JSON2JS_dataTrans.py         # JSON to JS conversion utility
+├── resources/                          # Static assets
+│   ├── icons.js                        # SVG icons
+│   ├── LUTO.png                        # Logo
+│   └── Roboto-Light.ttf                # Custom font
+├── index.html                          # Main HTML entry point
+└── index.js                            # Application bootstrap
+
 ```
 
 ## Key Features
