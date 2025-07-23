@@ -1,7 +1,5 @@
 # VUE_LUTO - Land Use Trade-Offs (LUTO) 2.0 Dashboard
 
-![LUTO Dashboard](https://github.com/user-attachments/assets/0b55344e-bf35-4c79-99e5-d7bb54bd4ece)
-
 ## Overview
 
 VUE_LUTO is a web-based dashboard application for visualizing and analyzing results from the Land Use Trade-Offs (LUTO) 2.0 model. It provides interactive charts, maps, and data exploration tools for understanding the environmental, economic, and social impacts of different land use scenarios in Australia.
