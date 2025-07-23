@@ -19,12 +19,13 @@ This dashboard provides an intuitive interface to explore model outputs and unde
 
 ## Technology Stack
 
-- **Frontend Framework**: Vue.js 3 with Composition API
-- **Routing**: Vue Router 4
-- **Styling**: Tailwind CSS (via CDN)
-- **Charts**: Highcharts with accessibility features
+- **Frontend Framework**: Vue.js 3.5.18 with Composition API
+- **Routing**: Vue Router 4.5.1
+- **Styling**: Tailwind CSS 3.4.16
+- **Charts**: Highcharts 12.3.0 with accessibility features
 - **Maps**: Leaflet for interactive Australian region mapping
 - **Architecture**: Single Page Application (SPA) with no build process
+- **Dependencies**: All libraries are locally hosted in the `lib/` directory for offline use
 
 ## Project Structure
 
@@ -43,8 +44,18 @@ VUE_LUTO/
 │   └── route.js           # Vue Router setup
 ├── data/                # Data files and model outputs
 │   ├── chart_option/      # Chart configuration templates
+│   │   ├── Chart_default_options.js  # Default chart styles
+│   │   └── chartMemLogOptions.js     # Memory log chart configuration
 │   ├── geo/              # Geographic data (Australian regions)
-│   └── run_logs/         # Model run parameters and settings
+│   └── Supporting_info.js # Consolidated model settings and information
+├── lib/                 # Local library dependencies
+│   ├── Highcharts-12.3.0/   # Highcharts library and modules
+│   ├── vue.global.prod_3.5.18.js     # Vue.js library
+│   ├── vue-router.global_4.5.1.js    # Vue Router library
+│   └── tailwind_3.4.16.js            # Tailwind CSS library
+├── assets/              # Raw data assets (JSON format)
+├── dataTransform/       # Data transformation scripts
+│   └── 01_JSON2JS_dataTrans.py  # JSON to JS conversion utility
 ├── resources/           # Static assets
 │   ├── icons.js          # SVG icons
 │   ├── LUTO.png          # Logo
@@ -88,10 +99,12 @@ The application uses a custom script loading system (`helpers.js`) that:
 - Supports timeout mechanisms for reliable loading
 
 ### Data Types
-1. **Model Run Settings** (`model_run_settings.js`): Configuration parameters for LUTO model runs
-2. **Chart Data**: Time-series and categorical data for various metrics
+1. **Supporting Info** (`Supporting_info.js`): Consolidated information including model run settings
+2. **Chart Data**: Time-series and categorical data organized by region and category
 3. **Geographic Data** (`NRM_AUS.js`): GeoJSON data for Australian regions
-4. **Chart Options** (`Chart_default_options.js`): Default styling and configuration for charts
+4. **Chart Options**: Multiple files with specific chart configurations:
+   - `Chart_default_options.js`: Default styling and configuration for charts
+   - `chartMemLogOptions.js`: Memory log chart specific options
 
 ## Component Architecture
 
@@ -136,6 +149,16 @@ The application uses a custom script loading system (`helpers.js`) that:
    http://localhost:8000
    ```
 
+### Data Transformation
+If you need to update data from raw JSON files:
+
+1. Place your JSON files in the `assets/` directory
+2. Run the transformation script:
+   ```bash
+   python dataTransform/01_JSON2JS_dataTrans.py
+   ```
+3. This will convert JSON files to JavaScript files in the `data/` directory with proper window object assignments
+
 ### Production Deployment
 The application is a static web application that can be deployed to any web server:
 - Upload all files to your web server
@@ -169,10 +192,12 @@ The model generates datasets for:
 - Consistent naming conventions (camelCase for variables, kebab-case for components)
 
 ### Performance Considerations
+- Locally hosted libraries for offline use and faster loading
 - Lazy loading of data files to reduce initial load time
 - Chart reuse and proper cleanup to prevent memory leaks
 - Efficient map rendering with minimal DOM manipulation
 - Responsive design principles for various screen sizes
+- Structured data organization by region for faster access
 
 ### Browser Support
 - Modern browsers supporting ES6+
@@ -190,3 +215,18 @@ When contributing to this project:
 ## License
 
 This project is part of the LUTO (Land Use Trade-Offs) model system. Please refer to the main LUTO project for licensing information.
+
+## Version History
+
+### Latest Changes
+- Migrated from CDN dependencies to local libraries for offline use
+- Improved data handling with better organization by region
+- Enhanced responsive UI with better layout and spacing
+- Consolidated model settings into a single Supporting_info.js file
+- Standardized chart options in dedicated configuration files
+
+### Future Enhancements
+- Add more detailed analysis views for each domain
+- Implement scenario comparison functionality
+- Add data download options for raw model outputs
+- Improve accessibility features for all visualizations
