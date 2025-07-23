@@ -16,11 +16,11 @@ window.AreaView = {
     onMounted(async () => {
 
       await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
-      await loadScript("./data/area_0_grouped_lu_area_wide.js", 'area_0_grouped_lu_area_wide');
+      await loadScript("./data/Area_overview_2_Category.js", 'Area_overview_2_Category');
 
       selectDataset.value = {
         ...window.Chart_default_options,
-        series: window.area_0_grouped_lu_area_wide,
+        series: window['Area_overview_2_Category']['AUSTRALIA'],
       };
     });
 
