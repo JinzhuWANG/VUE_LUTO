@@ -11,7 +11,10 @@ const app = createApp({
 app.component("chart-container", window.Highchart);
 app.component("side-bar", window.Sidebar);
 app.component('map-geojson', window.map_geojson);
+app.component('ranking-cards', window.RankingCards);
 
-// Use router
+// Use modules
+app.use(ElementPlus);
 app.use(window.router);
+
 app.mount("#app");

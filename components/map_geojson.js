@@ -21,7 +21,7 @@ window.map_geojson = {
             color: "#fefefe",
             fillColor: "#d2d7dd",
             fillOpacity: 0.5,
-            weight: 0.5,
+            weight: 1.5,
         };
 
         const highlightStyle = {
