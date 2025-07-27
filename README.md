@@ -33,11 +33,19 @@ VUE_LUTO/
 │   ├── chart_container.js              # Highcharts wrapper component
 │   ├── helpers.js                      # Utility functions for script/data loading
 │   ├── map_geojson.js                  # Interactive map component
+│   ├── ranking_card.js                 # Ranking cards component
 │   └── sidebar.js                      # Navigation sidebar
 ├── views/                              # Page components (routes)
 │   ├── Home.js                         # Main dashboard with overview
 │   ├── Area.js                         # Area analysis view
+│   ├── Economics.js                    # Economics analysis view
+│   ├── GHG.js                          # Greenhouse Gas analysis view
+│   ├── Water.js                        # Water usage analysis view
+│   ├── Biodiversity.js                 # Biodiversity analysis view
 │   └── NotFound.js                     # 404 error page
+├── services/                           # Service modules
+│   ├── data_service.js                 # Data handling service
+│   └── year_selection.js               # Year selection functionality
 ├── routes/                             # Routing configuration
 │   └── route.js                        # Vue Router setup
 ├── data/                               # Data files and model outputs
@@ -53,7 +61,8 @@ VUE_LUTO/
 │   └── tailwind_3.4.16.js              # Tailwind CSS library
 ├── assets/                             # Raw data assets (JSON format)
 ├── dataTransform/                      # Data transformation scripts
-│   └── 01_JSON2JS_dataTrans.py         # JSON to JS conversion utility
+│   ├── 01_JSON2JS_dataTrans.py         # JSON to JS conversion utility
+│   └── NRM_SIMPLIFY_FILTER/            # Geographic data processing tools
 ├── resources/                          # Static assets
 │   ├── icons.js                        # SVG icons
 │   ├── LUTO.png                        # Logo
