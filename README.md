@@ -44,8 +44,7 @@ VUE_LUTO/
 │   ├── Biodiversity.js                 # Biodiversity analysis view
 │   └── NotFound.js                     # 404 error page
 ├── services/                           # Service modules
-│   ├── data_service.js                 # Data handling service
-│   └── year_selection.js               # Year selection functionality
+│   └── DataService.js                  # Data handling service
 ├── routes/                             # Routing configuration
 │   └── route.js                        # Vue Router setup
 ├── data/                               # Data files and model outputs
