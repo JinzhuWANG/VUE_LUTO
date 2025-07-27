@@ -6,22 +6,21 @@ window.RankingCards = {
     selectRegion: {
       type: String,
       default: 'AUSTRALIA'
+    },
+    selectYear: {
+      type: Number,
+      default: 2020
     }
   },
 
   setup(props) {
     const { computed } = Vue;
 
-    // Reference to DataService
-    const DataService = window.DataService;
-
-    // Computed property to get the ranking data based on the selected region
     const rankingData = computed(() => {
-      return DataService.getRankingData(props.selectRegion);
+      return window.DataService.getRankingData(props.selectRegion, props.selectYear);
     });
 
     return {
-      DataService,
       rankingData
     };
   },
@@ -33,7 +32,7 @@ window.RankingCards = {
       <div class="flex justify-between gap-2">
 
         <!-- Economics -->
-        <div class="flex-2 w-full w-min-[300px] bg-gradient-to-r from-[#6074e4] to-[#825fe4] rounded-lg p-2 shadow-md">
+        <div class="flex-2 w-full w-min-[300px] bg-gradient-to-r from-[#e6b980] to-[#eacda3] rounded-lg p-2 shadow-md">
           <p class="text-white mb-4">Revenue</p>
           <div class="flex justify-between w-full gap-1">
             <el-progress 
@@ -297,7 +296,7 @@ window.RankingCards = {
         </div>
         
         <!-- Biodiversity -->
-        <div class="flex-4 w-full bg-gradient-to-r from-[#606064ff] to-[#c1c6d0ff] rounded-lg p-2 shadow-md">
+        <div class="flex-4 w-full bg-gradient-to-r from-[#696969] to-[#c1c6d0] rounded-lg p-2 shadow-md">
           <p class="text-white mb-4">Biodiversity</p>
           <div class="flex items-center justify-between gap-1">
             <el-progress 

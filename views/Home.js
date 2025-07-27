@@ -9,7 +9,9 @@ window.HomeView = {
     // Define reactive variables
     const settingsFilterTxt = ref("");
     const selectRegion = ref("AUSTRALIA");
-    const isGeojsonLoaded = ref(false);
+    const selectYear = ref(2020);
+    const yearIndex = ref(0);
+    const availableYears = ref([]);
     const isMapVisible = ref(window.innerWidth >= 1280);
     const filteredSettings = ref([]);
 
@@ -34,7 +36,6 @@ window.HomeView = {
     const trackResize = () => {
       windowWidth.value = window.innerWidth;
     };
-
 
 
     const changeDataset = async (datasetName) => {
@@ -67,7 +68,6 @@ window.HomeView = {
     // Load scripts and data when the component is mounted
     onMounted(async () => {
       try {
-        isGeojsonLoaded.value = true;
 
         // Add resize event listener
         window.addEventListener('resize', trackResize);
@@ -82,8 +82,12 @@ window.HomeView = {
         await loadScript("./data/Area_ranking.js", 'Area_ranking');
         await loadScript("./data/Economics_ranking.js", 'Economics_ranking');
 
-        // RankingData component is now included in index.html
+        // Set initial year to first available year
+        availableYears.value = window.Supporting_info.years;
+        selectYear.value = availableYears.value[0];
+        yearIndex.value = 0;
 
+        // RankingData component is now included in index.html
         chartMemLogData.value = {
           ...window['Chart_default_options'],
           ...window['chartMemLogOptions'],
@@ -128,21 +132,28 @@ window.HomeView = {
         changeDataset(selectDataset.value);
       }
     );
-
+    watch(
+      selectYear,
+      (newYear) => {
+        selectYear.value = newYear;
+      }
+    );
 
     return {
       isMapVisible,
       selectRegion,
       selectDataset,
+      selectYear,
+      yearIndex,
       DataService,
       windowWidth,
-      isGeojsonLoaded,
       settingsFilterTxt,
       filteredSettings,
       availableDatasets,
       chartMemLogData,
       chartOverview,
       changeDataset,
+      availableYears,
     };
   },
 
@@ -153,32 +164,51 @@ window.HomeView = {
 
         <!-- Rank cards -->
         <div class="mb-6 mr-4">
-          <ranking-cards :select-region="selectRegion"></ranking-cards>
+          <ranking-cards :selectRegion="selectRegion" :selectYear="selectYear"></ranking-cards>
         </div>
 
 
         <div class="flex flex-wrap mr-4 gap-4 mb-4">
 
-          <div v-show="isMapVisible" class="flex flex-col rounded-[10px] bg-white shadow-md w-[500px]">
+          <div class="flex flex-col rounded-[10px] bg-white shadow-md w-[500px]">
 
             <!-- Buttons -->
-            <div class="flex flex-col items-center justify-between p-2">
-              <div class="flex flex-wrap space-x-1 mr-3">
-                <button v-for="(data, key) in availableDatasets" :key="key"
-                  @click="selectDataset = key; changeDataset(key)"
-                  class="bg-[#e8eaed] text-[#1f1f1f] text-sm px-1 py-1 rounded"
-                  :class="{'bg-sky-500 text-white': selectDataset === key}">
-                  {{ data.type }}
-                </button>
+            <div class="flex items-center justify-between w-full">
+              <div class="text-[0.7rem] ml-2">
+                <p>Region: <strong>{{ selectRegion }}</strong></p>
+              </div>
+              <div class="flex items-center justify-end p-2">
+                <div class="flex flex-wrap space-x-1">
+                  <button v-for="(data, key) in availableDatasets" :key="key"
+                    @click="selectDataset = key; changeDataset(key)"
+                    class="bg-[#e8eaed] text-[#1f1f1f] text-[0.7rem] px-1 py-1 rounded"
+                    :class="{'bg-sky-500 text-white': selectDataset === key}">
+                    {{ data.type }}
+                  </button>
+                </div>
               </div>
             </div>
 
             <hr class="border-gray-300">
 
             <!-- Map -->
-            <div class="relative">
-              <p class="text-sm absolute top-2 left-2">Selected Region: <strong>{{ selectRegion }}</strong></p>
-              <map-geojson v-if="isGeojsonLoaded" :height="'470px'" v-model="selectRegion" />
+            <div v-show="isMapVisible" class="relative">
+              <div class="absolute flex w-full top-1 left-2 right-2 pr-4 justify-between items-center">
+                <p class="text-[0.7rem]">Year: <strong>{{ selectYear }}</strong></p>
+                <el-slider 
+                  v-if="availableYears.length > 0"
+                  class="justify-end flex-1 max-w-[240px] custom-slider" 
+                  v-model="yearIndex"
+                  size="small"
+                  :min="0" 
+                  :max="availableYears.length - 1"
+                  :step="1"
+                  :format-tooltip="index => availableYears[index]"
+                  :marks="availableYears.reduce((acc, year, index) => ({ ...acc, [index]: year }), {})"
+                  @change="(index) => { selectYear = availableYears[index]; }"
+                />
+              </div>
+              <map-geojson :height="'470px'" v-model="selectRegion" />
             </div>
 
           </div>

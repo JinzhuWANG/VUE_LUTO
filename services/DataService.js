@@ -5,10 +5,10 @@ window.DataService = {
   /**
    * Get ranking data based on the selected region and year
    * @param {String} selectRegion - The selected region (default: 'AUSTRALIA')
-   * @param {String} selectYear - The selected year (default: '2020')
+   * @param {String} selectYear - The selected year (default: 2020)
    * @returns {Object} The ranking data object
    */
-  getRankingData(selectRegion = 'AUSTRALIA', selectYear = '2020') {
+  getRankingData(selectRegion = 'AUSTRALIA', selectYear = 2020) {
     try {
       // Populate the rankingData based on the selected region
       const rankingData = {
