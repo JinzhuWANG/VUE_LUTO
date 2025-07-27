@@ -34,7 +34,7 @@ window.HomeView = {
     const trackResize = () => {
       windowWidth.value = window.innerWidth;
     };
-    
+
 
 
     const changeDataset = async (datasetName) => {
@@ -46,7 +46,7 @@ window.HomeView = {
         chartOverview.value = {
           ...window['Chart_default_options'],
           chart: {
-            height: 480,
+            height: 510,
           },
           title: {
             text: `${availableDatasets.value[datasetName]['type']} overview for ${selectRegion.value}`
@@ -81,7 +81,7 @@ window.HomeView = {
         await loadScript("./data/Water_yield_ranking.js", 'Water_yield_ranking');
         await loadScript("./data/Area_ranking.js", 'Area_ranking');
         await loadScript("./data/Economics_ranking.js", 'Economics_ranking');
-        
+
         // RankingData component is now included in index.html
 
         chartMemLogData.value = {
@@ -111,7 +111,7 @@ window.HomeView = {
         isMapVisible.value = newWindowWidth >= 1280;
       }
     );
-    
+
     // Watch for changes and then make reactive updates
     watch(
       settingsFilterTxt,
@@ -125,7 +125,7 @@ window.HomeView = {
     watch(
       selectRegion,
       (newValues) => {
-          changeDataset(selectDataset.value);
+        changeDataset(selectDataset.value);
       }
     );
 
@@ -150,35 +150,44 @@ window.HomeView = {
   template: `
     <div class="bg-[#f8f9fe]">
       <div class="flex flex-col">
-        <!-- Rank cards -->
-        <ranking-cards :select-region="selectRegion"></ranking-cards>
-        
-        <div class="flex flex-wrap gap-6 mb-6">
-          <!-- Map selection -->
-          <div v-show="isMapVisible" class="rounded-[10px] bg-white shadow-md w-[500px] shrink">
-            <p class="text-sm h-[50px] p-4">Selected Region: <strong>{{ selectRegion }}</strong></p>
-            <hr class="border-gray-300">
-            <map-geojson v-if="isGeojsonLoaded" :height="'500px'" v-model="selectRegion"></map-geojson>
-          </div>
 
-          <!-- Statistics overview -->
-          <div class="flex-1 rounded-[10px] bg-white shadow-md min-w-[300px]">
-            <div class="h-[50px] flex items-center flex-wrap">
-              <p class="flex-1 text-sm p-4">Statistics overview for <strong>{{ selectRegion }}</strong></p>
-              <!-- Button container -->
-              <div class="flex flex-wrap justify-end space-x-3 mr-4">
+        <!-- Rank cards -->
+        <div class="mb-6 mr-4">
+          <ranking-cards :select-region="selectRegion"></ranking-cards>
+        </div>
+
+
+        <div class="flex flex-wrap mr-4 gap-4 mb-4">
+
+          <div v-show="isMapVisible" class="flex flex-col rounded-[10px] bg-white shadow-md w-[500px]">
+
+            <!-- Buttons -->
+            <div class="flex flex-col items-center justify-between p-2">
+              <div class="flex flex-wrap space-x-1 mr-3">
                 <button v-for="(data, key) in availableDatasets" :key="key"
-                  @click="selectDataset = key; changeDataset(key)" 
-                  class="justify-end bg-[#e8eaed] text-[#1f1f1f] text-sm px-3 py-1 rounded mb-2" 
+                  @click="selectDataset = key; changeDataset(key)"
+                  class="bg-[#e8eaed] text-[#1f1f1f] text-sm px-1 py-1 rounded"
                   :class="{'bg-sky-500 text-white': selectDataset === key}">
                   {{ data.type }}
-                </button> 
+                </button>
               </div>
             </div>
+
             <hr class="border-gray-300">
-            <!-- Chart component -->
+
+            <!-- Map -->
+            <div class="relative">
+              <p class="text-sm absolute top-2 left-2">Selected Region: <strong>{{ selectRegion }}</strong></p>
+              <map-geojson v-if="isGeojsonLoaded" :height="'470px'" v-model="selectRegion" />
+            </div>
+
+          </div>
+
+          <!-- Statistics Chart -->
+          <div class="flex-1 rounded-[10px] bg-white shadow-md">
             <chart-container :chartData="chartOverview"></chart-container>
           </div>
+
         </div>
         
         <div class="flex flex-wrap gap-6 mb-16">

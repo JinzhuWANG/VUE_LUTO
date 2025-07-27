@@ -71,11 +71,9 @@ window.Highchart = {
     };
   },
   template: `
-    <div>
-      <div v-if="isLoading" class="flex justify-center items-center h-[400px]">
-        <div class="text-lg">Loading data...</div>
-      </div>
-      <div ref="chartElement" id="chart-container" style="min-height: 400px;"></div>
+    <div class="m-2">
+      <div v-if="isLoading" class="flex justify-center items-center text-lg">Loading data...</div>
+      <div ref="chartElement" id="chart-container"></div>
     </div>
   `
 }
