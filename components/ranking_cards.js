@@ -33,7 +33,7 @@ window.RankingCards = {
 
         <!-- Economics -->
         <div class="flex-2 w-full w-min-[300px] bg-gradient-to-r from-[#e6b980] to-[#eacda3] rounded-lg p-2 shadow-md">
-          <p class="text-white mb-4">Revenue</p>
+          <p class="text-white mb-4">Economics</p>
           <div class="flex justify-between w-full gap-1">
             <el-progress 
               type="dashboard" 
@@ -164,7 +164,7 @@ window.RankingCards = {
         </div>
         
         <!-- GHG -->
-        <div class="flex-2 w-full bg-gradient-to-r from-[#f4355c] to-[#f66137] rounded-lg p-2 shadow-md">
+        <div class="flex-2 w-full bg-gradient-to-r from-[#f46489] to-[#f088e1] rounded-lg p-2 shadow-md">
           <p class="text-white mb-4">GHG</p>
           <div class="flex items-center justify-between gap-1">
             <el-progress 
@@ -210,7 +210,7 @@ window.RankingCards = {
         </div>
         
         <!-- Water -->
-        <div class="flex-4 w-full bg-gradient-to-r from-[#1574ef] to-[#0dcdef] rounded-lg p-2 shadow-md">
+        <div class="flex-4 w-full bg-gradient-to-r from-[#4fadff] to-[#07f0fe] rounded-lg p-2 shadow-md">
           <p class="text-white mb-4">Water</p>
           <div class="flex items-center justify-between gap-1">
             <el-progress 
@@ -296,7 +296,7 @@ window.RankingCards = {
         </div>
         
         <!-- Biodiversity -->
-        <div class="flex-4 w-full bg-gradient-to-r from-[#696969] to-[#c1c6d0] rounded-lg p-2 shadow-md">
+        <div class="flex-4 w-full bg-gradient-to-r from-[#ecd3fe] to-[#666adf] rounded-lg p-2 shadow-md">
           <p class="text-white mb-4">Biodiversity</p>
           <div class="flex items-center justify-between gap-1">
             <el-progress 

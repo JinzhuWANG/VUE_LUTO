@@ -12,7 +12,6 @@ window.HomeView = {
     const selectYear = ref(2020);
     const yearIndex = ref(0);
     const availableYears = ref([]);
-    const isMapVisible = ref(window.innerWidth >= 1280);
     const filteredSettings = ref([]);
 
     //  Overview charts
@@ -108,13 +107,8 @@ window.HomeView = {
     });
 
 
-    // Watch for changes in window width to toggle map visibility
-    watch(
-      windowWidth,
-      (newWindowWidth) => {
-        isMapVisible.value = newWindowWidth >= 1280;
-      }
-    );
+    // Keep track of window resizing for any future responsive needs
+    // (No visibility toggling now - map and chart always visible)
 
     // Watch for changes and then make reactive updates
     watch(
@@ -125,7 +119,6 @@ window.HomeView = {
         );
       }
     );
-
     watch(
       selectRegion,
       (newValues) => {
@@ -133,14 +126,13 @@ window.HomeView = {
       }
     );
     watch(
-      selectYear,
-      (newYear) => {
-        selectYear.value = newYear;
+      yearIndex,
+      (newIndex) => {
+        selectYear.value = availableYears.value[newIndex];
       }
     );
 
     return {
-      isMapVisible,
       selectRegion,
       selectDataset,
       selectYear,
@@ -174,14 +166,14 @@ window.HomeView = {
 
             <!-- Buttons -->
             <div class="flex items-center justify-between w-full">
-              <div class="text-[0.7rem] ml-2">
+              <div class="text-[0.8rem] ml-2">
                 <p>Region: <strong>{{ selectRegion }}</strong></p>
               </div>
               <div class="flex items-center justify-end p-2">
                 <div class="flex flex-wrap space-x-1">
                   <button v-for="(data, key) in availableDatasets" :key="key"
                     @click="selectDataset = key; changeDataset(key)"
-                    class="bg-[#e8eaed] text-[#1f1f1f] text-[0.7rem] px-1 py-1 rounded"
+                    class="bg-[#e8eaed] text-[#1f1f1f] text-[0.8rem] px-1 py-1 rounded"
                     :class="{'bg-sky-500 text-white': selectDataset === key}">
                     {{ data.type }}
                   </button>
@@ -192,12 +184,12 @@ window.HomeView = {
             <hr class="border-gray-300">
 
             <!-- Map -->
-            <div v-show="isMapVisible" class="relative">
+            <div class="relative">
               <div class="absolute flex w-full top-1 left-2 right-2 pr-4 justify-between items-center">
-                <p class="text-[0.7rem]">Year: <strong>{{ selectYear }}</strong></p>
+                <p class="text-[0.8rem]">Year: <strong>{{ selectYear }}</strong></p>
                 <el-slider 
                   v-if="availableYears.length > 0"
-                  class="justify-end flex-1 max-w-[240px] custom-slider" 
+                  class="justify-end flex-1 max-w-[240px] custom-slider mr-3" 
                   v-model="yearIndex"
                   size="small"
                   :min="0" 
@@ -205,7 +197,7 @@ window.HomeView = {
                   :step="1"
                   :format-tooltip="index => availableYears[index]"
                   :marks="availableYears.reduce((acc, year, index) => ({ ...acc, [index]: year }), {})"
-                  @change="(index) => { selectYear = availableYears[index]; }"
+                  @input="(index) => { yearIndex = index; }"
                 />
               </div>
               <map-geojson :height="'470px'" v-model="selectRegion" />
@@ -214,7 +206,7 @@ window.HomeView = {
           </div>
 
           <!-- Statistics Chart -->
-          <div class="flex-1 rounded-[10px] bg-white shadow-md">
+          <div class="flex-1 rounded-[10px] bg-white shadow-md min-w-[300px]">
             <chart-container :chartData="chartOverview"></chart-container>
           </div>
 
