@@ -4,6 +4,9 @@ window.map_geojson = {
             type: String,
             default: '500px',
         },
+        selectDataType: {
+            type: String,
+        },
         modelValue: {
             type: String,
         },
@@ -37,105 +40,101 @@ window.map_geojson = {
         };
 
         onMounted(async () => {
-            try {
 
-                // Load data
-                await window.loadScript("./data/geo/NRM_AUS.js", 'NRM_AUS_data');
-                const geoJSONData = window.NRM_AUS_data;
+            // Load data
+            await window.loadScript("./data/geo/NRM_AUS.js", 'NRM_AUS');
 
-                // Initialize map
-                const map = L.map(mapElement.value, {
-                    zoomControl: false,
-                    attributionControl: false,
-                    zoomSnap: 0.1,
-                    dragging: false,
-                    scrollWheelZoom: false,
-                    doubleClickZoom: false,
-                });
+            // Initialize map
+            const map = L.map(mapElement.value, {
+                zoomControl: false,
+                attributionControl: false,
+                zoomSnap: 0.1,
+                dragging: false,
+                scrollWheelZoom: false,
+                doubleClickZoom: false,
+            });
 
 
-                map.setView(
-                    australiaBounds.getCenter(),
-                    map.getBoundsZoom(australiaBounds),
-                    { animate: false }
-                );
+            map.setView(
+                australiaBounds.getCenter(),
+                map.getBoundsZoom(australiaBounds),
+                { animate: false }
+            );
 
 
-                // Store GeoJSON layer for later access
-                geoJSONLayer.value = L.geoJSON(geoJSONData, {
-                    style: defaultStyle,
-                    onEachFeature: (feature, layer) => {
-                        // Store region name in layer options for easier access later
-                        layer.options.regionName = feature.properties.NHT2NAME;
-                        layer.on({
-                            mousemove: (e) => {
-                                const layer_e = e.target;
+            // Store GeoJSON layer for later access
+            geoJSONLayer.value = L.geoJSON(window['NRM_AUS'], {
+                style: defaultStyle,
+                onEachFeature: (feature, layer) => {
+                    // Store region name in layer options for easier access later
+                    layer.options.regionName = feature.properties.NHT2NAME;
+                    layer.on({
+                        mousemove: (e) => {
+                            const layer_e = e.target;
 
-                                if (layer_e._path) {
-                                    layer_e._path.style.cursor = 'default';
-                                }
+                            if (layer_e._path) {
+                                layer_e._path.style.cursor = 'default';
+                            }
 
-                                // Remove previous hover tooltip
-                                if (hoverTooltip.value) {
-                                    map.removeLayer(hoverTooltip.value);
-                                    hoverTooltip.value = null;
-                                }
+                            // Remove previous hover tooltip
+                            if (hoverTooltip.value) {
+                                map.removeLayer(hoverTooltip.value);
+                                hoverTooltip.value = null;
+                            }
 
-                                // Create new hover tooltip
-                                hoverTooltip.value = L.tooltip({
-                                    permanent: false,
-                                    direction: "top",
-                                });
-                                hoverTooltip.value.setContent(feature.properties.NHT2NAME);
-                                hoverTooltip.value.setLatLng(e.latlng);
-                                hoverTooltip.value.addTo(map);
+                            // Create new hover tooltip
+                            hoverTooltip.value = L.tooltip({
+                                permanent: false,
+                                direction: "top",
+                            });
+                            hoverTooltip.value.setContent(feature.properties.NHT2NAME);
+                            hoverTooltip.value.setLatLng(e.latlng);
+                            hoverTooltip.value.addTo(map);
 
 
-                                // Highlight the hovered region
+                            // Highlight the hovered region
+                            layer_e.setStyle(highlightStyle);
+                        },
+                        mouseout: (e) => {
+                            const layer_e = e.target;
+
+                            // Remove hover tooltip if it exists
+                            if (hoverTooltip.value) {
+                                map.removeLayer(hoverTooltip.value);
+                                hoverTooltip.value = null;
+                            }
+
+                            // Ensure the selected region maintains its highlight style
+                            if (layer_e.options.regionName === activeRegionName.value) {
                                 layer_e.setStyle(highlightStyle);
-                            },
-                            mouseout: (e) => {
-                                const layer_e = e.target;
+                            } else {
+                                layer_e.setStyle(defaultStyle);
+                            }
+                        },
+                        click: (e) => {
+                            const layer_e = e.target;
 
-                                // Remove hover tooltip if it exists
-                                if (hoverTooltip.value) {
-                                    map.removeLayer(hoverTooltip.value);
-                                    hoverTooltip.value = null;
-                                }
+                            // Check if the clicked region is already the active region
+                            if (layer_e.options.regionName === activeRegionName.value) {
+                                layer_e.setStyle(defaultStyle);
+                                updateRegionName('AUSTRALIA');
+                                return;
+                            }
 
-                                // Ensure the selected region maintains its highlight style
-                                if (layer_e.options.regionName === activeRegionName.value) {
-                                    layer_e.setStyle(highlightStyle);
-                                } else {
-                                    layer_e.setStyle(defaultStyle);
-                                }
-                            },
-                            click: (e) => {
-                                const layer_e = e.target;
+                            // Remove highlight style from all regions
+                            geoJSONLayer.value.eachLayer(function (layer) {
+                                layer.setStyle(defaultStyle);
+                            });
 
-                                // Check if the clicked region is already the active region
-                                if (layer_e.options.regionName === activeRegionName.value) {
-                                    layer_e.setStyle(defaultStyle);
-                                    updateRegionName('AUSTRALIA');
-                                    return;
-                                }
+                            // Set new selection
+                            updateRegionName(layer_e.options.regionName);
+                            layer_e.setStyle(highlightStyle);
 
-                                // Remove highlight style from all regions
-                                geoJSONLayer.value.eachLayer(function (layer) {
-                                    layer.setStyle(defaultStyle);
-                                });
+                        },
+                    });
+                },
+            }).addTo(map);
 
-                                // Set new selection
-                                updateRegionName(layer_e.options.regionName);
-                                layer_e.setStyle(highlightStyle);
-
-                            },
-                        });
-                    },
-                }).addTo(map);
-            } catch (error) {
-                console.error("Error initializing map:", error);
-            }
         });
 
         return {

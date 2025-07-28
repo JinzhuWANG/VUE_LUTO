@@ -12,7 +12,7 @@ window.DataService = {
     try {
       // Populate the rankingData based on the selected region
       const rankingData = {
-        'Economy': {
+        'Economics': {
           'Revenue': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
             'Rank': window['Economics_ranking'][selectRegion]['Revenue']['Rank'][selectYear],
             'Percent': window['Economics_ranking'][selectRegion]['Revenue']['Percent'][selectYear],
@@ -58,7 +58,7 @@ window.DataService = {
             'color': window['GHG_ranking'][selectRegion]['GHG sequestrations']['color'][selectYear],
           },
         },
-        'Water_yield': {
+        'Water': {
           'Ag': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
             'Rank': window['Water_yield_ranking'][selectRegion]['Agricultural Landuse']['Rank'][selectYear],
             'Percent': window['Water_yield_ranking'][selectRegion]['Agricultural Landuse']['Percent'][selectYear],

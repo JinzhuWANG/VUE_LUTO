@@ -2,7 +2,7 @@ window.HomeView = {
 
   setup() {
 
-    const { ref, onMounted, watch } = Vue;
+    const { ref, onMounted, watch, computed } = Vue;
     const windowWidth = ref(window.innerWidth);
     const loadScript = window.loadScript;
 
@@ -14,7 +14,8 @@ window.HomeView = {
     const availableYears = ref([]);
     const filteredSettings = ref([]);
 
-    //  Overview charts
+    //  Reactive data 
+    const chartMemLogData = ref({});
     const chartOverview = ref({});
     const availableDatasets = ref({
       'Economics_overview': { 'type': 'Economics', 'unit': 'AUD' },
@@ -24,19 +25,12 @@ window.HomeView = {
       'BIO_quality_overview_1_Type': { 'type': 'Biodiversity', 'unit': 'Weighted score (ha)' },
     });
     const selectDataset = ref('Area_overview_2_Category');
+    const selectDataType = computed(() => {
+      return availableDatasets.value[selectDataset.value].type;
+    });
 
-    // Define data object with reactive properties
-    const chartMemLogData = ref({});
-
-    // Reference to ranking data service
-    const DataService = window.DataService;
 
     // Functions
-    const trackResize = () => {
-      windowWidth.value = window.innerWidth;
-    };
-
-
     const changeDataset = async (datasetName) => {
       try {
         // Load the selected dataset script
@@ -68,13 +62,11 @@ window.HomeView = {
     onMounted(async () => {
       try {
 
-        // Add resize event listener
-        window.addEventListener('resize', trackResize);
-
         // Load required data
         await loadScript("./data/Supporting_info.js", 'Supporting_info');
         await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
         await loadScript("./data/chart_option/chartMemLogOptions.js", 'chartMemLogOptions');
+
         await loadScript("./data/Biodiversity_ranking.js", 'Biodiversity_ranking');
         await loadScript("./data/GHG_ranking.js", 'GHG_ranking');
         await loadScript("./data/Water_yield_ranking.js", 'Water_yield_ranking');
@@ -107,8 +99,6 @@ window.HomeView = {
     });
 
 
-    // Keep track of window resizing for any future responsive needs
-    // (No visibility toggling now - map and chart always visible)
 
     // Watch for changes and then make reactive updates
     watch(
@@ -135,9 +125,9 @@ window.HomeView = {
     return {
       selectRegion,
       selectDataset,
+      selectDataType,
       selectYear,
       yearIndex,
-      DataService,
       windowWidth,
       settingsFilterTxt,
       filteredSettings,
@@ -200,7 +190,7 @@ window.HomeView = {
                   @input="(index) => { yearIndex = index; }"
                 />
               </div>
-              <map-geojson :height="'470px'" v-model="selectRegion" />
+              <map-geojson :height="'470px'" :selectDataType="selectDataType" v-model="selectRegion" />
             </div>
 
           </div>

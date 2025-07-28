@@ -1,4 +1,4 @@
-window.NRM_AUS_data = {
+window.NRM_AUS = {
   "type": "FeatureCollection",
   "name": "NRM_AUS",
   "crs": {

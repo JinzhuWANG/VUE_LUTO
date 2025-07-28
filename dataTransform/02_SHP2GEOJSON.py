@@ -12,7 +12,7 @@ with open('../data/geo/NRM_AUS.geojson', 'r', encoding='utf-8') as f:
     geojson_data = json.load(f)
     
 with open('../data/geo/NRM_AUS.js', 'w', encoding='utf-8') as f:
-    f.write(f'window.NRM_AUS_data = {json.dumps(geojson_data, indent=2)};\n')
+    f.write(f'window.NRM_AUS = {json.dumps(geojson_data, indent=2)};\n')
 
 
 
