@@ -26,19 +26,19 @@ window.DataService = {
         },
         'Area': {
           'Ag': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Area_ranking'][selectRegion]['Agricultural landuse']['Rank'][selectYear],
-            'Percent': window['Area_ranking'][selectRegion]['Agricultural landuse']['Percent'][selectYear],
-            'color': window['Area_ranking'][selectRegion]['Agricultural landuse']['color'][selectYear],
+            'Rank': window['Area_ranking'][selectRegion]['Agricultural Landuse']['Rank'][selectYear],
+            'Percent': window['Area_ranking'][selectRegion]['Agricultural Landuse']['Percent'][selectYear],
+            'color': window['Area_ranking'][selectRegion]['Agricultural Landuse']['color'][selectYear],
           },
           'Am': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Area_ranking'][selectRegion]['Agricultural management']['Rank'][selectYear],
-            'Percent': window['Area_ranking'][selectRegion]['Agricultural management']['Percent'][selectYear],
-            'color': window['Area_ranking'][selectRegion]['Agricultural management']['color'][selectYear],
+            'Rank': window['Area_ranking'][selectRegion]['Agricultural Management']['Rank'][selectYear],
+            'Percent': window['Area_ranking'][selectRegion]['Agricultural Management']['Percent'][selectYear],
+            'color': window['Area_ranking'][selectRegion]['Agricultural Management']['color'][selectYear],
           },
           'NonAg': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Area_ranking'][selectRegion]['Non-agricultural landuse']['Rank'][selectYear],
-            'Percent': window['Area_ranking'][selectRegion]['Non-agricultural landuse']['Percent'][selectYear],
-            'color': window['Area_ranking'][selectRegion]['Non-agricultural landuse']['color'][selectYear],
+            'Rank': window['Area_ranking'][selectRegion]['Non-Agricultural Landuse']['Rank'][selectYear],
+            'Percent': window['Area_ranking'][selectRegion]['Non-Agricultural Landuse']['Percent'][selectYear],
+            'color': window['Area_ranking'][selectRegion]['Non-Agricultural Landuse']['color'][selectYear],
           },
           'Total': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
             'Rank': window['Area_ranking'][selectRegion]['Total']['Rank'][selectYear],
@@ -60,24 +60,24 @@ window.DataService = {
         },
         'Water': {
           'Ag': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Water_yield_ranking'][selectRegion]['Agricultural Landuse']['Rank'][selectYear],
-            'Percent': window['Water_yield_ranking'][selectRegion]['Agricultural Landuse']['Percent'][selectYear],
-            'color': window['Water_yield_ranking'][selectRegion]['Agricultural Landuse']['color'][selectYear],
+            'Rank': window['Water_ranking'][selectRegion]['Agricultural Landuse']['Rank'][selectYear],
+            'Percent': window['Water_ranking'][selectRegion]['Agricultural Landuse']['Percent'][selectYear],
+            'color': window['Water_ranking'][selectRegion]['Agricultural Landuse']['color'][selectYear],
           },
           'Am': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Water_yield_ranking'][selectRegion]['Agricultural Management']['Rank'][selectYear],
-            'Percent': window['Water_yield_ranking'][selectRegion]['Agricultural Management']['Percent'][selectYear],
-            'color': window['Water_yield_ranking'][selectRegion]['Agricultural Management']['color'][selectYear],
+            'Rank': window['Water_ranking'][selectRegion]['Agricultural Management']['Rank'][selectYear],
+            'Percent': window['Water_ranking'][selectRegion]['Agricultural Management']['Percent'][selectYear],
+            'color': window['Water_ranking'][selectRegion]['Agricultural Management']['color'][selectYear],
           },
           'NonAg': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Water_yield_ranking'][selectRegion]['Non-Agricultural Landuse']['Rank'][selectYear],
-            'Percent': window['Water_yield_ranking'][selectRegion]['Non-Agricultural Landuse']['Percent'][selectYear],
-            'color': window['Water_yield_ranking'][selectRegion]['Non-Agricultural Landuse']['color'][selectYear],
+            'Rank': window['Water_ranking'][selectRegion]['Non-Agricultural Landuse']['Rank'][selectYear],
+            'Percent': window['Water_ranking'][selectRegion]['Non-Agricultural Landuse']['Percent'][selectYear],
+            'color': window['Water_ranking'][selectRegion]['Non-Agricultural Landuse']['color'][selectYear],
           },
           'Total': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Water_yield_ranking'][selectRegion]['Total']['Rank'][selectYear],
-            'Percent': window['Water_yield_ranking'][selectRegion]['Total']['Percent'][selectYear],
-            'color': window['Water_yield_ranking'][selectRegion]['Total']['color'][selectYear],
+            'Rank': window['Water_ranking'][selectRegion]['Total']['Rank'][selectYear],
+            'Percent': window['Water_ranking'][selectRegion]['Total']['Percent'][selectYear],
+            'color': window['Water_ranking'][selectRegion]['Total']['color'][selectYear],
           },
         },
         'Biodiversity': {
@@ -125,18 +125,16 @@ window.DataService = {
     'Economics': {
       'Revenue': 'Revenue',
       'Cost': 'Cost',
-      'Total': 'Total'
     },
     'Area': {
-      'Ag': 'Agricultural landuse',
-      'Am': 'Agricultural management',
-      'NonAg': 'Non-agricultural landuse',
+      'Ag': 'Agricultural Landuse',
+      'Am': 'Agricultural Management',
+      'NonAg': 'Non-Agricultural Landuse',
       'Total': 'Total'
     },
     'GHG': {
       'Emissions': 'GHG emissions',
       'Sequestration': 'GHG sequestrations',
-      'Total': 'Total'
     },
     'Water': {
       'Ag': 'Agricultural Landuse',

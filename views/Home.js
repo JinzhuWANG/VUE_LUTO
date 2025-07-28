@@ -16,6 +16,7 @@ window.HomeView = {
     //  Reactive data 
     const chartMemLogData = ref({});
     const chartOverview = ref({});
+    const colorsRanking = ref({});
     const availableDatasets = ref({
       'Economics_overview': { 'type': 'Economics', 'unit': 'AUD' },
       'Area_overview_2_Category': { 'type': 'Area', 'unit': 'Hectares' },
@@ -54,6 +55,7 @@ window.HomeView = {
             }
           },
           series: window[datasetName][selectRegion.value],
+          colors: window['Supporting_info'].colors,
         };
       } catch (error) {
         console.error(`Error loading dataset ${datasetName}:`, error);
@@ -72,7 +74,7 @@ window.HomeView = {
 
         await loadScript("./data/Biodiversity_ranking.js", 'Biodiversity_ranking');
         await loadScript("./data/GHG_ranking.js", 'GHG_ranking');
-        await loadScript("./data/Water_yield_ranking.js", 'Water_yield_ranking');
+        await loadScript("./data/Water_ranking.js", 'Water_ranking');
         await loadScript("./data/Area_ranking.js", 'Area_ranking');
         await loadScript("./data/Economics_ranking.js", 'Economics_ranking');
 
@@ -82,6 +84,8 @@ window.HomeView = {
         availableYears.value = window.Supporting_info.years;
         selectYear.value = availableYears.value[0];
         selectSubcategory.value = DtypeSubCategories.value[0];
+        colorsRanking.value = window.Supporting_info.colors_ranking;
+
 
         // RankingData component is now included in index.html
         chartMemLogData.value = {
@@ -140,16 +144,16 @@ window.HomeView = {
       yearIndex,
       settingsFilterTxt,
 
-      chartMemLogData,
-      chartOverview,
-
       selectRegion,
       selectDataset,
       selectDataType,
       selectYear,
       selectSubcategory,
 
+      chartMemLogData,
+      chartOverview,
       filteredSettings,
+      colorsRanking,
       changeDataset,
     };
   },
@@ -226,6 +230,7 @@ window.HomeView = {
                 :selectDataType="selectDataType" 
                 :selectYear="selectYear" 
                 :selectSubcategory="selectSubcategory"
+                :legendObj="colorsRanking"
                 v-model="selectRegion" 
               />
             </div>

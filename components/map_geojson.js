@@ -17,6 +17,10 @@ window.map_geojson = {
         selectSubcategory: {
             type: String,
         },
+        legendObj: {
+            type: Object,
+            default: () => ({}),
+        },
     },
     setup(props, { emit }) {
         const { ref, onMounted, watch } = Vue;
@@ -70,14 +74,11 @@ window.map_geojson = {
                     const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
 
                     // Access color from ranking data
-                    if (window[`${dataType}_ranking`] &&
-                        window[`${dataType}_ranking`][regionName] &&
-                        window[`${dataType}_ranking`][regionName][subcategory] &&
-                        window[`${dataType}_ranking`][regionName][subcategory]['color'] &&
-                        window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear]) {
+                    // Special handling for Water data type
+                    const rankingKey = `${dataType}_ranking`;
 
-                        // Get color from the ranking data
-                        style.fillColor = window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear];
+                    if (window[rankingKey]?.[regionName]?.[subcategory]?.color?.[currentYear]) {
+                        style.fillColor = window[rankingKey][regionName][subcategory].color[currentYear];
                     }
 
                     // Store the style for later reference
@@ -136,15 +137,12 @@ window.map_geojson = {
                 try {
                     const dataType = props.selectDataType || 'Area';
                     const currentYear = props.selectYear;
-                    // Access color from ranking data
-                    if (window[`${dataType}_ranking`] &&
-                        window[`${dataType}_ranking`][regionName] &&
-                        window[`${dataType}_ranking`][regionName][subcategory] &&
-                        window[`${dataType}_ranking`][regionName][subcategory]['color'] &&
-                        window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear]) {
+                    const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
+                    const rankingKey = `${dataType}_ranking`;
 
-                        // Get color from the ranking data
-                        style.fillColor = window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear];
+                    // Simple check if ranking data is available
+                    if (window[rankingKey]?.[regionName]?.[subcategory]?.color?.[currentYear]) {
+                        style.fillColor = window[rankingKey][regionName][subcategory].color[currentYear];
                     }
                 } catch (error) {
                     console.error(`Error getting color for region ${regionName}:`, error);
@@ -184,8 +182,6 @@ window.map_geojson = {
                             hoverTooltip.value.setLatLng(e.latlng);
                             hoverTooltip.value.addTo(map);
 
-                            // No longer highlighting the hovered region
-                            // We only show the tooltip now
                         },
                         mouseout: (e) => {
                             const layer_e = e.target;
@@ -196,13 +192,10 @@ window.map_geojson = {
                                 hoverTooltip.value = null;
                             }
 
-                            // Since we're not changing styles on hover anymore, 
-                            // we only need to ensure the selected region maintains its highlight style
                             if (layer_e.options.regionName === activeRegionName.value) {
                                 layer_e.setStyle(highlightStyle);
                             }
-                            // We don't need to restore styles for non-selected regions
-                            // since we're not changing them on hover anymore
+
                         },
                         click: (e) => {
                             const layer_e = e.target;
@@ -221,19 +214,15 @@ window.map_geojson = {
                                         const currentYear = props.selectYear;
                                         const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
 
-                                        if (window[`${dataType}_ranking`] &&
-                                            window[`${dataType}_ranking`][regionName] &&
-                                            window[`${dataType}_ranking`][regionName][subcategory] &&
-                                            window[`${dataType}_ranking`][regionName][subcategory]['color'] &&
-                                            window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear]) {
+                                        // Special handling for Water data type
+                                        const rankingKey = `${dataType}_ranking`;
 
-                                            // Create a new style object using the region's color
-                                            const style = { ...defaultStyle };
-                                            style.fillColor = window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear];
-                                            layer_e.setStyle(style);
-                                        } else {
-                                            layer_e.setStyle(defaultStyle);
-                                        }
+
+                                        // Create a new style object using the region's color
+                                        const style = { ...defaultStyle };
+                                        style.fillColor = window[rankingKey][regionName][subcategory]['color'][currentYear];
+                                        layer_e.setStyle(style);
+
                                     } catch (error) {
                                         console.error(`Error getting color for region ${regionName}:`, error);
                                         layer_e.setStyle(defaultStyle);
@@ -271,7 +260,18 @@ window.map_geojson = {
         };
     },
     template: `
-      <div ref="mapElement" :style="{ background: 'transparent', height: props.height }"></div>
+      <div>
+        <div ref="mapElement" :style="{ background: 'transparent', height: props.height }"></div>
+        <div v-if="props.legendObj" class="absolute bottom-[30px] left-[35px]">
+          <div class="font-bold text-sm mb-2 text-gray-600">Ranking</div>
+          <div class="flex flex-row items-center">
+            <div v-for="(color, label) in props.legendObj" :key="label" class="flex items-center mr-4 mb-1">
+                <span class="inline-block w-[12px] h-[12px] mr-[3px]" :style="{ backgroundColor: color }"></span>
+                <span class="text-sm text-gray-600">{{ label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     `,
 };
 
