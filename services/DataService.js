@@ -109,5 +109,66 @@ window.DataService = {
       console.error("Error loading ranking data:", error);
       return {};
     }
-  }
+  },
+
+  /**
+   * Get subcategory keys for a given data type
+   * @param {String} dataType - The data type (Economics, Area, GHG, Water, Biodiversity)
+   * @returns {Array} Array of subcategory keys
+   */
+  getSubcategories(dataType) {
+    return this.SubcategoryMapping[dataType] ? Object.keys(this.SubcategoryMapping[dataType]) : [];
+  },
+
+  // Mapping between UI subcategory names and actual data structure keys
+  SubcategoryMapping: {
+    'Economics': {
+      'Revenue': 'Revenue',
+      'Cost': 'Cost',
+      'Total': 'Total'
+    },
+    'Area': {
+      'Ag': 'Agricultural landuse',
+      'Am': 'Agricultural management',
+      'NonAg': 'Non-agricultural landuse',
+      'Total': 'Total'
+    },
+    'GHG': {
+      'Emissions': 'GHG emissions',
+      'Sequestration': 'GHG sequestrations',
+      'Total': 'Total'
+    },
+    'Water': {
+      'Ag': 'Agricultural Landuse',
+      'Am': 'Agricultural Management',
+      'NonAg': 'Non-Agricultural Landuse',
+      'Total': 'Total'
+    },
+    'Biodiversity': {
+      'Ag': 'Agricultural Landuse',
+      'Am': 'Agricultural Management',
+      'NonAg': 'Non-Agricultural land-use',
+      'Total': 'Total'
+    }
+  },
+
+  /**
+   * Maps a UI subcategory to the actual data structure key
+   * @param {String} dataType - The data type (Economics, Area, GHG, Water, Biodiversity)
+   * @param {String} subcategory - The UI subcategory (Ag, Am, NonAg, Total, etc.)
+   * @returns {String} The actual data structure key
+   */
+  mapSubcategory(dataType, subcategory) {
+    // Default to 'Total' if no subcategory provided
+    if (!subcategory) return 'Total';
+
+    // Get the mapping for this data type
+    const mapping = this.SubcategoryMapping[dataType];
+    if (!mapping) return subcategory;
+
+    // Return the mapped subcategory or the original if no mapping found
+    return mapping[subcategory] || subcategory;
+  },
+
+
 };

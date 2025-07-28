@@ -3,7 +3,6 @@ window.HomeView = {
   setup() {
 
     const { ref, onMounted, watch, computed } = Vue;
-    const windowWidth = ref(window.innerWidth);
     const loadScript = window.loadScript;
 
     // Define reactive variables
@@ -28,6 +27,10 @@ window.HomeView = {
     const selectDataType = computed(() => {
       return availableDatasets.value[selectDataset.value].type;
     });
+    const DtypeSubCategories = computed(() => {
+      return window.DataService.getSubcategories(selectDataType.value);
+    });
+    const selectSubcategory = ref('');
 
 
     // Functions
@@ -73,10 +76,12 @@ window.HomeView = {
         await loadScript("./data/Area_ranking.js", 'Area_ranking');
         await loadScript("./data/Economics_ranking.js", 'Economics_ranking');
 
+        await loadScript("./services/DataService.js", 'DataService');
+
         // Set initial year to first available year
         availableYears.value = window.Supporting_info.years;
         selectYear.value = availableYears.value[0];
-        yearIndex.value = 0;
+        selectSubcategory.value = DtypeSubCategories.value[0];
 
         // RankingData component is now included in index.html
         chartMemLogData.value = {
@@ -121,21 +126,31 @@ window.HomeView = {
         selectYear.value = availableYears.value[newIndex];
       }
     );
+    watch(
+      selectDataType,
+      (newValues) => {
+        selectSubcategory.value = DtypeSubCategories.value[0];
+      }
+    );
 
     return {
+      availableYears,
+      availableDatasets,
+      DtypeSubCategories,
+      yearIndex,
+      settingsFilterTxt,
+
+      chartMemLogData,
+      chartOverview,
+
       selectRegion,
       selectDataset,
       selectDataType,
       selectYear,
-      yearIndex,
-      windowWidth,
-      settingsFilterTxt,
+      selectSubcategory,
+
       filteredSettings,
-      availableDatasets,
-      chartMemLogData,
-      chartOverview,
       changeDataset,
-      availableYears,
     };
   },
 
@@ -175,13 +190,27 @@ window.HomeView = {
 
             <!-- Map -->
             <div class="relative">
-              <div class="absolute flex w-full top-1 left-2 right-2 pr-4 justify-between items-center">
-                <p class="text-[0.8rem]">Year: <strong>{{ selectYear }}</strong></p>
+              <div class="absolute flex-col w-full top-1 left-2 right-2 pr-4 justify-between items-center z-10">
+                
+              <div class="flex flex-col">
+                <div class="flex items-center justify-between">
+                  <p class="text-[0.8rem]">Year: <strong>{{ selectYear }}</strong></p>
+                  <div class="flex space-x-1 mr-4">
+                    <button v-for="cat in DtypeSubCategories" :key="cat"
+                      @click="selectSubcategory = cat"
+                      class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 rounded"
+                      :class="{'bg-sky-500 text-white': selectSubcategory === cat}">
+                      {{ cat }}
+                    </button>
+                  </div>
+                </div>
+
                 <el-slider 
                   v-if="availableYears.length > 0"
-                  class="justify-end flex-1 max-w-[240px] custom-slider mr-3" 
+                  class="flex-1 max-w-[150px] pt-2 pl-2" 
                   v-model="yearIndex"
                   size="small"
+                  :show-tooltip="false"
                   :min="0" 
                   :max="availableYears.length - 1"
                   :step="1"
@@ -189,8 +218,16 @@ window.HomeView = {
                   :marks="availableYears.reduce((acc, year, index) => ({ ...acc, [index]: year }), {})"
                   @input="(index) => { yearIndex = index; }"
                 />
+        
+                </div>
               </div>
-              <map-geojson :height="'470px'" :selectDataType="selectDataType" v-model="selectRegion" />
+              <map-geojson 
+                :height="'470px'" 
+                :selectDataType="selectDataType" 
+                :selectYear="selectYear" 
+                :selectSubcategory="selectSubcategory"
+                v-model="selectRegion" 
+              />
             </div>
 
           </div>

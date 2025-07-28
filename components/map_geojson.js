@@ -10,14 +10,22 @@ window.map_geojson = {
         modelValue: {
             type: String,
         },
+        selectYear: {
+            type: [Number, String],
+            default: 2020,
+        },
+        selectSubcategory: {
+            type: String,
+        },
     },
     setup(props, { emit }) {
-        const { ref, onMounted } = Vue;
+        const { ref, onMounted, watch } = Vue;
 
         const mapElement = ref(null);
         const activeRegionName = ref(props.modelValue);
         const hoverTooltip = ref(null);
         const geoJSONLayer = ref(null);
+        const featureStyles = ref({});
         const australiaBounds = L.latLngBounds([-43, 113], [-12, 154]);
 
         const defaultStyle = {
@@ -38,6 +46,63 @@ window.map_geojson = {
             activeRegionName.value = newRegionName;
             emit('update:modelValue', newRegionName);
         };
+
+        // Function to update styles based on data type and year
+        const updateMapStyles = () => {
+            if (!geoJSONLayer.value) return;
+
+            // Update styles for all layers
+            geoJSONLayer.value.eachLayer(function (layer) {
+                const regionName = layer.options.regionName;
+
+                // Skip the currently selected region (which should keep highlight style)
+                if (regionName === activeRegionName.value) return;
+
+                try {
+                    // Get data type from props (Area by default)
+                    const dataType = props.selectDataType || 'Area';
+                    // Get current year from props
+                    const currentYear = props.selectYear;
+
+                    // Create a new style object starting with default
+                    let style = { ...defaultStyle };
+                    // Get subcategory from props and map it to the actual data structure key
+                    const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
+
+                    // Access color from ranking data
+                    if (window[`${dataType}_ranking`] &&
+                        window[`${dataType}_ranking`][regionName] &&
+                        window[`${dataType}_ranking`][regionName][subcategory] &&
+                        window[`${dataType}_ranking`][regionName][subcategory]['color'] &&
+                        window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear]) {
+
+                        // Get color from the ranking data
+                        style.fillColor = window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear];
+                    }
+
+                    // Store the style for later reference
+                    featureStyles.value[regionName] = style;
+
+                    // Apply the style
+                    layer.setStyle(style);
+                } catch (error) {
+                    console.error(`Error updating style for region ${regionName}:`, error);
+                }
+            });
+        };
+
+        // Watch for changes in data type or year
+        watch(() => props.selectDataType, (newValue) => {
+            updateMapStyles();
+        });
+
+        watch(() => props.selectYear, (newValue) => {
+            updateMapStyles();
+        });
+
+        watch(() => props.selectSubcategory, (newValue) => {
+            updateMapStyles();
+        });
 
         onMounted(async () => {
 
@@ -61,10 +126,38 @@ window.map_geojson = {
                 { animate: false }
             );
 
-
             // Store GeoJSON layer for later access
+            // Create custom style function for each feature
+            const getFeatureStyle = (feature) => {
+                const regionName = feature.properties.NHT2NAME;
+                // Default style if we can't find a color
+                let style = { ...defaultStyle };
+
+                try {
+                    const dataType = props.selectDataType || 'Area';
+                    const currentYear = props.selectYear;
+                    // Access color from ranking data
+                    if (window[`${dataType}_ranking`] &&
+                        window[`${dataType}_ranking`][regionName] &&
+                        window[`${dataType}_ranking`][regionName][subcategory] &&
+                        window[`${dataType}_ranking`][regionName][subcategory]['color'] &&
+                        window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear]) {
+
+                        // Get color from the ranking data
+                        style.fillColor = window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear];
+                    }
+                } catch (error) {
+                    console.error(`Error getting color for region ${regionName}:`, error);
+                }
+
+                // Store the style for later reference
+                featureStyles.value[regionName] = style;
+
+                return style;
+            };
+
             geoJSONLayer.value = L.geoJSON(window['NRM_AUS'], {
-                style: defaultStyle,
+                style: getFeatureStyle,
                 onEachFeature: (feature, layer) => {
                     // Store region name in layer options for easier access later
                     layer.options.regionName = feature.properties.NHT2NAME;
@@ -91,9 +184,8 @@ window.map_geojson = {
                             hoverTooltip.value.setLatLng(e.latlng);
                             hoverTooltip.value.addTo(map);
 
-
-                            // Highlight the hovered region
-                            layer_e.setStyle(highlightStyle);
+                            // No longer highlighting the hovered region
+                            // We only show the tooltip now
                         },
                         mouseout: (e) => {
                             const layer_e = e.target;
@@ -104,26 +196,61 @@ window.map_geojson = {
                                 hoverTooltip.value = null;
                             }
 
-                            // Ensure the selected region maintains its highlight style
+                            // Since we're not changing styles on hover anymore, 
+                            // we only need to ensure the selected region maintains its highlight style
                             if (layer_e.options.regionName === activeRegionName.value) {
                                 layer_e.setStyle(highlightStyle);
-                            } else {
-                                layer_e.setStyle(defaultStyle);
                             }
+                            // We don't need to restore styles for non-selected regions
+                            // since we're not changing them on hover anymore
                         },
                         click: (e) => {
                             const layer_e = e.target;
 
                             // Check if the clicked region is already the active region
                             if (layer_e.options.regionName === activeRegionName.value) {
-                                layer_e.setStyle(defaultStyle);
+                                // Restore the custom style for this region when deselecting
+                                const regionName = layer_e.options.regionName;
+                                // Always use the region's color attributes (featureStyles) when deselecting
+                                if (featureStyles.value[regionName]) {
+                                    layer_e.setStyle(featureStyles.value[regionName]);
+                                } else {
+                                    // As a fallback, try to get color from current data
+                                    try {
+                                        const dataType = props.selectDataType || 'Area';
+                                        const currentYear = props.selectYear;
+                                        const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
+
+                                        if (window[`${dataType}_ranking`] &&
+                                            window[`${dataType}_ranking`][regionName] &&
+                                            window[`${dataType}_ranking`][regionName][subcategory] &&
+                                            window[`${dataType}_ranking`][regionName][subcategory]['color'] &&
+                                            window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear]) {
+
+                                            // Create a new style object using the region's color
+                                            const style = { ...defaultStyle };
+                                            style.fillColor = window[`${dataType}_ranking`][regionName][subcategory]['color'][currentYear];
+                                            layer_e.setStyle(style);
+                                        } else {
+                                            layer_e.setStyle(defaultStyle);
+                                        }
+                                    } catch (error) {
+                                        console.error(`Error getting color for region ${regionName}:`, error);
+                                        layer_e.setStyle(defaultStyle);
+                                    }
+                                }
                                 updateRegionName('AUSTRALIA');
                                 return;
                             }
 
-                            // Remove highlight style from all regions
+                            // Remove highlight style from all regions and restore their custom styles
                             geoJSONLayer.value.eachLayer(function (layer) {
-                                layer.setStyle(defaultStyle);
+                                const regionName = layer.options.regionName;
+                                if (featureStyles.value[regionName]) {
+                                    layer.setStyle(featureStyles.value[regionName]);
+                                } else {
+                                    layer.setStyle(defaultStyle);
+                                }
                             });
 
                             // Set new selection
