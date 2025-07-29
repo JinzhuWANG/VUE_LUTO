@@ -1,7 +1,7 @@
 window.chartMemLogOptions = {
     chart: {
         type: "area",
-        height: 420,
+        height: 450,
     },
     title: {
         text: null,

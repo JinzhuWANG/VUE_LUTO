@@ -244,14 +244,14 @@ window.HomeView = {
 
         </div>
         
-        <div class="flex flex-wrap gap-6 mb-16">
+        <div class="flex flex-wrap gap-4 mb-16">
           <!-- Settings -->
           <div class="flex-1 flex-col rounded-[10px] bg-white shadow-md min-w-[300px]">
-            <div class="flex flex-wrap items-center h-auto min-h-[40px]">
-              <p class="flex-1 text-sm font-bold p-4">Scenarios and Settings</p>
-              <input v-model="settingsFilterTxt" type="text" placeholder="Filter parameters..." class="sticky bg-white mr-4 justify-end text-sm border rounded mb-2" />
+            <div class="flex flex-wrap items-center h-[auto] min-h-[40px]">
+              <p class="flex-1 text-sm font-bold ml-2 p-1 items-center z-10">Scenarios and Settings</p>
+              <input v-model="settingsFilterTxt" type="text" placeholder="Filter parameters..." class="sticky bg-white mr-4 justify-end text-sm border rounded" />
             </div>
-            <div class="h-[400px] overflow-y-auto">
+            <div class="h-[440px] overflow-y-auto mb-2">
               <table class="text-left min-w-[300px]">
                 <tbody>
                   <tr v-for="setting in filteredSettings" :key="setting.parameter" class="bg-white border-b border-gray-200 hover:bg-gray-100">
@@ -264,8 +264,10 @@ window.HomeView = {
           </div>
 
           <!-- Memory use logs -->
-          <div class="flex flex-col rounded-[10px] bg-white shadow-md flex-1 min-w-[300px]">
-            <p class="h-[40px] text-sm font-bold p-4">Memory Use Logs</p>
+          <div class="flex flex-col rounded-[10px] bg-white shadow-md flex-1 min-w-[300px] mr-4">
+            <div class="flex items-center justify-start ml-2 h-[40px]">
+              <p class="text-sm font-bold">Memory Use Logs</p>
+            </div>
             <hr class="border-gray-300">
             <chart-container class="flex-1 rounded-[10px]" :chartData="chartMemLogData"/>
           </div>
