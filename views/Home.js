@@ -160,7 +160,7 @@ window.HomeView = {
 
   // This template is a fallback that will be replaced by the loaded template
   template: `
-    <div class="bg-[#f8f9fe]">
+    <div>
       <div class="flex flex-col">
 
         <!-- Rank cards -->

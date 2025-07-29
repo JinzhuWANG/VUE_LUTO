@@ -32,10 +32,9 @@ window.AreaView = {
     };
   },
   template: `
-    <div class="p-6">
+    <div>
       <!-- Chart component -->
       <chart-container :chartData="selectDataset"></chart-container>
-      <div class="mt-6 bg-white shadow-md rounded-lg p-4" style="height: 550px; width: 100%;"></div>
     </div>
   `
 };
