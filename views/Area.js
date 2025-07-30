@@ -4,14 +4,6 @@ window.AreaView = {
 
     const selectDataset = ref({});
     const chartOptions = ref({});
-    const datasetNames = [
-      "area_0_grouped_lu_area_wide",
-      "area_1_total_area_wide",
-      "area_2_forest_coverage",
-      "area_3_agricultural_land",
-    ];
-
-
 
     onMounted(async () => {
 

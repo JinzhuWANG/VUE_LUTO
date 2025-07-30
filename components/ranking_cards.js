@@ -5,11 +5,9 @@ window.RankingCards = {
   props: {
     selectRegion: {
       type: String,
-      default: 'AUSTRALIA'
     },
     selectYear: {
       type: Number,
-      default: 2020
     }
   },
 
@@ -27,29 +25,29 @@ window.RankingCards = {
 
   template: `
     <div class="flex flex-col">
-      <p class="text-black text-xl font-bold p-2">Overall Ranking</p>
+      <p class="text-black text-xl font-bold p-1 pt-4">Metric Overview</p>
 
-      <div class="flex justify-between gap-2">
+      <div class="flex justify-between gap-1">
 
         <!-- Economics -->
-        <div class="flex-2 w-full w-min-[300px] bg-gradient-to-r from-[#e6b980] to-[#eacda3] rounded-lg p-2 shadow-md">
+        <div v-if="rankingData" class="flex-2 w-full w-min-[300px] bg-gradient-to-r from-[#e6b980] to-[#eacda3] rounded-lg p-1 shadow-md">
           <p class="text-white mb-4">Economics</p>
           <div class="flex justify-between w-full gap-1">
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Economics.Revenue.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col h-full relative">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Economics.Revenue.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Economics.Revenue.value }} AUD</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Revenue</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Revenue</span>
                   </div>
                 </div>
               </template>
@@ -57,19 +55,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Economics.Cost.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Economics.Cost.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Economics.Cost.value }} AUD</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Cost</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Cost</span>
                   </div>
                 </div>
               </template>
@@ -78,24 +76,24 @@ window.RankingCards = {
         </div>
 
         <!-- Area -->
-        <div class="flex-4 w-full bg-gradient-to-r from-[#78cc7a] to-[#edde54] rounded-lg p-2 shadow-md">
+        <div class="flex-4 w-full bg-gradient-to-r from-[#78cc7a] to-[#edde54] rounded-lg p-1 shadow-md">
           <p class="text-white mb-4">Area</p>
           <div class="flex items-center justify-between gap-1">
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Area.Ag.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Area.Ag.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Area.Ag.value }} ha</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Ag Land</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Ag Land</span>
                   </div>
                 </div>
               </template>
@@ -103,19 +101,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Area.Am.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Area.Am.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Area.Am.value }} ha</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Ag Mgt</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Ag Mgt</span>
                   </div>
                 </div>
               </template>
@@ -123,19 +121,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Area.NonAg.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Area.NonAg.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Area.NonAg.value }} ha</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Non-Ag</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Non-Ag</span>
                   </div>
                 </div>
               </template>
@@ -143,19 +141,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Area.Total.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Area.Total.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Area.Total.value }} ha</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Total</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Total</span>
                   </div>
                 </div>
               </template>
@@ -164,24 +162,24 @@ window.RankingCards = {
         </div>
         
         <!-- GHG -->
-        <div class="flex-2 w-full bg-gradient-to-r from-[#f46489] to-[#f088e1] rounded-lg p-2 shadow-md">
+        <div class="flex-2 w-full bg-gradient-to-r from-[#f46489] to-[#f088e1] rounded-lg p-1 shadow-md">
           <p class="text-white mb-4">GHG</p>
           <div class="flex items-center justify-between gap-1">
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.GHG.Emissions.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.GHG.Emissions.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.GHG.Emissions.value }} tCO2e</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[11px] text-gray-800">Emissions</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Emissions</span>
                   </div>
                 </div>
               </template>
@@ -189,19 +187,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.GHG.Sequestration.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.GHG.Sequestration.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.GHG.Sequestration.value }} tCO2e</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[11px] text-gray-800">Reduction</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Reduction</span>
                   </div>
                 </div>
               </template>
@@ -210,24 +208,24 @@ window.RankingCards = {
         </div>
         
         <!-- Water -->
-        <div class="flex-4 w-full bg-gradient-to-r from-[#4fadff] to-[#07f0fe] rounded-lg p-2 shadow-md">
+        <div class="flex-4 w-full bg-gradient-to-r from-[#4fadff] to-[#07f0fe] rounded-lg p-1 shadow-md">
           <p class="text-white mb-4">Water</p>
           <div class="flex items-center justify-between gap-1">
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Water.Ag.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Water.Ag.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Water.Ag.value }} ML</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Ag Land</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Ag Land</span>
                   </div>
                 </div>
               </template>
@@ -235,19 +233,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Water.Am.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Water.Am.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Water.Am.value }} ML</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Ag Mgt</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Ag Mgt</span>
                   </div>
                 </div>
               </template>
@@ -255,19 +253,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Water.NonAg.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Water.NonAg.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Water.NonAg.value }} ML</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Non-Ag</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Non-Ag</span>
                   </div>
                 </div>
               </template>
@@ -275,19 +273,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Water.Total.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Water.Total.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Water.Total.value }} ML</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Total</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Total</span>
                   </div>
                 </div>
               </template>
@@ -296,24 +294,24 @@ window.RankingCards = {
         </div>
         
         <!-- Biodiversity -->
-        <div class="flex-4 w-full bg-gradient-to-r from-[#666adf] to-[#ecd3fe] rounded-lg p-2 shadow-md">
+        <div class="flex-4 w-full bg-gradient-to-r from-[#666adf] to-[#ecd3fe] rounded-lg p-1 shadow-md">
           <p class="text-white mb-4">Biodiversity</p>
           <div class="flex items-center justify-between gap-1">
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Biodiversity.Ag.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Biodiversity.Ag.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Biodiversity.Ag.value }} ha</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Ag Land</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Ag Land</span>
                   </div>
                 </div>
               </template>
@@ -321,19 +319,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Biodiversity.Am.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Biodiversity.Am.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Biodiversity.Am.value }} ha</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Ag Mgt</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Ag Mgt</span>
                   </div>
                 </div>
               </template>
@@ -341,19 +339,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Biodiversity.NonAg.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Biodiversity.NonAg.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Biodiversity.NonAg.value }} ha</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Non-Ag</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Non-Ag</span>
                   </div>
                 </div>
               </template>
@@ -361,19 +359,19 @@ window.RankingCards = {
 
             <el-progress 
               type="dashboard" 
-              width="87" 
+              width="95" 
               :percentage="rankingData.Biodiversity.Total.Percent" 
               color="#56a771" 
               stroke-width="3"
             >
               <template #default="{ percentage }">
                 <div class="flex flex-col justify-between h-full">
-                  <div>
-                    <span class="text-[13px] text-white">{{ percentage }}%</span> <br>
-                    <span class="text-[13px] text-white">{{ rankingData.Biodiversity.Total.Rank }} / 57</span>
+                  <div class="space-y-1">
+                    <span class="text-[12px] text-white">{{ percentage }}%</span> <br>
+                    <span class="text-[12px] text-white">{{ rankingData.Biodiversity.Total.value }} ha</span>
                   </div>
-                  <div class="mt-5">
-                    <span class="text-[13px] text-gray-800">Total</span>
+                  <div class="mt-2">
+                    <span class="text-[12px] text-gray-800">Total</span>
                   </div>
                 </div>
               </template>

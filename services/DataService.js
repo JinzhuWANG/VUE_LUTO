@@ -10,96 +10,121 @@ window.DataService = {
    */
   getRankingData(selectRegion = 'AUSTRALIA', selectYear = 2020) {
     try {
+      // Helper function to safely access nested properties
+      const safeAccess = (obj, path, defaultValue = null) => {
+        try {
+          return path.reduce((acc, key) => acc && acc[key], obj);
+        } catch (e) {
+          return defaultValue;
+        }
+      };
+
       // Populate the rankingData based on the selected region
       const rankingData = {
         'Economics': {
-          'Revenue': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Economics_ranking'][selectRegion]['Revenue']['Rank'][selectYear],
-            'Percent': window['Economics_ranking'][selectRegion]['Revenue']['Percent'][selectYear],
-            'color': window['Economics_ranking'][selectRegion]['Revenue']['color'][selectYear],
+          'Revenue': {
+            'Rank': safeAccess(window, ['Economics_ranking', selectRegion, 'Revenue', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Economics_ranking', selectRegion, 'Revenue', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Economics_ranking', selectRegion, 'Revenue', 'color', selectYear]),
+            'value': safeAccess(window, ['Economics_ranking', selectRegion, 'Revenue', 'value', selectYear]),
           },
-          'Cost': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Economics_ranking'][selectRegion]['Cost']['Rank'][selectYear],
-            'Percent': window['Economics_ranking'][selectRegion]['Cost']['Percent'][selectYear],
-            'color': window['Economics_ranking'][selectRegion]['Cost']['color'][selectYear],
+          'Cost': {
+            'Rank': safeAccess(window, ['Economics_ranking', selectRegion, 'Cost', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Economics_ranking', selectRegion, 'Cost', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Economics_ranking', selectRegion, 'Cost', 'color', selectYear]),
+            'value': safeAccess(window, ['Economics_ranking', selectRegion, 'Cost', 'value', selectYear]),
           },
         },
         'Area': {
-          'Ag': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Area_ranking'][selectRegion]['Agricultural Landuse']['Rank'][selectYear],
-            'Percent': window['Area_ranking'][selectRegion]['Agricultural Landuse']['Percent'][selectYear],
-            'color': window['Area_ranking'][selectRegion]['Agricultural Landuse']['color'][selectYear],
+          'Ag': {
+            'Rank': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Landuse', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Landuse', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Landuse', 'color', selectYear]),
+            'value': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Landuse', 'value', selectYear]),
           },
-          'Am': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Area_ranking'][selectRegion]['Agricultural Management']['Rank'][selectYear],
-            'Percent': window['Area_ranking'][selectRegion]['Agricultural Management']['Percent'][selectYear],
-            'color': window['Area_ranking'][selectRegion]['Agricultural Management']['color'][selectYear],
+          'Am': {
+            'Rank': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Management', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Management', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Management', 'color', selectYear]),
+            'value': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Management', 'value', selectYear]),
           },
-          'NonAg': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Area_ranking'][selectRegion]['Non-Agricultural Landuse']['Rank'][selectYear],
-            'Percent': window['Area_ranking'][selectRegion]['Non-Agricultural Landuse']['Percent'][selectYear],
-            'color': window['Area_ranking'][selectRegion]['Non-Agricultural Landuse']['color'][selectYear],
+          'NonAg': {
+            'Rank': safeAccess(window, ['Area_ranking', selectRegion, 'Non-Agricultural Landuse', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Area_ranking', selectRegion, 'Non-Agricultural Landuse', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Area_ranking', selectRegion, 'Non-Agricultural Landuse', 'color', selectYear]),
+            'value': safeAccess(window, ['Area_ranking', selectRegion, 'Non-Agricultural Landuse', 'value', selectYear]),
           },
-          'Total': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Area_ranking'][selectRegion]['Total']['Rank'][selectYear],
-            'Percent': window['Area_ranking'][selectRegion]['Total']['Percent'][selectYear],
-            'color': window['Area_ranking'][selectRegion]['Total']['color'][selectYear],
+          'Total': {
+            'Rank': safeAccess(window, ['Area_ranking', selectRegion, 'Total', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Area_ranking', selectRegion, 'Total', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Area_ranking', selectRegion, 'Total', 'color', selectYear]),
+            'value': safeAccess(window, ['Area_ranking', selectRegion, 'Total', 'value', selectYear]),
           },
         },
         'GHG': {
-          'Emissions': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['GHG_ranking'][selectRegion]['GHG emissions']['Rank'][selectYear],
-            'Percent': window['GHG_ranking'][selectRegion]['GHG emissions']['Percent'][selectYear],
-            'color': window['GHG_ranking'][selectRegion]['GHG emissions']['color'][selectYear],
+          'Emissions': {
+            'Rank': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG emissions', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG emissions', 'Percent', selectYear]),
+            'color': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG emissions', 'color', selectYear]),
+            'value': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG emissions', 'value', selectYear]),
           },
-          'Sequestration': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['GHG_ranking'][selectRegion]['GHG sequestrations']['Rank'][selectYear],
-            'Percent': window['GHG_ranking'][selectRegion]['GHG sequestrations']['Percent'][selectYear],
-            'color': window['GHG_ranking'][selectRegion]['GHG sequestrations']['color'][selectYear],
+          'Sequestration': {
+            'Rank': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG sequestrations', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG sequestrations', 'Percent', selectYear]),
+            'color': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG sequestrations', 'color', selectYear]),
+            'value': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG sequestrations', 'value', selectYear]),
           },
         },
         'Water': {
-          'Ag': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Water_ranking'][selectRegion]['Agricultural Landuse']['Rank'][selectYear],
-            'Percent': window['Water_ranking'][selectRegion]['Agricultural Landuse']['Percent'][selectYear],
-            'color': window['Water_ranking'][selectRegion]['Agricultural Landuse']['color'][selectYear],
+          'Ag': {
+            'Rank': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Landuse', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Landuse', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Landuse', 'color', selectYear]),
+            'value': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Landuse', 'value', selectYear]),
           },
-          'Am': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Water_ranking'][selectRegion]['Agricultural Management']['Rank'][selectYear],
-            'Percent': window['Water_ranking'][selectRegion]['Agricultural Management']['Percent'][selectYear],
-            'color': window['Water_ranking'][selectRegion]['Agricultural Management']['color'][selectYear],
+          'Am': {
+            'Rank': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Management', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Management', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Management', 'color', selectYear]),
+            'value': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Management', 'value', selectYear]),
           },
-          'NonAg': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Water_ranking'][selectRegion]['Non-Agricultural Landuse']['Rank'][selectYear],
-            'Percent': window['Water_ranking'][selectRegion]['Non-Agricultural Landuse']['Percent'][selectYear],
-            'color': window['Water_ranking'][selectRegion]['Non-Agricultural Landuse']['color'][selectYear],
+          'NonAg': {
+            'Rank': safeAccess(window, ['Water_ranking', selectRegion, 'Non-Agricultural Landuse', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Water_ranking', selectRegion, 'Non-Agricultural Landuse', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Water_ranking', selectRegion, 'Non-Agricultural Landuse', 'color', selectYear]),
+            'value': safeAccess(window, ['Water_ranking', selectRegion, 'Non-Agricultural Landuse', 'value', selectYear]),
           },
-          'Total': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Water_ranking'][selectRegion]['Total']['Rank'][selectYear],
-            'Percent': window['Water_ranking'][selectRegion]['Total']['Percent'][selectYear],
-            'color': window['Water_ranking'][selectRegion]['Total']['color'][selectYear],
+          'Total': {
+            'Rank': safeAccess(window, ['Water_ranking', selectRegion, 'Total', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Water_ranking', selectRegion, 'Total', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Water_ranking', selectRegion, 'Total', 'color', selectYear]),
+            'value': safeAccess(window, ['Water_ranking', selectRegion, 'Total', 'value', selectYear]),
           },
         },
         'Biodiversity': {
-          'Ag': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Biodiversity_ranking'][selectRegion]['Agricultural Landuse']['Rank'][selectYear],
-            'Percent': window['Biodiversity_ranking'][selectRegion]['Agricultural Landuse']['Percent'][selectYear],
-            'color': window['Biodiversity_ranking'][selectRegion]['Agricultural Landuse']['color'][selectYear],
+          'Ag': {
+            'Rank': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Landuse', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Landuse', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Landuse', 'color', selectYear]),
+            'value': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Landuse', 'value', selectYear]),
           },
-          'Am': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Biodiversity_ranking'][selectRegion]['Agricultural Management']['Rank'][selectYear],
-            'Percent': window['Biodiversity_ranking'][selectRegion]['Agricultural Management']['Percent'][selectYear],
-            'color': window['Biodiversity_ranking'][selectRegion]['Agricultural Management']['color'][selectYear],
+          'Am': {
+            'Rank': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Management', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Management', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Management', 'color', selectYear]),
+            'value': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Management', 'value', selectYear]),
           },
-          'NonAg': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Biodiversity_ranking'][selectRegion]['Non-Agricultural land-use']['Rank'][selectYear],
-            'Percent': window['Biodiversity_ranking'][selectRegion]['Non-Agricultural land-use']['Percent'][selectYear],
-            'color': window['Biodiversity_ranking'][selectRegion]['Non-Agricultural land-use']['color'][selectYear],
+          'NonAg': {
+            'Rank': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Non-Agricultural land-use', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Non-Agricultural land-use', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Non-Agricultural land-use', 'color', selectYear]),
+            'value': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Non-Agricultural land-use', 'value', selectYear]),
           },
-          'Total': selectRegion === 'AUSTRALIA' ? { 'Rank': 'N.A.', 'Percent': 0, 'color': '#e8eaed' } : {
-            'Rank': window['Biodiversity_ranking'][selectRegion]['Total']['Rank'][selectYear],
-            'Percent': window['Biodiversity_ranking'][selectRegion]['Total']['Percent'][selectYear],
-            'color': window['Biodiversity_ranking'][selectRegion]['Total']['color'][selectYear],
+          'Total': {
+            'Rank': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Total', 'Rank', selectYear]),
+            'Percent': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Total', 'Percent', selectYear]),
+            'color': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Total', 'color', selectYear]),
+            'value': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Total', 'value', selectYear]),
           },
         },
       };
@@ -128,8 +153,8 @@ window.DataService = {
     },
     'Area': {
       'Ag': 'Agricultural Landuse',
-      'Am': 'Agricultural Management',
-      'NonAg': 'Non-Agricultural Landuse',
+      'Ag Mgt': 'Agricultural Management',
+      'Non-Ag': 'Non-Agricultural Landuse',
       'Total': 'Total'
     },
     'GHG': {
@@ -138,14 +163,14 @@ window.DataService = {
     },
     'Water': {
       'Ag': 'Agricultural Landuse',
-      'Am': 'Agricultural Management',
-      'NonAg': 'Non-Agricultural Landuse',
+      'Ag Mgt': 'Agricultural Management',
+      'Non-Ag': 'Non-Agricultural Landuse',
       'Total': 'Total'
     },
     'Biodiversity': {
       'Ag': 'Agricultural Landuse',
-      'Am': 'Agricultural Management',
-      'NonAg': 'Non-Agricultural land-use',
+      'Ag Mgt': 'Agricultural Management',
+      'Non-Ag': 'Non-Agricultural land-use',
       'Total': 'Total'
     }
   },
