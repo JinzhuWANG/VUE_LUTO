@@ -15,54 +15,24 @@ window.Highchart = {
 
     // Function to handle dataset loading and chart creation
     const createOrUpdateChart = async () => {
+
       isLoading.value = true;
 
-      // Clean up previous chart instance if it exists
-      if (chartInstance.value) {
-        chartInstance.value.destroy();
-        chartInstance.value = null;
-      }
+      chartInstance.value = Highcharts.chart(
+        chartElement.value,
+        props.chartData
+      );
 
-      try {
-        // Make sure chartElement.value exists before trying to render the chart
-        if (chartElement.value && props.chartData) {
-          chartInstance.value = Highcharts.chart(
-            chartElement.value,
-            props.chartData
-          );
-          // Only set loading to false after successful chart creation
-          isLoading.value = false;
-        } else {
-          console.error("Chart container element is null or chart data is empty", {
-            element: chartElement.value,
-            data: props.chartData
-          });
-        }
-      } catch (error) {
-        console.error("Error creating chart:", error);
-      }
+      isLoading.value = false;
+
     };
 
     // Load initial dataset
-    onMounted(() => {
-      // Make sure DOM is fully rendered before creating chart
-      nextTick(() => {
-        // Check that chartElement is defined
-        if (chartElement.value) {
-          createOrUpdateChart();
-        } else {
-          console.error("Chart element does not exist during mount");
-        }
-      });
-    });
+    onMounted(() => { createOrUpdateChart(); });
 
     // Watch for changes in chart data
     watch(() => props.chartData, (newValue) => {
-      if (newValue) {
-        nextTick(() => {
-          createOrUpdateChart();
-        });
-      }
+      createOrUpdateChart();
     }, { deep: true });
 
     return {
