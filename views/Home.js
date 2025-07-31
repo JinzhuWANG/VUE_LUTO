@@ -44,11 +44,9 @@ window.HomeView = {
         chartOverview.value = {
           ...window['Chart_default_options'],
           chart: {
-            height: 510,
+            height: 480,
           },
-          title: {
-            text: `${availableDatasets.value[datasetName]['type']} overview for ${selectRegion.value}`
-          },
+          title: null,
           yAxis: {
             title: {
               text: availableDatasets.value[datasetName]['unit']
@@ -164,10 +162,16 @@ window.HomeView = {
       <div class="flex flex-col">
 
         <!-- Rank cards -->
-        <div class="mb-6 mr-4">
+        <p class="text-black text font-bold p-1 pt-4">Metric Overview</p>
+        <div class="mb-4 mr-4">
           <ranking-cards :selectRegion="selectRegion" :selectYear="selectYear"></ranking-cards>
         </div>
 
+        <!-- Title for map and chart -->
+        <div class="flex items-center justify-between">
+          <p class="text-black w-[500px] text font-bold p-1 pt-4">Map and Statistics</p>
+          <p class="flex-1 text font-bold ml-4 p-1 pt-4">{{ selectDataType }} overview for {{ selectRegion }}</p>
+        </div>
 
         <div class="flex flex-wrap mr-4 gap-4 mb-4">
 
@@ -238,15 +242,15 @@ window.HomeView = {
           </div>
 
           <!-- Statistics Chart -->
-          <div class="flex-1 rounded-[10px] bg-white shadow-md min-w-[300px]">
-            <chart-container :chartData="chartOverview"></chart-container>
+          <div class="flex-1 rounded-[10px] bg-white shadow-md">
+            <chart-container class="mt-4" :chartData="chartOverview"></chart-container>
           </div>
 
         </div>
         
         <div class="flex flex-wrap gap-4 mb-16">
           <!-- Settings -->
-          <div class="flex-1 flex-col rounded-[10px] bg-white shadow-md min-w-[300px]">
+          <div class="flex-1 flex-col rounded-[10px] bg-white shadow-md">
             <div class="flex flex-wrap items-center h-[auto] min-h-[40px]">
               <p class="flex-1 text-sm font-bold ml-2 p-1 items-center z-10">Scenarios and Settings</p>
               <input v-model="settingsFilterTxt" type="text" placeholder="Filter parameters..." class="sticky bg-white mr-4 justify-end text-sm border rounded" />

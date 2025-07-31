@@ -25,8 +25,7 @@ window.RankingCards = {
 
   template: `
     <div class="flex flex-col">
-      <p class="text-black text-xl font-bold p-1 pt-4">Metric Overview</p>
-
+    
       <div class="flex justify-between gap-1">
 
         <!-- Economics -->
