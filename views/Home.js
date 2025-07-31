@@ -173,7 +173,7 @@ window.HomeView = {
           <p class="flex-1 text font-bold ml-4 p-1 pt-4">{{ selectDataType }} overview for {{ selectRegion }}</p>
         </div>
 
-        <div class="flex flex-wrap mr-4 gap-4 mb-4">
+        <div class="flex mr-4 gap-4 mb-4">
 
           <div class="flex flex-col rounded-[10px] bg-white shadow-md w-[500px]">
 
@@ -242,16 +242,16 @@ window.HomeView = {
           </div>
 
           <!-- Statistics Chart -->
-          <div class="flex-1 rounded-[10px] bg-white shadow-md">
-            <chart-container class="mt-4" :chartData="chartOverview"></chart-container>
+          <div class="flex-1 rounded-[10px] bg-white shadow-md w-vw">
+            <chart-container :chartData="chartOverview"></chart-container>
           </div>
 
         </div>
         
-        <div class="flex flex-wrap gap-4 mb-16">
+        <div class="flex gap-4 mb-16">
           <!-- Settings -->
           <div class="flex-1 flex-col rounded-[10px] bg-white shadow-md">
-            <div class="flex flex-wrap items-center h-[auto] min-h-[40px]">
+            <div class="flex items-center h-[auto] min-h-[40px]">
               <p class="flex-1 text-sm font-bold ml-2 p-1 items-center z-10">Scenarios and Settings</p>
               <input v-model="settingsFilterTxt" type="text" placeholder="Filter parameters..." class="sticky bg-white mr-4 justify-end text-sm border rounded" />
             </div>
@@ -268,7 +268,7 @@ window.HomeView = {
           </div>
 
           <!-- Memory use logs -->
-          <div class="flex flex-col rounded-[10px] bg-white shadow-md flex-1 min-w-[300px] mr-4">
+          <div class="flex flex-col rounded-[10px] bg-white shadow-md flex-1  mr-4">
             <div class="flex items-center justify-start ml-2 h-[40px]">
               <p class="text-sm font-bold">Memory Use Logs</p>
             </div>
