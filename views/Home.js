@@ -159,6 +159,11 @@ window.HomeView = {
   // This template is a fallback that will be replaced by the loaded template
   template: `
     <div>
+
+      <!-- Empty span that acts as the minimum width of the content -->
+      <span class="min-w-[1650px]"></span>
+
+
       <div class="flex flex-col">
 
         <!-- Rank cards -->
@@ -183,7 +188,7 @@ window.HomeView = {
                 <p>Region: <strong>{{ selectRegion }}</strong></p>
               </div>
               <div class="flex items-center justify-end p-2">
-                <div class="flex flex-wrap space-x-1">
+                <div class="flex space-x-1">
                   <button v-for="(data, key) in availableDatasets" :key="key"
                     @click="selectDataset = key; changeDataset(key)"
                     class="bg-[#e8eaed] text-[#1f1f1f] text-[0.8rem] px-1 py-1 rounded"
