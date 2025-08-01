@@ -6,7 +6,8 @@ window.Highchart = {
     }
   },
   setup(props) {
-    const { ref, onMounted, onUnmounted, watch, nextTick } = Vue
+    const { ref, onMounted, onUnmounted, watch, nextTick, inject } = Vue
+    const sidebarToggleCount = inject('sidebarToggleCount', ref(0))
 
     // Reactive state for loading status and datasets
     const chartElement = ref(null);
@@ -31,7 +32,6 @@ window.Highchart = {
 
     // Function to handle window resize
     const handleResize = () => { createChart(); };
-
 
     // Function to update the chart with new series data
     const updateChart = (chart, newChartData) => {
@@ -94,6 +94,13 @@ window.Highchart = {
 
     // Watch for changes in chart data
     watch(() => props.chartData, (newValue) => { updateChart(ChartInstance.value, newValue); }, { deep: true });
+
+    // Watch for sidebar toggle changes via inject
+    watch(sidebarToggleCount, () => {
+      setTimeout(() => {
+        createChart();
+      }, 300); // Wait for sidebar animation to complete
+    });
 
     return {
       chartElement,

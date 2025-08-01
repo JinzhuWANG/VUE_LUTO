@@ -46,7 +46,6 @@ window.HomeView = {
           chart: {
             height: 480,
           },
-          title: null,
           yAxis: {
             title: {
               text: availableDatasets.value[datasetName]['unit']
@@ -159,10 +158,6 @@ window.HomeView = {
   // This template is a fallback that will be replaced by the loaded template
   template: `
     <div>
-
-      <!-- Empty span that acts as the minimum width of the content -->
-      <span class="min-w-[1650px]"></span>
-
 
       <div class="flex flex-col">
 

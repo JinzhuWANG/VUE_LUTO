@@ -1,3 +1,4 @@
 .vscode-upload.json
-assets
+assets/*
 data/*.js
+.vscode

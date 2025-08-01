@@ -5,8 +5,7 @@ window.Chart_default_options = {
         height: 600,
     },
     title: {
-        text: "Landuse Areas",
-        align: "left",
+        text: ''
     },
     yAxis: {
         title: {
@@ -15,15 +14,14 @@ window.Chart_default_options = {
     },
     legend: {
         itemStyle: {
-            fontSize: "10.5px",
+            fontSize: "10px",
         },
         align: "right",
         layout: "vertical",
-        x: -10,
         verticalAlign: "middle",
         itemMarginTop: 0,
-        itemMarginBottom: 0.75,
-        width: 220,
+        itemMarginBottom: 1,
+        width: 180,
     },
     tooltip: {
         formatter: function () {

@@ -3,7 +3,18 @@ const { createApp } = Vue;
 // Initialize app
 const app = createApp({
     setup() {
-        return {};
+        const { ref, provide } = Vue;
+        const sidebarToggleCount = ref(0);
+
+        const handleSidebarToggle = () => {
+            sidebarToggleCount.value++;
+        };
+
+        provide('sidebarToggleCount', sidebarToggleCount);
+
+        return {
+            handleSidebarToggle,
+        };
     },
 });
 
