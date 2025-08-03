@@ -1,7 +1,7 @@
 window.Sidebar = {
-  props: {},
-  emits: ['sidebar-toggle'],
+  emits: ['update:isCollapsed'],
   setup(props, { emit }) {
+    const { ref, computed } = Vue;
     // Function to standardize SVG icons for consistent display
     const standardizeIcon = (icon) => {
       // Add a fixed viewBox to ensure consistent sizing
@@ -17,6 +17,7 @@ window.Sidebar = {
       { id: "water", label: "Water Analysis", path: "/water", icon: standardizeIcon(window.NavIcons.water) },
       { id: "biodiversity", label: "Biodiversity", path: "/biodiversity", icon: standardizeIcon(window.NavIcons.biodiversity) },
       { id: "map", label: "Map View", path: "/map", icon: standardizeIcon(window.NavIcons.map) },
+      { id: "test", label: "Test Page", path: "/test" },
     ];
 
     const CommonIcons = {
@@ -24,16 +25,16 @@ window.Sidebar = {
       Collapse: standardizeIcon(window.CommonIcons.Collapse),
     }
 
-    const isCollapsed = Vue.ref(false);
+    const isCollapsed = ref(false);
+
     const toggleCollapse = () => {
       isCollapsed.value = !isCollapsed.value;
-      // Emit sidebar toggle event
-      emit('sidebar-toggle');
+      emit('update:isCollapsed', isCollapsed.value);
     };
 
     // Get route info for highlighting active menu item
     const route = VueRouter.useRoute();
-    const activeIndex = Vue.computed(() => {
+    const activeIndex = computed(() => {
       return route.path;
     });
 

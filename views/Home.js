@@ -1,13 +1,14 @@
 window.HomeView = {
 
-  setup() {
+  setup(props, { emit }) {
 
-    const { ref, onMounted, watch, computed } = Vue;
+    const { ref, onMounted, watch, computed, inject } = Vue;
     const loadScript = window.loadScript;
+
 
     // Define reactive variables
     const settingsFilterTxt = ref("");
-    const selectRegion = ref("AUSTRALIA");
+    const selectRegion = inject('globalSelectedRegion');
     const selectYear = ref(2020);
     const yearIndex = ref(0);
     const availableYears = ref([]);
@@ -235,7 +236,6 @@ window.HomeView = {
                 :selectYear="selectYear" 
                 :selectSubcategory="selectSubcategory"
                 :legendObj="colorsRanking"
-                v-model="selectRegion" 
               />
             </div>
 

@@ -31,11 +31,13 @@
     <script src="./components/chart_container.js" defer></script>
     <script src="./components/ranking_cards.js" defer></script>
     <script src="./services/DataService.js" defer></script>
+    <script src="./components/filterable_dropdown.js" defer></script>
 
     <!-- Views -->
     <script src="./views/Home.js" defer></script>
     <script src="./views/Area.js" defer></script>
     <script src="./views/NotFound.js" defer></script>
+    <script src="./views/Test.js" defer></script>
 
     <!-- Routes -->
     <script src="./routes/route.js" defer></script>
@@ -60,13 +62,6 @@
   </head>
 
   <body>
-    <div id="app">
-      <div class="flex">
-        <!-- Sidebar -->
-        <side-bar @sidebar-toggle="handleSidebarToggle"></side-bar>
-        <!-- Main content -->
-        <router-view class="bg-[#f8f9fe] flex-1 mr-4 pl-4"></router-view>
-      </div>
-    </div>
+    <div id="app"></div>
   </body>
 </html>

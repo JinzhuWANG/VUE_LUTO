@@ -7,9 +7,6 @@ window.map_geojson = {
         selectDataType: {
             type: String,
         },
-        modelValue: {
-            type: String,
-        },
         selectYear: {
             type: [Number, String],
             default: 2020,
@@ -23,10 +20,10 @@ window.map_geojson = {
         },
     },
     setup(props, { emit }) {
-        const { ref, onMounted, watch } = Vue;
+        const { ref, onMounted, watch, inject } = Vue;
 
         const mapElement = ref(null);
-        const activeRegionName = ref(props.modelValue);
+        const activeRegionName = inject('globalSelectedRegion');
         const hoverTooltip = ref(null);
         const geoJSONLayer = ref(null);
         const featureStyles = ref({});
@@ -48,7 +45,6 @@ window.map_geojson = {
 
         const updateRegionName = (newRegionName) => {
             activeRegionName.value = newRegionName;
-            emit('update:modelValue', newRegionName);
         };
 
         // Function to update styles based on data type and year
@@ -64,7 +60,7 @@ window.map_geojson = {
 
                 try {
                     // Get data type from props (Area by default)
-                    const dataType = props.selectDataType || 'Area';
+                    const dataType = props.selectDataType;
                     // Get current year from props
                     const currentYear = props.selectYear;
 
@@ -127,25 +123,22 @@ window.map_geojson = {
                 { animate: false }
             );
 
-            // Store GeoJSON layer for later access
-            // Create custom style function for each feature
+            // Get custom style function for each feature
             const getFeatureStyle = (feature) => {
                 const regionName = feature.properties.NHT2NAME;
-                // Default style if we can't find a color
+
+
+                const dataType = props.selectDataType;
+                const currentYear = props.selectYear;
+                const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
+                const rankingKey = `${dataType}_ranking`;
+
+                // Need a check to access a deep property safely
                 let style = { ...defaultStyle };
-
-                try {
-                    const dataType = props.selectDataType || 'Area';
-                    const currentYear = props.selectYear;
-                    const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
-                    const rankingKey = `${dataType}_ranking`;
-
-                    // Simple check if ranking data is available
-                    if (window[rankingKey]?.[regionName]?.[subcategory]?.color?.[currentYear]) {
-                        style.fillColor = window[rankingKey][regionName][subcategory].color[currentYear];
-                    }
-                } catch (error) {
-                    console.error(`Error getting color for region ${regionName}:`, error);
+                if (window[rankingKey]?.[regionName]?.[subcategory]?.color?.[currentYear]) {
+                    style.fillColor = window[rankingKey][regionName][subcategory].color[currentYear];
+                } else {
+                    style.fillColor = defaultStyle.fillColor; // Fallback to default color
                 }
 
                 // Store the style for later reference
@@ -159,6 +152,13 @@ window.map_geojson = {
                 onEachFeature: (feature, layer) => {
                     // Store region name in layer options for easier access later
                     layer.options.regionName = feature.properties.NHT2NAME;
+                    // Set the initial style for the layer
+                    if (activeRegionName.value === feature.properties.NHT2NAME) {
+                        layer.setStyle(highlightStyle);
+                    } else {
+                        layer.setStyle(featureStyles.value[feature.properties.NHT2NAME] || defaultStyle);
+                    }
+                    // Add hover and click events
                     layer.on({
                         mousemove: (e) => {
                             const layer_e = e.target;

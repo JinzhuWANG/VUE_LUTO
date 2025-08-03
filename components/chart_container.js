@@ -6,8 +6,8 @@ window.Highchart = {
     }
   },
   setup(props) {
-    const { ref, onMounted, onUnmounted, watch, nextTick, inject } = Vue
-    const sidebarToggleCount = inject('sidebarToggleCount', ref(0))
+    const { ref, onMounted, onUnmounted, watch, inject } = Vue
+    const isCollapsed = inject('isCollapsed', ref(false))
 
     // Reactive state for loading status and datasets
     const chartElement = ref(null);
@@ -95,8 +95,8 @@ window.Highchart = {
     // Watch for changes in chart data
     watch(() => props.chartData, (newValue) => { updateChart(ChartInstance.value, newValue); }, { deep: true });
 
-    // Watch for sidebar toggle changes via inject
-    watch(sidebarToggleCount, () => {
+    // Watch for sidebar collapsed state changes via inject
+    watch(isCollapsed, () => {
       setTimeout(() => {
         createChart();
       }, 300); // Wait for sidebar animation to complete
