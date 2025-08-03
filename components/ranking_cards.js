@@ -30,7 +30,7 @@ window.RankingCards = {
     <div class="mb-8">
       <div class="flex flex-wrap gap-4 justify-between">
         <!-- Economics Card -->
-        <div class="flex-1 min-w-[200px] rounded-lg p-3 shadow-md flex flex-col bg-gradient-to-r from-pink-400 to-pink-500" >
+        <div class="flex-1 min-w-[200px] rounded-lg p-3 shadow-md flex flex-col bg-gradient-to-r from-[#e6ba7f] to-[#eacca2]" >
           <h4 class="text-white text-center text-lg mb-2">Economics</h4>
           <div class="text-2xl text-center font-bold text-white mb-1">{{ rankingData.Economics.Total.value }}</div>
           <div class="text-white/80 text-center text-[12px] mb-4">Australian Dollar</div>
@@ -79,7 +79,7 @@ window.RankingCards = {
             </div>
             <div class="flex justify-between text-white text-[14px] py-1 border-t border-white/20">
               <span>Reduction</span>
-              <span>-{{ rankingData.GHG.Sequestration.value }}</span>
+              <span>{{ rankingData.GHG.Sequestration.value }}</span>
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ window.RankingCards = {
         </div>
         
         <!-- Biodiversity Card -->
-        <div class="flex-1 min-w-[200px] rounded-lg p-3 shadow-md flex flex-col bg-gradient-to-r from-teal-300 to-teal-200" >
+        <div class="flex-1 min-w-[200px] rounded-lg p-3 shadow-md flex flex-col bg-gradient-to-r from-[#918be9] to-[#e2cbfa]" >
           <h4 class="text-white text-center text-lg mb-2">Biodiversity</h4>
           <div class="text-2xl text-center font-bold text-white mb-1">{{ rankingData.Biodiversity.Total.value }}</div>
           <div class="text-white/80 text-center text-[12px] mb-4">Priority Weighted Hectares</div>
