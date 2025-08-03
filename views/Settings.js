@@ -3,11 +3,16 @@ window.SettingsView = {
     const { ref, onMounted, watch, computed } = Vue;
     const loadScript = window.loadScript;
 
-    const settingsFilterTxt = ref("");
-    const filteredSettings = ref([]);
+    // Tab management
+    const activeTab = ref('settings');
+    
+    // Settings related reactive variables
+    const searchTerm = ref('');
+    const activeFilter = ref('all');
+    const modelRunSettings = ref([]);
     const chartMemLogData = ref({});
-    const activeFilter = ref("all");
 
+    // Categories definition for parameter organization
     const categories = {
       'Basic Configuration': {
         icon: '⚙️',
@@ -71,6 +76,19 @@ window.SettingsView = {
       }
     };
 
+    const filterButtons = ref([
+      { key: 'all', label: 'All' },
+      { key: 'BIO_', label: 'Biodiversity' },
+      { key: 'GBF', label: 'GBF' },
+      { key: 'GHG', label: 'GHG' },
+      { key: 'WATER', label: 'Water' },
+      { key: 'SOLVER', label: 'Solver' },
+      { key: 'AG_', label: 'Agriculture' },
+      { key: 'CP_', label: 'Carbon' },
+      { key: 'COST', label: 'Costs' }
+    ]);
+
+    // Helper functions
     const categorizeParameters = (parameters) => {
       const categorized = {};
       const uncategorized = [];
@@ -81,9 +99,9 @@ window.SettingsView = {
 
       parameters.forEach(param => {
         let assigned = false;
-
+        
         for (const [categoryName, categoryData] of Object.entries(categories)) {
-          if (categoryData.keywords.some(keyword =>
+          if (categoryData.keywords.some(keyword => 
             param.parameter.toUpperCase().includes(keyword.toUpperCase())
           )) {
             categorized[categoryName].push(param);
@@ -91,7 +109,7 @@ window.SettingsView = {
             break;
           }
         }
-
+        
         if (!assigned) {
           uncategorized.push(param);
         }
@@ -104,71 +122,72 @@ window.SettingsView = {
       return categorized;
     };
 
-    const filterParameters = (searchTerm, filterType, allSettings) => {
-      let filtered = allSettings || [];
+    const getValueClass = (value) => {
+      const length = typeof value === 'string' ? value.length : 0;
+      if (length > 200) {
+        return 'bg-blue-50 text-blue-700 border border-blue-200';
+      } else if (length > 50) {
+        return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+      } else {
+        return 'bg-green-50 text-green-700 border border-green-200';
+      }
+    };
 
-      if (searchTerm) {
-        filtered = filtered.filter(param =>
-          param.parameter.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          param.val.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    // Computed properties
+    const filteredParameters = computed(() => {
+      let filtered = modelRunSettings.value;
+
+      if (searchTerm.value) {
+        filtered = filtered.filter(param => 
+          param.parameter.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+          param.val.toString().toLowerCase().includes(searchTerm.value.toLowerCase())
         );
       }
 
-      if (filterType && filterType !== 'all') {
-        filtered = filtered.filter(param =>
-          param.parameter.includes(filterType)
+      if (activeFilter.value && activeFilter.value !== 'all') {
+        filtered = filtered.filter(param => 
+          param.parameter.includes(activeFilter.value)
         );
       }
 
       return filtered;
-    };
-
-    const categorizedSettings = computed(() => {
-      const allSettings = window['Supporting_info']?.model_run_settings || [];
-      const filtered = filterParameters(settingsFilterTxt.value, activeFilter.value, allSettings);
-      return categorizeParameters(filtered);
     });
 
-    const settingsStats = computed(() => {
-      const allSettings = window['Supporting_info']?.model_run_settings || [];
-      const filtered = filterParameters(settingsFilterTxt.value, activeFilter.value, allSettings);
-      const categories = new Set();
-
-      filtered.forEach(param => {
-        if (param.parameter.includes('BIO_')) categories.add('Biodiversity');
-        if (param.parameter.includes('GHG')) categories.add('GHG');
-        if (param.parameter.includes('WATER')) categories.add('Water');
-        if (param.parameter.includes('SOLVER')) categories.add('Solver');
-        if (param.parameter.includes('AG_')) categories.add('Agriculture');
-        if (param.parameter.includes('CP_')) categories.add('Carbon');
-        if (param.parameter.includes('COST')) categories.add('Costs');
-      });
-
-      return {
-        total: filtered.length,
-        categories: categories.size,
-        biodiversity: filtered.filter(p => p.parameter.includes('BIO_')).length,
-        enabled: filtered.filter(p => p.val === 'on' || p.val === 'True').length
-      };
+    const filteredCategories = computed(() => {
+      const categorized = categorizeParameters(filteredParameters.value);
+      return Object.entries(categorized)
+        .filter(([_, params]) => params.length > 0)
+        .map(([name, params]) => ({
+          name,
+          icon: categories[name]?.icon || '📋',
+          params
+        }));
     });
 
-    const setActiveFilter = (filter) => {
-      activeFilter.value = filter;
-    };
+    const stats = computed(() => {
+      const totalParams = filteredParameters.value.length;
+      const activeCategories = filteredCategories.value.length;
+      const biodiversityParams = filteredParameters.value.filter(p => p.parameter.includes('BIO_')).length;
+      const enabledFeatures = filteredParameters.value.filter(p => 
+        p.val === 'on' || p.val === 'True' || p.val === 'true'
+      ).length;
 
-    const isLongValue = (value) => {
-      return typeof value === 'string' && value.length > 50;
-    };
+      return [
+        { value: totalParams, label: 'Total Parameters' },
+        { value: activeCategories, label: 'Active Categories' },
+        { value: biodiversityParams, label: 'Biodiversity Params' },
+        { value: enabledFeatures, label: 'Enabled Features' }
+      ];
+    });
 
-    const isVeryLongValue = (value) => {
-      return typeof value === 'string' && value.length > 200;
-    };
-
+    // Load scripts and data when the component is mounted
     onMounted(async () => {
       try {
         await loadScript("./data/Supporting_info.js", 'Supporting_info');
         await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
         await loadScript("./data/chart_option/chartMemLogOptions.js", 'chartMemLogOptions');
+
+        modelRunSettings.value = window['Supporting_info']['model_run_settings'] || [];
 
         chartMemLogData.value = {
           ...window['Chart_default_options'],
@@ -176,58 +195,153 @@ window.SettingsView = {
           series: window['Supporting_info'].mem_logs,
         };
 
-        filteredSettings.value = window['Supporting_info']['model_run_settings'] || [];
-
       } catch (error) {
         console.error("Error loading dependencies for Settings view:", error);
       }
     });
 
     return {
-      settingsFilterTxt,
-      filteredSettings,
-      chartMemLogData,
+      activeTab,
+      searchTerm,
       activeFilter,
-      categories,
-      categorizedSettings,
-      settingsStats,
-      setActiveFilter,
-      isLongValue,
-      isVeryLongValue,
+      filterButtons,
+      filteredCategories,
+      stats,
+      getValueClass,
+      chartMemLogData,
     };
   },
 
   template: `
-    <div class="p-6">
-      <h1 class="text-2xl font-bold text-gray-800 mb-6">Settings and Logs</h1>
-      
-      <div class="flex gap-4 mb-16">
-        <!-- Settings -->
-        <div class="flex-1 flex-col rounded-[10px] bg-white shadow-md">
-          <div class="flex items-center h-[auto] min-h-[40px]">
-            <p class="flex-1 text-sm font-bold ml-2 p-1 items-center z-10">Scenarios and Settings</p>
-            <input v-model="settingsFilterTxt" type="text" placeholder="Filter parameters..." class="sticky bg-white mr-4 justify-end text-sm border rounded" />
-          </div>
-          <div class="h-[440px] overflow-y-auto mb-2">
-            <table class="text-left min-w-[300px]">
-              <tbody>
-                <tr v-for="setting in filteredSettings" :key="setting.parameter" class="bg-white border-b border-gray-200 hover:bg-gray-100">
-                  <td class="px-2 py-1 text-[0.55rem] text-gray-900 whitespace-wrap break-words">{{ setting.parameter }}</td>
-                  <td class="px-2 py-1 text-[0.55rem] text-gray-500 whitespace-wrap break-words">{{ setting.val }}</td>
-                </tr>
-              </tbody>
-            </table>
+    <div class="min-h-screen p-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <div class="max-w-7xl mx-auto" style="backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.95);" class="rounded-3xl p-8 shadow-2xl">
+        
+        <!-- Header -->
+        <div class="text-center mb-10 p-6 rounded-2xl text-white shadow-lg" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+          <h1 class="text-2xl md:text-3xl font-bold mb-3">Model Settings & Logs</h1>
+          <p class="text-sm opacity-90"><strong>Configuration Overview and Memory Usage</strong></p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="mb-8">
+          <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <button 
+              @click="activeTab = 'settings'"
+              :class="[
+                'flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200',
+                activeTab === 'settings' 
+                  ? 'bg-white text-blue-600 shadow-md' 
+                  : 'text-gray-600 hover:text-gray-800'
+              ]"
+            >
+              ⚙️ Model Settings
+            </button>
+            <button 
+              @click="activeTab = 'memory'"
+              :class="[
+                'flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200',
+                activeTab === 'memory' 
+                  ? 'bg-white text-blue-600 shadow-md' 
+                  : 'text-gray-600 hover:text-gray-800'
+              ]"
+            >
+              📊 Memory Log
+            </button>
           </div>
         </div>
 
-        <!-- Memory use logs -->
-        <div class="flex flex-col rounded-[10px] bg-white shadow-md flex-1 mr-4">
-          <div class="flex items-center justify-start ml-2 h-[40px]">
-            <p class="text-sm font-bold">Memory Use Logs</p>
+        <!-- Settings Tab Content -->
+        <div v-if="activeTab === 'settings'">
+          <!-- Statistics -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8">
+            <div v-for="(stat, index) in stats" :key="index" 
+                 class="text-white p-5 rounded-2xl text-center shadow-lg transition-all duration-300 hover:transform hover:translateY(-2px)"
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              <div class="text-xl md:text-2xl font-bold mb-2">{{ stat.value }}</div>
+              <div class="text-xs opacity-90">{{ stat.label }}</div>
+            </div>
           </div>
-          <hr class="border-gray-300">
-          <chart-container class="flex-1 rounded-[10px]" :chartData="chartMemLogData"/>
+
+          <!-- Search and Filters -->
+          <div class="mb-8 space-y-4">
+            <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
+              <input 
+                v-model="searchTerm"
+                type="text" 
+                placeholder="🔍 Search parameters..."
+                class="flex-1 min-w-64 px-3 py-2 border-2 border-gray-200 rounded-full text-sm transition-all duration-300 focus:outline-none focus:border-blue-400 focus:shadow-lg bg-white"
+              >
+              <div class="flex flex-wrap gap-3">
+                <button 
+                  v-for="filter in filterButtons" 
+                  :key="filter.key"
+                  @click="activeFilter = filter.key"
+                  :class="[
+                    'px-3 py-2 border-2 rounded-full cursor-pointer transition-all duration-300 hover:transform hover:translateY(-2px) text-xs',
+                    activeFilter === filter.key 
+                      ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-blue-500 hover:text-white hover:border-blue-500'
+                  ]"
+                >
+                  {{ filter.label }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parameters Grid -->
+          <div v-if="filteredCategories.length === 0" class="text-center text-gray-500 italic p-10 bg-gray-50 rounded-xl text-sm">
+            No parameters found matching your search.
+          </div>
+          
+          <div v-else class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div 
+              v-for="(category, index) in filteredCategories" 
+              :key="category.name"
+              class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300 hover:transform hover:translateY(-5px)"
+            >
+              <h3 class="text-sm font-bold text-gray-800 mb-5 pb-3 border-b-2 border-blue-400 flex items-center gap-3">
+                <span class="text-lg">{{ category.icon }}</span>
+                {{ category.name }} ({{ category.params.length }})
+              </h3>
+              
+              <div class="space-y-0">
+                <div 
+                  v-for="param in category.params" 
+                  :key="param.parameter"
+                  class="flex justify-between items-start gap-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-blue-50 hover:mx-[-1.5rem] hover:px-6 hover:rounded-lg transition-all duration-200 min-h-[3rem]"
+                >
+                  <span class="font-semibold text-gray-700 text-xs flex-1 min-w-0 max-w-[50%]" style="word-wrap: break-word; word-break: break-word; hyphens: auto; line-height: 1.4;">
+                    {{ param.parameter }}
+                  </span>
+                  <span 
+                    :class="[
+                      'font-medium text-xs font-mono flex-1 min-w-0 max-w-[50%] px-2 py-1 rounded-lg',
+                      getValueClass(param.val)
+                    ]"
+                    :title="param.val"
+                    style="word-wrap: break-word; word-break: break-word; white-space: pre-wrap; line-height: 1.4; overflow-wrap: break-word;"
+                  >
+                    {{ param.val }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Memory Log Tab Content -->
+        <div v-if="activeTab === 'memory'" class="bg-white rounded-2xl p-6 shadow-lg">
+          <div class="flex items-center justify-start mb-4">
+            <span class="text-lg mr-3">📊</span>
+            <h2 class="text-lg font-bold text-gray-800">Memory Usage Log</h2>
+          </div>
+          <hr class="border-gray-300 mb-6">
+          <div class="h-[600px]">
+            <chart-container class="w-full h-full rounded-lg" :chartData="chartMemLogData"/>
+          </div>
+        </div>
+
       </div>
     </div>
   `,
