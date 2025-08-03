@@ -23,9 +23,14 @@ const app = createApp({
     template: `
     <div class="flex">
         <!-- Sidebar -->
-        <side-bar @update:isCollapsed="updateSidebarCollapsed"></side-bar>
+        <div  class="bg-white pl-2 w-min-[50px] transform transition-all duration-300 ease-in-out"
+            :class="{'w-[50px]': isCollapsed, 'w-[200px]': !isCollapsed}">
+          <side-bar @update:isCollapsed="updateSidebarCollapsed"></side-bar>
+        </div>
         <!-- Main content -->
-        <router-view class="bg-[#f8f9fe] flex-1 mr-4 pl-4"></router-view>
+        <div class="flex-1 bg-[#f8f9fe] mr-4 pl-4">
+          <router-view></router-view>
+        </div>
     </div>
     `
 });

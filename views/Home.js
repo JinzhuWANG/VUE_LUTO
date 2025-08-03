@@ -163,7 +163,7 @@ window.HomeView = {
       <div class="flex flex-col">
 
         <!-- Rank cards -->
-        <p class="text-black text font-bold p-1 pt-4">Metric Overview</p>
+        <p class="text-[#505051] font-bold p-1 pt-4">Metric Overview</p>
         <div class="mb-4 mr-4">
           <ranking-cards 
             :selectRegion="selectRegion"
@@ -173,8 +173,8 @@ window.HomeView = {
 
         <!-- Title for map and chart -->
         <div class="flex items-center justify-between">
-          <p class="text-black w-[500px] text font-bold p-1 pt-4">Map and Statistics</p>
-          <p class="flex-1 text font-bold ml-4 p-1 pt-4">{{ selectDataType }} overview for {{ selectRegion }}</p>
+          <p class="text-[#505051] w-[500px] text font-bold p-1 pt-4">Map and Statistics</p>
+          <p class="flex-1 text-[#505051] font-bold ml-4 p-1 pt-4">{{ selectDataType }} overview for {{ selectRegion }}</p>
         </div>
 
         <div class="flex mr-4 gap-4 mb-4">

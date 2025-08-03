@@ -48,8 +48,7 @@ window.Sidebar = {
   },
 
   template: `
-    <div class="bg-white pl-2 w-min-[50px] transform transition-all duration-300 ease-in-out" 
-      :class="{'w-[50px]': isCollapsed, 'w-min-[200px]': !isCollapsed}">
+    <div>
 
       <div class="flex items-center h-[80px]">
         <!-- Logo -->
@@ -71,7 +70,7 @@ window.Sidebar = {
             <router-link :to="item.path" class="flex flex-nowrap ml-2 py-3 cursor-pointer" 
               :class="{ 'bg-gray-50 border-l-4 border-blue-700': activeIndex === item.path }">
               <span v-html="item.icon" class="w-6 h-6 items-center justify-center"></span>
-              <span v-if="!isCollapsed" class="ml-2 text-sm">{{ item.label }}</span>
+              <span v-if="!isCollapsed" class="ml-2 text-sm w-[180px]">{{ item.label }}</span>
             </router-link>
           </li>
         </ul>

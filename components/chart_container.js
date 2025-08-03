@@ -109,9 +109,9 @@ window.Highchart = {
     };
   },
   template: `
-    <div class="m-2">
+    <div class="m-2 ">
       <div v-if="isLoading" class="flex justify-center items-center text-lg">Loading data...</div>
-      <div ref="chartElement" id="chart-container" style="width: 100%;"></div>
+      <div ref="chartElement" id="chart-container"></div>
     </div>
   `
 }
