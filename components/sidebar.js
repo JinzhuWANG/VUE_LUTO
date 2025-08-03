@@ -17,6 +17,7 @@ window.Sidebar = {
       { id: "water", label: "Water Analysis", path: "/water", icon: standardizeIcon(window.NavIcons.water) },
       { id: "biodiversity", label: "Biodiversity", path: "/biodiversity", icon: standardizeIcon(window.NavIcons.biodiversity) },
       { id: "map", label: "Map View", path: "/map", icon: standardizeIcon(window.NavIcons.map) },
+      { id: "settings", label: "Settings and Log", path: "/settings", icon: standardizeIcon(window.NavIcons.settings) },
       { id: "test", label: "Test Page", path: "/test" },
     ];
 

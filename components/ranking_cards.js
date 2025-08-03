@@ -15,10 +15,7 @@ window.RankingCards = {
     const { computed } = Vue;
 
     const rankingData = computed(() => {
-      console.log("Fetching ranking data for region:", props.selectRegion, "and year:", props.selectYear);
-      const data = window.DataService.getRankingData(props.selectRegion, props.selectYear);
-      console.log("Ranking Data:", data);
-      return data;
+      return window.DataService.getRankingData(props.selectRegion, props.selectYear);
     });
 
     return {

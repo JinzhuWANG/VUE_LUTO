@@ -187,5 +187,4 @@ window.DataService = {
     return mapping[subcategory] || subcategory;
   },
 
-
 };

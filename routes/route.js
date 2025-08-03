@@ -4,6 +4,7 @@ const { createRouter, createWebHashHistory } = VueRouter;
 const routes = [
   { path: "/", component: window.HomeView },
   { path: "/area", component: window.AreaView },
+  { path: "/settings", component: window.SettingsView },
   { path: "/economy", component: window.NotFound },
   { path: "/map", component: window.NotFound },
   { path: "/test", component: window.Test },

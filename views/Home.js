@@ -7,15 +7,13 @@ window.HomeView = {
 
 
     // Define reactive variables
-    const settingsFilterTxt = ref("");
     const selectRegion = inject('globalSelectedRegion');
     const selectYear = ref(2020);
     const yearIndex = ref(0);
     const availableYears = ref([]);
-    const filteredSettings = ref([]);
+    const runScenario = ref({})
 
-    //  Reactive data 
-    const chartMemLogData = ref({});
+    //  Reactive data
     const chartOverview = ref({});
     const colorsRanking = ref({});
     const availableDatasets = ref({
@@ -68,7 +66,6 @@ window.HomeView = {
         // Load required data
         await loadScript("./data/Supporting_info.js", 'Supporting_info');
         await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
-        await loadScript("./data/chart_option/chartMemLogOptions.js", 'chartMemLogOptions');
 
         await loadScript("./data/Biodiversity_ranking.js", 'Biodiversity_ranking');
         await loadScript("./data/GHG_ranking.js", 'GHG_ranking');
@@ -83,22 +80,23 @@ window.HomeView = {
         selectYear.value = availableYears.value[0];
         selectSubcategory.value = DtypeSubCategories.value[0];
         colorsRanking.value = window.Supporting_info.colors_ranking;
+        runScenario.value = {
+          'SSP': window.Supporting_info.model_run_settings.filter(item => item.parameter === "SSP")[0]['val'],
+          'GHG': window.Supporting_info.model_run_settings.filter(item => item.parameter === "GHG_EMISSIONS_LIMITS")[0]['val'],
+          'BIO_CUT': window.Supporting_info.model_run_settings.filter(item => item.parameter === "GBF2_PRIORITY_DEGRADED_AREAS_PERCENTAGE_CUT")[0]['val'],
+          'BIO_GBF2': window.Supporting_info.model_run_settings.filter(item => item.parameter === "BIODIVERSITY_TARGET_GBF_2")[0]['val'],
+          'BIO_GBF3': window.Supporting_info.model_run_settings.filter(item => item.parameter === "BIODIVERSITY_TARGET_GBF_3")[0]['val'],
+          'BIO_GBF4_SNES': window.Supporting_info.model_run_settings.filter(item => item.parameter === "BIODIVERSITY_TARGET_GBF_4_SNES")[0]['val'],
+          'BIO_GBF4_ECNES': window.Supporting_info.model_run_settings.filter(item => item.parameter === "BIODIVERSITY_TARGET_GBF_4_ECNES")[0]['val'],
+          'BIODIVERSITY_TARGET_GBF_8': window.Supporting_info.model_run_settings.filter(item => item.parameter === "BIODIVERSITY_TARGET_GBF_8")[0]['val'],
+        }
 
 
         // RankingData component is now included in index.html
-        chartMemLogData.value = {
-          ...window['Chart_default_options'],
-          ...window['chartMemLogOptions'],
-          series: window['Supporting_info'].mem_logs,
-        };
 
         // Initialize the overview chart with the selected dataset
         await changeDataset(selectDataset.value);
 
-        // Update filteredSettings now that supporting info is loaded
-        filteredSettings.value = window['Supporting_info']['model_run_settings'].filter(setting =>
-          setting.parameter.toLowerCase().includes(settingsFilterTxt.value.toLowerCase())
-        );
 
       } catch (error) {
         console.error("Error loading dependencies:", error);
@@ -108,14 +106,6 @@ window.HomeView = {
 
 
     // Watch for changes and then make reactive updates
-    watch(
-      settingsFilterTxt,
-      (newFilterText) => {
-        filteredSettings.value = window['Supporting_info']['model_run_settings'].filter(setting =>
-          setting.parameter.toLowerCase().includes(newFilterText.toLowerCase())
-        );
-      }
-    );
     watch(
       selectRegion,
       (newValues) => {
@@ -140,7 +130,7 @@ window.HomeView = {
       availableDatasets,
       DtypeSubCategories,
       yearIndex,
-      settingsFilterTxt,
+      runScenario,
 
       selectRegion,
       selectDataset,
@@ -148,9 +138,7 @@ window.HomeView = {
       selectYear,
       selectSubcategory,
 
-      chartMemLogData,
       chartOverview,
-      filteredSettings,
       colorsRanking,
       changeDataset,
     };
@@ -163,7 +151,7 @@ window.HomeView = {
       <div class="flex flex-col">
 
         <!-- Rank cards -->
-        <p class="text-[#505051] font-bold p-1 pt-4">Metric Overview</p>
+        <p class="text-[#505051] font-bold p-1 pt-4">Metric Overview under SSP {{ runScenario.SSP }} - GHG {{ runScenario.GHG }} - Biodiversity {{ runScenario.BIO_GBF2 }}</p>
         <div class="mb-4 mr-4">
           <ranking-cards 
             :selectRegion="selectRegion"
@@ -251,34 +239,6 @@ window.HomeView = {
 
         </div>
         
-        <div class="flex gap-4 mb-16">
-          <!-- Settings -->
-          <div class="flex-1 flex-col rounded-[10px] bg-white shadow-md">
-            <div class="flex items-center h-[auto] min-h-[40px]">
-              <p class="flex-1 text-sm font-bold ml-2 p-1 items-center z-10">Scenarios and Settings</p>
-              <input v-model="settingsFilterTxt" type="text" placeholder="Filter parameters..." class="sticky bg-white mr-4 justify-end text-sm border rounded" />
-            </div>
-            <div class="h-[440px] overflow-y-auto mb-2">
-              <table class="text-left min-w-[300px]">
-                <tbody>
-                  <tr v-for="setting in filteredSettings" :key="setting.parameter" class="bg-white border-b border-gray-200 hover:bg-gray-100">
-                    <td class="px-2 py-1 text-[0.55rem] text-gray-900 whitespace-wrap break-words">{{ setting.parameter }}</td>
-                    <td class="px-2 py-1 text-[0.55rem] text-gray-500 whitespace-wrap break-words">{{ setting.val }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Memory use logs -->
-          <div class="flex flex-col rounded-[10px] bg-white shadow-md flex-1  mr-4">
-            <div class="flex items-center justify-start ml-2 h-[40px]">
-              <p class="text-sm font-bold">Memory Use Logs</p>
-            </div>
-            <hr class="border-gray-300">
-            <chart-container class="flex-1 rounded-[10px]" :chartData="chartMemLogData"/>
-          </div>
-        </div>
       </div>
     </div>
   `,
