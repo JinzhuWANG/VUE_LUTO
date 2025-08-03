@@ -49,7 +49,7 @@ window.Sidebar = {
 
   template: `
     <div class="bg-white pl-2 w-min-[50px] transform transition-all duration-300 ease-in-out" 
-      :class="{'w-[50px]': isCollapsed, 'w-[200px]': !isCollapsed}">
+      :class="{'w-[50px]': isCollapsed, 'w-min-[200px]': !isCollapsed}">
 
       <div class="flex items-center h-[80px]">
         <!-- Logo -->

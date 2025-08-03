@@ -71,14 +71,14 @@ window.FilterableDropdown = {
       <!-- Dropdown content -->
       <div v-if="isOpen" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
         <!-- Search input -->
-        <div class="p-1 border-b border-gray-200">
+        <div class="p-0.5 border-b border-gray-200 h-8">
           <div class="relative">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.3-4.3"/>
             </svg>
             <input
-              class="text-[0.8rem]"
+              class="text-[0.75rem]"
               type="text"
               placeholder="Search regions..."
               v-model="searchTerm"

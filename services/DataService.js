@@ -24,39 +24,38 @@ window.DataService = {
         'Economics': {
           'Revenue': {
             'Rank': safeAccess(window, ['Economics_ranking', selectRegion, 'Revenue', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Economics_ranking', selectRegion, 'Revenue', 'Percent', selectYear]),
             'color': safeAccess(window, ['Economics_ranking', selectRegion, 'Revenue', 'color', selectYear]),
             'value': safeAccess(window, ['Economics_ranking', selectRegion, 'Revenue', 'value', selectYear]),
           },
           'Cost': {
             'Rank': safeAccess(window, ['Economics_ranking', selectRegion, 'Cost', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Economics_ranking', selectRegion, 'Cost', 'Percent', selectYear]),
             'color': safeAccess(window, ['Economics_ranking', selectRegion, 'Cost', 'color', selectYear]),
             'value': safeAccess(window, ['Economics_ranking', selectRegion, 'Cost', 'value', selectYear]),
+          },
+          'Total': {
+            'Rank': safeAccess(window, ['Economics_ranking', selectRegion, 'Total', 'Rank', selectYear]),
+            'color': safeAccess(window, ['Economics_ranking', selectRegion, 'Total', 'color', selectYear]),
+            'value': safeAccess(window, ['Economics_ranking', selectRegion, 'Total', 'value', selectYear]),
           },
         },
         'Area': {
           'Ag': {
             'Rank': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Landuse', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Landuse', 'Percent', selectYear]),
             'color': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Landuse', 'color', selectYear]),
             'value': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Landuse', 'value', selectYear]),
           },
           'Am': {
             'Rank': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Management', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Management', 'Percent', selectYear]),
             'color': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Management', 'color', selectYear]),
             'value': safeAccess(window, ['Area_ranking', selectRegion, 'Agricultural Management', 'value', selectYear]),
           },
           'NonAg': {
             'Rank': safeAccess(window, ['Area_ranking', selectRegion, 'Non-Agricultural Landuse', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Area_ranking', selectRegion, 'Non-Agricultural Landuse', 'Percent', selectYear]),
             'color': safeAccess(window, ['Area_ranking', selectRegion, 'Non-Agricultural Landuse', 'color', selectYear]),
             'value': safeAccess(window, ['Area_ranking', selectRegion, 'Non-Agricultural Landuse', 'value', selectYear]),
           },
           'Total': {
             'Rank': safeAccess(window, ['Area_ranking', selectRegion, 'Total', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Area_ranking', selectRegion, 'Total', 'Percent', selectYear]),
             'color': safeAccess(window, ['Area_ranking', selectRegion, 'Total', 'color', selectYear]),
             'value': safeAccess(window, ['Area_ranking', selectRegion, 'Total', 'value', selectYear]),
           },
@@ -64,39 +63,38 @@ window.DataService = {
         'GHG': {
           'Emissions': {
             'Rank': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG emissions', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG emissions', 'Percent', selectYear]),
             'color': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG emissions', 'color', selectYear]),
             'value': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG emissions', 'value', selectYear]),
           },
           'Sequestration': {
             'Rank': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG sequestrations', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG sequestrations', 'Percent', selectYear]),
             'color': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG sequestrations', 'color', selectYear]),
             'value': safeAccess(window, ['GHG_ranking', selectRegion, 'GHG sequestrations', 'value', selectYear]),
+          },
+          'Total': {
+            'Rank': safeAccess(window, ['GHG_ranking', selectRegion, 'Total', 'Rank', selectYear]),
+            'color': safeAccess(window, ['GHG_ranking', selectRegion, 'Total', 'color', selectYear]),
+            'value': safeAccess(window, ['GHG_ranking', selectRegion, 'Total', 'value', selectYear]),
           },
         },
         'Water': {
           'Ag': {
             'Rank': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Landuse', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Landuse', 'Percent', selectYear]),
             'color': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Landuse', 'color', selectYear]),
             'value': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Landuse', 'value', selectYear]),
           },
           'Am': {
             'Rank': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Management', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Management', 'Percent', selectYear]),
             'color': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Management', 'color', selectYear]),
             'value': safeAccess(window, ['Water_ranking', selectRegion, 'Agricultural Management', 'value', selectYear]),
           },
           'NonAg': {
             'Rank': safeAccess(window, ['Water_ranking', selectRegion, 'Non-Agricultural Landuse', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Water_ranking', selectRegion, 'Non-Agricultural Landuse', 'Percent', selectYear]),
             'color': safeAccess(window, ['Water_ranking', selectRegion, 'Non-Agricultural Landuse', 'color', selectYear]),
             'value': safeAccess(window, ['Water_ranking', selectRegion, 'Non-Agricultural Landuse', 'value', selectYear]),
           },
           'Total': {
             'Rank': safeAccess(window, ['Water_ranking', selectRegion, 'Total', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Water_ranking', selectRegion, 'Total', 'Percent', selectYear]),
             'color': safeAccess(window, ['Water_ranking', selectRegion, 'Total', 'color', selectYear]),
             'value': safeAccess(window, ['Water_ranking', selectRegion, 'Total', 'value', selectYear]),
           },
@@ -104,25 +102,21 @@ window.DataService = {
         'Biodiversity': {
           'Ag': {
             'Rank': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Landuse', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Landuse', 'Percent', selectYear]),
             'color': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Landuse', 'color', selectYear]),
             'value': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Landuse', 'value', selectYear]),
           },
           'Am': {
             'Rank': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Management', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Management', 'Percent', selectYear]),
             'color': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Management', 'color', selectYear]),
             'value': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Agricultural Management', 'value', selectYear]),
           },
           'NonAg': {
             'Rank': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Non-Agricultural land-use', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Non-Agricultural land-use', 'Percent', selectYear]),
             'color': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Non-Agricultural land-use', 'color', selectYear]),
             'value': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Non-Agricultural land-use', 'value', selectYear]),
           },
           'Total': {
             'Rank': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Total', 'Rank', selectYear]),
-            'Percent': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Total', 'Percent', selectYear]),
             'color': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Total', 'color', selectYear]),
             'value': safeAccess(window, ['Biodiversity_ranking', selectRegion, 'Total', 'value', selectYear]),
           },

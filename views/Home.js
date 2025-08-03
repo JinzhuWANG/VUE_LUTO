@@ -165,7 +165,10 @@ window.HomeView = {
         <!-- Rank cards -->
         <p class="text-black text font-bold p-1 pt-4">Metric Overview</p>
         <div class="mb-4 mr-4">
-          <ranking-cards :selectRegion="selectRegion" :selectYear="selectYear"></ranking-cards>
+          <ranking-cards 
+            :selectRegion="selectRegion"
+            :selectYear="selectYear">
+          </ranking-cards>
         </div>
 
         <!-- Title for map and chart -->
