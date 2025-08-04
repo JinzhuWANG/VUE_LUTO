@@ -41,6 +41,7 @@ app.component("side-bar", window.Sidebar);
 app.component('map-geojson', window.map_geojson);
 app.component('ranking-cards', window.RankingCards);
 app.component('filterable-dropdown', window.FilterableDropdown);
+app.component('regions-map', window.RegionsMap);
 
 // Use modules
 app.use(ElementPlus);

@@ -43,7 +43,7 @@ window.HomeView = {
         chartOverview.value = {
           ...window['Chart_default_options'],
           chart: {
-            height: 480,
+            height: 550,
           },
           yAxis: {
             title: {
@@ -151,7 +151,7 @@ window.HomeView = {
       <div class="flex flex-col">
 
         <!-- Rank cards -->
-        <p class="text-[#505051] font-bold p-1 pt-4">Metric Overview under SSP {{ runScenario.SSP }} - GHG {{ runScenario.GHG }} - Biodiversity {{ runScenario.BIO_GBF2 }}</p>
+        <p class="text-[#505051] font-bold p-1 pt-8"> SSP - {{ runScenario.SSP }} | GHG - {{ runScenario.GHG }} | Biodiversity - {{ runScenario.BIO_GBF2 }}</p>
         <div class="mb-4 mr-4">
           <ranking-cards 
             :selectRegion="selectRegion"
@@ -161,8 +161,8 @@ window.HomeView = {
 
         <!-- Title for map and chart -->
         <div class="flex items-center justify-between">
-          <p class="text-[#505051] w-[500px] text font-bold p-1 pt-4">Map and Statistics</p>
-          <p class="flex-1 text-[#505051] font-bold ml-4 p-1 pt-4">{{ selectDataType }} overview for {{ selectRegion }}</p>
+          <p class="text-[#505051] w-[500px] text font-bold p-1 pt-8">Map and Statistics</p>
+          <p class="flex-1 text-[#505051] font-bold ml-4 p-1 pt-8">{{ selectDataType }} overview for {{ selectRegion }}</p>
         </div>
 
         <div class="flex mr-4 gap-4 mb-4">
@@ -222,7 +222,7 @@ window.HomeView = {
                 </div>
               </div>
               <map-geojson 
-                :height="'470px'" 
+                :height="'530px'" 
                 :selectDataType="selectDataType" 
                 :selectYear="selectYear" 
                 :selectSubcategory="selectSubcategory"
@@ -233,9 +233,9 @@ window.HomeView = {
           </div>
 
           <!-- Statistics Chart -->
-          <div class="flex-1 rounded-[10px] bg-white shadow-md w-vw">
-            <chart-container :chartData="chartOverview"></chart-container>
-          </div>
+          <chart-container 
+          class="flex-1 rounded-[10px] bg-white shadow-md"
+          :chartData="chartOverview"></chart-container>
 
         </div>
         
