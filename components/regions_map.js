@@ -1,10 +1,12 @@
 // Define the RegionsMap component
 window.RegionsMap = {
   setup() {
+
     const { ref, inject, onMounted, computed } = Vue;
     const selectedRegion = inject('globalSelectedRegion');
+    const selectDataType = inject('globalSelectedDataType');
+    const mapData = ref(null);
     const map = ref(null);
-    const centroidMarker = ref(null);
     const boundingBoxRectangle = ref(null);
     const regions = ref([]);
     const loadScript = window.loadScript;
@@ -17,6 +19,7 @@ window.RegionsMap = {
       return window.NRM_AUS_centroid_bbox[selectedRegion.value];
     });
 
+
     // Initialize map
     const initMap = () => {
       // Initialize the map centered on Australia
@@ -27,6 +30,27 @@ window.RegionsMap = {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 18
       }).addTo(map.value);
+
+      // Add image overlay for the map data
+      const mapSel = mapData.value['dry']['Beef - modified land'][2050];
+      const imageOverlay = L.imageOverlay(
+        mapSel.img_str,
+        [[mapSel.bbox[1], mapSel.bbox[0]], [mapSel.bbox[3], mapSel.bbox[2]]],
+        {
+          // Disable image smoothing/interpolation
+          className: 'crisp-image'
+        }
+      ).addTo(map.value);
+
+      // Apply CSS to disable image interpolation
+      setTimeout(() => {
+        const imgElement = imageOverlay.getElement();
+        if (imgElement) {
+          imgElement.style.imageRendering = 'pixelated';
+          imgElement.style.imageRendering = '-moz-crisp-edges';
+          imgElement.style.imageRendering = 'crisp-edges';
+        }
+      }, 100);
     };
 
     // Update map when region changes
@@ -37,10 +61,7 @@ window.RegionsMap = {
 
       // Fade out existing elements first
       fadeOutExistingElements().then(() => {
-        // Remove existing markers and rectangles after fade out
-        if (centroidMarker.value) {
-          map.value.removeLayer(centroidMarker.value);
-        }
+        // Remove existing rectangles after fade out
         if (boundingBoxRectangle.value) {
           map.value.removeLayer(boundingBoxRectangle.value);
         }
@@ -69,9 +90,6 @@ window.RegionsMap = {
     // Fade out existing map elements
     const fadeOutExistingElements = () => {
       return new Promise((resolve) => {
-        if (centroidMarker.value) {
-          animateMarkerOpacity(centroidMarker.value, 1, 0, 300);
-        }
         if (boundingBoxRectangle.value) {
           animateRectangleOpacity(boundingBoxRectangle.value, 0.2, 0, 300);
         }
@@ -81,20 +99,6 @@ window.RegionsMap = {
 
     // Add new elements to the map
     const addNewElements = (region, bounds) => {
-      // Add centroid marker with initial opacity 0
-      centroidMarker.value = L.marker([region.centroid[1], region.centroid[0]], {
-        title: `${selectedRegion.value} Centroid`,
-        opacity: 0
-      }).addTo(map.value);
-
-      centroidMarker.value.bindPopup(`
-        <div class="text-center">
-          <h3 class="font-bold">${selectedRegion.value}</h3>
-          <p class="text-sm">Centroid</p>
-          <p class="text-xs">${region.centroid[1].toFixed(4)}°, ${region.centroid[0].toFixed(4)}°</p>
-        </div>
-      `);
-
       // Add bounding box rectangle with initial opacity 0
       boundingBoxRectangle.value = L.rectangle(bounds, {
         color: '#3b82f6',
@@ -115,28 +119,11 @@ window.RegionsMap = {
 
       // Fade in new elements
       setTimeout(() => {
-        animateMarkerOpacity(centroidMarker.value, 0, 1, 500);
         animateRectangleOpacity(boundingBoxRectangle.value, 0, 0.2, 500);
       }, 200);
     };
 
     // Animation functions
-    const animateMarkerOpacity = (marker, startOpacity, endOpacity, duration) => {
-      const startTime = Date.now();
-      const animate = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const currentOpacity = startOpacity + (endOpacity - startOpacity) * easeInOut(progress);
-
-        marker.setOpacity(currentOpacity);
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      };
-      requestAnimationFrame(animate);
-    };
-
     const animateRectangleOpacity = (rectangle, startFillOpacity, endFillOpacity, duration) => {
       const startTime = Date.now();
       const startStrokeOpacity = startFillOpacity > 0 ? 1 : 0;
@@ -170,6 +157,7 @@ window.RegionsMap = {
     onMounted(async () => {
       try {
         // Load region data
+        await loadScript("data/map_area_Ag.js", 'map_area_Ag');
         await loadScript('data/geo/NRM_AUS_centroid_bbox.js', 'NRM_AUS_centroid_bbox');
 
         // Convert region data object to array
@@ -177,6 +165,8 @@ window.RegionsMap = {
           name,
           ...window.NRM_AUS_centroid_bbox[name]
         }));
+
+        mapData.value = window.map_area_Ag;
 
         // Initialize map
         initMap();
@@ -226,15 +216,6 @@ window.RegionsMap = {
           leave-from-class="opacity-100 transform translate-y-0"
           leave-to-class="opacity-0 transform translate-y-2"
         >
-          <div v-if="selectedRegion && selectedRegion !== 'AUSTRALIA' && getCurrentRegion" class="bg-blue-50 rounded-lg p-4 flex-1 relative z-40">
-            <h3 class="font-semibold text-blue-800 mb-2">{{ selectedRegion }}</h3>
-            <div class="text-sm text-blue-700 space-y-1">
-              <p><span class="font-medium">Centroid:</span> {{ getCurrentRegion.centroid[1].toFixed(4) }}°, {{ getCurrentRegion.centroid[0].toFixed(4) }}°</p>
-              <p><span class="font-medium">Bounding Box:</span></p>
-              <p class="ml-4">SW: {{ getCurrentRegion.bounding_box[1].toFixed(4) }}°, {{ getCurrentRegion.bounding_box[0].toFixed(4) }}°</p>
-              <p class="ml-4">NE: {{ getCurrentRegion.bounding_box[3].toFixed(4) }}°, {{ getCurrentRegion.bounding_box[2].toFixed(4) }}°</p>
-            </div>
-          </div>
         </transition>
       </div>
 
@@ -247,10 +228,6 @@ window.RegionsMap = {
       <div class="bg-white rounded-lg shadow-lg p-4 mt-6">
         <h3 class="font-semibold text-gray-800 mb-3">Legend</h3>
         <div class="flex flex-wrap gap-6 text-sm">
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-red-500 rounded-full"></div>
-            <span>Centroid Point</span>
-          </div>
           <div class="flex items-center gap-2">
             <div class="w-4 h-4 border-2 border-blue-500 bg-blue-100"></div>
             <span>Bounding Box</span>

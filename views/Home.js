@@ -8,6 +8,7 @@ window.HomeView = {
 
     // Define reactive variables
     const selectRegion = inject('globalSelectedRegion');
+    const selectDataType = inject('globalSelectedDataType');
     const selectYear = ref(2020);
     const yearIndex = ref(0);
     const availableYears = ref([]);
@@ -24,9 +25,6 @@ window.HomeView = {
       'BIO_quality_overview_1_Type': { 'type': 'Biodiversity', 'unit': 'Weighted score (ha)' },
     });
     const selectDataset = ref('Area_overview_2_Category');
-    const selectDataType = computed(() => {
-      return availableDatasets.value[selectDataset.value].type;
-    });
     const DtypeSubCategories = computed(() => {
       return window.DataService.getSubcategories(selectDataType.value);
     });
@@ -113,17 +111,19 @@ window.HomeView = {
       }
     );
     watch(
+      selectDataset,
+      (newDataset) => {
+        selectDataType.value = availableDatasets.value[newDataset].type;
+        selectSubcategory.value = DtypeSubCategories.value[0];
+      }
+    );
+    watch(
       yearIndex,
       (newIndex) => {
         selectYear.value = availableYears.value[newIndex];
       }
     );
-    watch(
-      selectDataType,
-      (newValues) => {
-        selectSubcategory.value = DtypeSubCategories.value[0];
-      }
-    );
+
 
     return {
       availableYears,
