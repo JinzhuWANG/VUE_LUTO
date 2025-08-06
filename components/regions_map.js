@@ -1,18 +1,28 @@
 // Define the RegionsMap component
 window.RegionsMap = {
-  setup() {
 
+  props: {
+    mapPathName: {
+      type: Object,
+      required: true
+    },
+    mapKey: {
+      type: Array,
+      required: true
+    },
+  },
+
+  setup(props) {
     const { ref, inject, onMounted, computed } = Vue;
     const selectedRegion = inject('globalSelectedRegion');
-    const selectDataType = inject('globalSelectedDataType');
-    const mapData = ref(null);
+
     const map = ref(null);
-    const boundingBoxRectangle = ref(null);
-    const regionBounds = ref([]);
+    const boundingBox = ref(null);
     const loadScript = window.loadScript;
     const selectedBaseMap = ref('OSM');
     const tileLayers = ref({});
 
+    const mapData = ref({})
 
 
     // Function to get current bounding box for the selected region
@@ -41,27 +51,6 @@ window.RegionsMap = {
       if (selectedBaseMap.value !== 'None') {
         tileLayers.value[selectedBaseMap.value].addTo(map.value);
       }
-
-      // Add image overlay for the map data
-      const mapSel = mapData.value['Beef - modified land']['dry'][2050];
-      const imageOverlay = L.imageOverlay(
-        mapSel.img_str,
-        mapSel.bounds,
-        {
-          // Disable image smoothing/interpolation
-          className: 'crisp-image'
-        }
-      ).addTo(map.value);
-
-      // Apply CSS to disable image interpolation
-      setTimeout(() => {
-        const imgElement = imageOverlay.getElement();
-        if (imgElement) {
-          imgElement.style.imageRendering = 'pixelated';
-          imgElement.style.imageRendering = '-moz-crisp-edges';
-          imgElement.style.imageRendering = 'crisp-edges';
-        }
-      }, 100);
     };
 
     // Update map when region changes
@@ -70,8 +59,8 @@ window.RegionsMap = {
       // Fade out existing elements first
       fadeOutExistingElements().then(() => {
         // Remove existing rectangles after fade out
-        if (boundingBoxRectangle.value) {
-          map.value.removeLayer(boundingBoxRectangle.value);
+        if (boundingBox.value) {
+          map.value.removeLayer(boundingBox.value);
         }
 
         // Calculate bounds for smooth transition
@@ -98,8 +87,8 @@ window.RegionsMap = {
     // Fade out existing map elements
     const fadeOutExistingElements = () => {
       return new Promise((resolve) => {
-        if (boundingBoxRectangle.value) {
-          animateRectangleOpacity(boundingBoxRectangle.value, 0.2, 0, 300);
+        if (boundingBox.value) {
+          animateRectangleOpacity(boundingBox.value, 0.2, 0, 300);
         }
         setTimeout(resolve, 300);
       });
@@ -113,7 +102,7 @@ window.RegionsMap = {
       );
 
       // Add the actual region polygon with initial opacity 0
-      boundingBoxRectangle.value = L.geoJSON(regionLayer, {
+      boundingBox.value = L.geoJSON(regionLayer, {
         style: {
           color: '#3b82f6',
           weight: 2,
@@ -125,7 +114,7 @@ window.RegionsMap = {
 
       // Fade in new elements
       setTimeout(() => {
-        animateRectangleOpacity(boundingBoxRectangle.value, 0, 0.2, 500);
+        animateRectangleOpacity(boundingBox.value, 0, 0.2, 500);
       }, 200);
     };
 
@@ -164,20 +153,14 @@ window.RegionsMap = {
       try {
         // Load region data
         await loadScript("services/MapService.js", 'MapService');
-        await loadScript("data/map_area_Ag.js", 'map_area_Ag');
         await loadScript('data/geo/NRM_AUS_centroid_bbox.js', 'NRM_AUS_centroid_bbox');
         await loadScript('data/geo/NRM_AUS.js', 'NRM_AUS');
 
-        // Convert region data object to array
-        regionBounds.value = Object.keys(window.NRM_AUS_centroid_bbox).map(name => ({
-          name,
-          ...window.NRM_AUS_centroid_bbox[name]
-        }));
-
-        mapData.value = window.map_area_Ag;
-
-        // Initialize map
+        // Initialize map first
         initMap();
+
+        // Load map data if props are available
+        await loadMapData();
 
         // Update map if a region is already selected
         if (selectedRegion.value && selectedRegion.value !== 'AUSTRALIA') {
@@ -187,6 +170,56 @@ window.RegionsMap = {
         console.error('Failed to initialize RegionsMap:', error);
       }
     });
+
+    // Function to load map data
+    const loadMapData = async () => {
+      if (!props.mapPathName || !props.mapPathName.path || !props.mapPathName.name) {
+        console.log('Waiting for mapPathName to be available...');
+        return;
+      }
+
+      console.log('props.mapPathName:', props.mapPathName);
+
+      await loadScript(`${props.mapPathName['path']}`, `${props.mapPathName['name']}`);
+
+      mapData.value = props.mapKey.reduce((acc, key) => acc && acc[key], window[props.mapPathName['name']]);
+
+      console.log('Map data for overlay:', mapData.value);
+
+      // Update the image overlay if map is already initialized
+      if (map.value && mapData.value && mapData.value.img_str && mapData.value.bounds) {
+        // Remove existing overlay if any
+        map.value.eachLayer((layer) => {
+          if (layer instanceof L.ImageOverlay) {
+            map.value.removeLayer(layer);
+          }
+        });
+
+        // Add new image overlay
+        const imageOverlay = L.imageOverlay(
+          mapData.value.img_str,
+          mapData.value.bounds,
+          {
+            className: 'crisp-image'
+          }
+        ).addTo(map.value);
+
+        // Apply CSS to disable image interpolation
+        setTimeout(() => {
+          const imgElement = imageOverlay.getElement();
+          if (imgElement) {
+            imgElement.style.imageRendering = 'pixelated';
+            imgElement.style.imageRendering = '-moz-crisp-edges';
+            imgElement.style.imageRendering = 'crisp-edges';
+          }
+        }, 100);
+      }
+    };
+
+    // Watch for changes in mapPathName and mapKey
+    Vue.watch(() => [props.mapPathName, props.mapKey], async () => {
+      await loadMapData();
+    }, { deep: true });
 
     // Watch for changes in the selected region
     Vue.watch(selectedRegion, (newValue, oldValue) => {
@@ -214,7 +247,6 @@ window.RegionsMap = {
 
     return {
       selectedRegion,
-      regionBounds,
       getCurrentRegion,
       updateMap,
       selectedBaseMap,
