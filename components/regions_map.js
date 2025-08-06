@@ -8,34 +8,45 @@ window.RegionsMap = {
     const mapData = ref(null);
     const map = ref(null);
     const boundingBoxRectangle = ref(null);
-    const regions = ref([]);
+    const regionBounds = ref([]);
     const loadScript = window.loadScript;
+    const selectedBaseMap = ref('OSM');
+    const tileLayers = ref({});
 
 
 
-    // Function to get current region data
-    const getCurrentRegion = computed(() => {
-      if (!selectedRegion.value || !window.NRM_AUS_centroid_bbox) return null;
-      return window.NRM_AUS_centroid_bbox[selectedRegion.value];
-    });
-
+    // Function to get current bounding box for the selected region
+    const getCurrentRegion = computed(() => window.NRM_AUS_centroid_bbox[selectedRegion.value]);
 
     // Initialize map
     const initMap = () => {
       // Initialize the map centered on Australia
-      map.value = L.map('map').setView([-25.2744, 133.7751], 5);
+      map.value = L.map('map', {
+        zoomControl: false
+      }).setView([-25.2744, 133.7751], 5);
 
-      // Add OpenStreetMap tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 18
-      }).addTo(map.value);
+      // Create tile layers but don't add them yet
+      tileLayers.value = {
+        OSM: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 18
+        }),
+        Satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+          maxZoom: 18
+        })
+      };
+
+      // Add initial base map
+      if (selectedBaseMap.value !== 'None') {
+        tileLayers.value[selectedBaseMap.value].addTo(map.value);
+      }
 
       // Add image overlay for the map data
-      const mapSel = mapData.value['dry']['Beef - modified land'][2050];
+      const mapSel = mapData.value['Beef - modified land']['dry'][2050];
       const imageOverlay = L.imageOverlay(
         mapSel.img_str,
-        [[mapSel.bbox[1], mapSel.bbox[0]], [mapSel.bbox[3], mapSel.bbox[2]]],
+        mapSel.bounds,
         {
           // Disable image smoothing/interpolation
           className: 'crisp-image'
@@ -55,9 +66,6 @@ window.RegionsMap = {
 
     // Update map when region changes
     const updateMap = () => {
-      if (!selectedRegion.value || !getCurrentRegion.value) return;
-
-      const region = getCurrentRegion.value;
 
       // Fade out existing elements first
       fadeOutExistingElements().then(() => {
@@ -67,7 +75,7 @@ window.RegionsMap = {
         }
 
         // Calculate bounds for smooth transition
-        const bbox = region.bounding_box;
+        const bbox = window.NRM_AUS_centroid_bbox[selectedRegion.value].bounding_box;
         const bounds = [
           [bbox[1], bbox[0]], // Southwest corner
           [bbox[3], bbox[2]]  // Northeast corner
@@ -82,7 +90,7 @@ window.RegionsMap = {
 
         // Add new elements with a delay to allow map transition
         setTimeout(() => {
-          addNewElements(region, bounds);
+          addRegionLayer();
         }, 500);
       });
     };
@@ -98,24 +106,22 @@ window.RegionsMap = {
     };
 
     // Add new elements to the map
-    const addNewElements = (region, bounds) => {
-      // Add bounding box rectangle with initial opacity 0
-      boundingBoxRectangle.value = L.rectangle(bounds, {
-        color: '#3b82f6',
-        weight: 2,
-        fillColor: '#3b82f6',
-        fillOpacity: 0,
-        opacity: 0
-      }).addTo(map.value);
+    const addRegionLayer = () => {
+      // Find the actual region feature from NRM_AUS data
+      const regionLayer = window.NRM_AUS.features.find(feature =>
+        feature.properties.NHT2NAME === selectedRegion.value
+      );
 
-      boundingBoxRectangle.value.bindPopup(`
-        <div class="text-center">
-          <h3 class="font-bold">${selectedRegion.value}</h3>
-          <p class="text-sm">Bounding Box</p>
-          <p class="text-xs">SW: ${bounds[0][0].toFixed(4)}°, ${bounds[0][1].toFixed(4)}°</p>
-          <p class="text-xs">NE: ${bounds[1][0].toFixed(4)}°, ${bounds[1][1].toFixed(4)}°</p>
-        </div>
-      `);
+      // Add the actual region polygon with initial opacity 0
+      boundingBoxRectangle.value = L.geoJSON(regionLayer, {
+        style: {
+          color: '#3b82f6',
+          weight: 2,
+          fillColor: '#3b82f6',
+          fillOpacity: 0,
+          opacity: 0
+        }
+      }).addTo(map.value);
 
       // Fade in new elements
       setTimeout(() => {
@@ -157,11 +163,13 @@ window.RegionsMap = {
     onMounted(async () => {
       try {
         // Load region data
+        await loadScript("services/MapService.js", 'MapService');
         await loadScript("data/map_area_Ag.js", 'map_area_Ag');
         await loadScript('data/geo/NRM_AUS_centroid_bbox.js', 'NRM_AUS_centroid_bbox');
+        await loadScript('data/geo/NRM_AUS.js', 'NRM_AUS');
 
         // Convert region data object to array
-        regions.value = Object.keys(window.NRM_AUS_centroid_bbox).map(name => ({
+        regionBounds.value = Object.keys(window.NRM_AUS_centroid_bbox).map(name => ({
           name,
           ...window.NRM_AUS_centroid_bbox[name]
         }));
@@ -187,52 +195,69 @@ window.RegionsMap = {
       }
     });
 
+    // Function to change base map
+    const changeBaseMap = (mapType) => {
+      selectedBaseMap.value = mapType;
+
+      // Remove all existing tile layers
+      Object.values(tileLayers.value).forEach(layer => {
+        if (map.value.hasLayer(layer)) {
+          map.value.removeLayer(layer);
+        }
+      });
+
+      // Add new tile layer if not 'None'
+      if (mapType !== 'None' && tileLayers.value[mapType]) {
+        tileLayers.value[mapType].addTo(map.value);
+      }
+    };
+
     return {
       selectedRegion,
-      regions,
+      regionBounds,
       getCurrentRegion,
-      updateMap
+      updateMap,
+      selectedBaseMap,
+      changeBaseMap
     };
   },
   template: `
-    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Australia Regions Explorer</h2>
-      
-      <!-- Controls Panel -->
-      <div class="flex flex-col md:flex-row gap-4 items-start md:items-center mb-4">
-        <div class="flex-1 relative z-50">
-          <label for="region-select" class="block text-sm font-medium text-gray-700 mb-2">
-            Select Region:
-          </label>
+    <div class="bg-white h-screen flex flex-col">
+    
+      <!-- Map Container with Controls Overlay -->
+      <div class="bg-white shadow-lg flex-1 relative">
+        <!-- Controls Panel -->
+        <div class="absolute w-[270px] top-32 left-4 z-50 bg-white rounded-lg shadow-lg p-4 max-w-xs">
           <filterable-dropdown></filterable-dropdown>
         </div>
-        
-        <!-- Region Info -->
-        <transition 
-          enter-active-class="transition-all duration-500 ease-out"
-          enter-from-class="opacity-0 transform translate-y-2"
-          enter-to-class="opacity-100 transform translate-y-0"
-          leave-active-class="transition-all duration-300 ease-in"
-          leave-from-class="opacity-100 transform translate-y-0"
-          leave-to-class="opacity-0 transform translate-y-2"
-        >
-        </transition>
-      </div>
 
-      <!-- Map Container -->
-      <div class="bg-white rounded-lg shadow-lg overflow-hidden mt-8">
-        <div id="map" class="w-full h-96 md:h-[500px] relative z-10"></div>
-      </div>
+        <!-- Base Map Selector -->
+        <div class="absolute top-4 left-4 z-50 bg-white rounded-lg shadow-lg p-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Base Map:</label>
+          <select 
+            v-model="selectedBaseMap" 
+            @change="changeBaseMap(selectedBaseMap)"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+          >
+            <option value="OSM">OpenStreetMap</option>
+            <option value="Satellite">Satellite</option>
+            <option value="None">None</option>
+          </select>
+        </div>
 
-      <!-- Legend -->
-      <div class="bg-white rounded-lg shadow-lg p-4 mt-6">
-        <h3 class="font-semibold text-gray-800 mb-3">Legend</h3>
-        <div class="flex flex-wrap gap-6 text-sm">
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 border-2 border-blue-500 bg-blue-100"></div>
-            <span>Bounding Box</span>
+        <!-- Legend -->
+        <div class="absolute bottom-20 left-10 z-50 bg-white rounded-lg shadow-lg p-4">
+          <h3 class="font-semibold text-gray-800 mb-3">Legend</h3>
+          <div class="flex flex-wrap gap-6 text-sm">
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 border-2 border-blue-500 bg-blue-100"></div>
+              <span>Bounding Box</span>
+            </div>
           </div>
         </div>
+
+        <!-- Map Container -->
+        <div id="map" class="w-full h-full relative z-10"></div>
       </div>
     </div>
   `
