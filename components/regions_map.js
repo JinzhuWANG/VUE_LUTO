@@ -1,4 +1,3 @@
-// Define the RegionsMap component
 window.RegionsMap = {
 
   props: {
@@ -22,13 +21,12 @@ window.RegionsMap = {
     const selectedBaseMap = ref('OSM');
     const tileLayers = ref({});
 
-    const mapData = ref({})
+    const mapData = ref({});
 
 
     // Function to get current bounding box for the selected region
     const getCurrentRegion = computed(() => window.NRM_AUS_centroid_bbox[selectedRegion.value]);
 
-    // Initialize map
     const initMap = () => {
       // Initialize the map centered on Australia
       map.value = L.map('map', {
@@ -171,7 +169,6 @@ window.RegionsMap = {
       }
     });
 
-    // Function to load map data
     const loadMapData = async () => {
       if (!props.mapPathName) {
         return;
@@ -216,19 +213,16 @@ window.RegionsMap = {
       }
     };
 
-    // Watch for changes in mapPathName and mapKey
     Vue.watch(() => [props.mapPathName, props.mapKey], async () => {
       await loadMapData();
     }, { deep: true });
 
-    // Watch for changes in the selected region
     Vue.watch(selectedRegion, (newValue, oldValue) => {
       if (newValue && newValue !== 'AUSTRALIA') {
         updateMap();
       }
     });
 
-    // Function to change base map
     const changeBaseMap = (mapType) => {
       selectedBaseMap.value = mapType;
 
@@ -256,39 +250,24 @@ window.RegionsMap = {
   template: `
     <div class="bg-white h-screen flex flex-col">
     
-      <!-- Map Container with Controls Overlay -->
+      <!-- Map Container with Controls Overlay - Base map selector and map element -->
       <div class="bg-white shadow-lg flex-1 relative">
-        <!-- Controls Panel -->
-        <div class="absolute w-[270px] top-32 left-4 z-50 bg-white rounded-lg shadow-lg p-4 max-w-xs z-[9999]">
-          <filterable-dropdown></filterable-dropdown>
-        </div>
 
-        <!-- Base Map Selector -->
-        <div class="absolute top-4 left-4 z-50 bg-white rounded-lg shadow-lg p-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Base Map:</label>
+        <!-- Base Map Selector - Dropdown to switch between map types -->
+        <div class="absolute top-[40px] left-[20px] z-50 bg-white/70 p-2 rounded-lg shadow-lg">
+          <label class="block text-[0.8rem] font-medium text-gray-700">Base Map:</label>
           <select 
             v-model="selectedBaseMap" 
             @change="changeBaseMap(selectedBaseMap)"
-            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+            class="block w-full px-1 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
           >
-            <option value="OSM">OpenStreetMap</option>
-            <option value="Satellite">Satellite</option>
-            <option value="None">None</option>
+            <option class="text-[0.8rem]" value="OSM">OpenStreetMap</option>
+            <option class="text-[0.8rem]" value="Satellite">Satellite</option>
+            <option class="text-[0.8rem]" value="None">None</option>
           </select>
         </div>
 
-        <!-- Legend -->
-        <div class="absolute bottom-20 left-10 z-50 bg-white rounded-lg shadow-lg p-4">
-          <h3 class="font-semibold text-gray-800 mb-3">Legend</h3>
-          <div class="flex flex-wrap gap-6 text-sm">
-            <div class="flex items-center gap-2">
-              <div class="w-4 h-4 border-2 border-blue-500 bg-blue-100"></div>
-              <span>Bounding Box</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Map Container -->
+        <!-- Map Container - Leaflet map will be initialized here -->
         <div id="map" class="w-full h-full relative z-10"></div>
       </div>
     </div>

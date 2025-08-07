@@ -6,10 +6,12 @@ window.AreaView = {
     const isDrawerOpen = ref(false);
     const yearIndex = ref(0);
 
+    // Data selection and visualization state
     const selectDataset = ref({});
     const mapPathName = ref({});
     const mapSelectKey = ref([]);
 
+    // Category selection state
     const selectCategory = ref('Ag');
     const selectAgMgt = ref('Environmental Plantings');
     const selectWater = ref('dry');
@@ -19,7 +21,6 @@ window.AreaView = {
     const availableYears = ref([]);
     const availableCategories = ref([]);
 
-    // Flag to control UI rendering
     const dataLoaded = ref(false);
 
     // Centralized function to navigate nested data structure based on current selections
@@ -87,7 +88,6 @@ window.AreaView = {
     const availableLanduse = computed(() => getOptionsForLevel('landuse'));
 
 
-
     onMounted(async () => {
 
       await loadScript("./data/Supporting_info.js", 'Supporting_info');
@@ -137,7 +137,6 @@ window.AreaView = {
       isDrawerOpen.value = !isDrawerOpen.value;
     };
 
-    // Update map configuration when selections change
     watch([selectCategory, selectAgMgt, selectWater, selectLanduse, selectYear], () => {
       // Reset values if they're no longer valid options
       if (selectCategory.value === 'Ag Mgt') {
@@ -202,7 +201,8 @@ window.AreaView = {
   },
   template: `
     <div class="relative w-full h-screen">
-      <!-- Drawer toggle button -->
+
+      <!-- Drawer toggle button - Controls visibility of the chart panel -->
       <button 
         @click="toggleDrawer"
         class="absolute top-5 z-[1001] p-2.5 bg-white border border-gray-300 rounded cursor-pointer transition-all duration-300 ease-in-out"
@@ -210,76 +210,93 @@ window.AreaView = {
         {{ isDrawerOpen ? '→' : '←' }}
       </button>
 
+      <!-- Region selection dropdown - Uses FilterableDropdown component -->
+      <div class="absolute w-[262px] top-32 left-[20px] z-50 bg-white/70 rounded-lg shadow-lg max-w-xs z-[9999]">
+        <filterable-dropdown></filterable-dropdown>
+      </div>
+
+      <!-- Year slider - Allows selection of different years in the dataset -->
+      <div class="absolute top-[200px] left-[20px] z-[1001] w-[262px] bg-white/70 p-2 rounded-lg items-center">
+        <p class="text-[0.8rem]">Year: <strong>{{ selectYear }}</strong></p>
+        <el-slider
+          v-if="availableYears && availableYears.length > 0"
+          v-model="yearIndex"
+          size="small"
+          :show-tooltip="false"
+          :min="0"
+          :max="availableYears.length - 1"
+          :step="1"
+          :format-tooltip="index => availableYears[index]"
+          :marks="availableYears.reduce((acc, year, index) => ({ ...acc, [index]: year }), {})"
+          @input="(index) => { yearIndex = index; selectYear = availableYears[index]; }"
+        />
+      </div>
 
 
-      <!-- Dynamic control panel with consistent styling -->
-      <!-- Category buttons (always visible) -->
-      <div class="flex items-center justify-end absolute top-[250px] left-[20px] z-[1001]">
-        <div class="flex space-x-1">
-          <button v-for="(val, key) in availableCategories" :key="key"
-            @click="selectCategory = val"
-            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded"
-            :class="{'bg-sky-500 text-white': selectCategory === val}">
-            {{ val }}
-          </button>
+      <!-- Data selection controls container - Categories, AgMgt, Water, Landuse selections -->
+      <div class="absolute top-[285px] left-[20px] w-[262px] z-[1001] flex flex-col space-y-3 bg-white/70 p-2 rounded-lg">
+
+        <!-- Category buttons (always visible) -->
+        <div class="flex items-center">
+          <div class="flex space-x-1">
+            <span class="text-[0.8rem] mr-1 font-medium">Category:</span>
+            <button v-for="(val, key) in availableCategories" :key="key"
+              @click="selectCategory = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded"
+              :class="{'bg-sky-500 text-white': selectCategory === val}">
+              {{ val }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Ag Mgt options (only for Ag Mgt category) -->
+        <div 
+          v-if="availableAgMgt.length > 0" 
+          class="flex items-start border-t border-white/10 pt-1">
+          <div class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Ag Mgt:</span>
+            <button v-for="(val, key) in availableAgMgt" :key="key"
+              @click="selectAgMgt = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectAgMgt === val}">
+              {{ val }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Water options -->
+        <div 
+          v-if="dataLoaded && availableWater.length > 0" 
+          class="flex items-start border-t border-white/10 pt-1">
+          <div class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Water:</span>
+            <button v-for="(val, key) in availableWater" :key="key"
+              @click="selectWater = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectWater === val}">
+              {{ val }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Landuse options -->
+        <div 
+          v-if="dataLoaded && availableLanduse.length > 0" 
+          class="flex items-start border-t border-white/10 pt-1">
+          <div class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Landuse:</span>
+            <button v-for="(val, key) in availableLanduse" :key="key"
+              @click="selectLanduse = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectLanduse === val}">
+              {{ val }}
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Ag Mgt options (only for Ag Mgt category) -->
-      <div v-if="availableAgMgt.length > 0" class="flex items-center justify-end absolute top-[280px] left-[20px] z-[1001]">
-        <div class="flex flex-wrap gap-1 max-w-[300px]">
-          <span class="text-[0.8rem] mr-1 font-medium">Ag Mgt:</span>
-          <button v-for="(val, key) in availableAgMgt" :key="key"
-            @click="selectAgMgt = val"
-            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
-            :class="{'bg-sky-500 text-white': selectAgMgt === val}">
-            {{ val }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Water options -->
-      <div v-if="dataLoaded && availableWater.length > 0" class="flex items-center justify-end absolute top-[380px] left-[20px] z-[1001]">
-        <div class="flex flex-wrap gap-1 max-w-[300px]">
-          <span class="text-[0.8rem] mr-1 font-medium">Water:</span>
-          <button v-for="(val, key) in availableWater" :key="key"
-            @click="selectWater = val"
-            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
-            :class="{'bg-sky-500 text-white': selectWater === val}">
-            {{ val }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Landuse options -->
-      <div v-if="dataLoaded && availableLanduse.length > 0" class="flex items-center justify-end absolute top-[410px] left-[20px] z-[1001]">
-        <div class="flex flex-wrap gap-1 max-w-[300px]">
-          <span class="text-[0.8rem] mr-1 font-medium">Landuse:</span>
-          <button v-for="(val, key) in availableLanduse" :key="key"
-            @click="selectLanduse = val"
-            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
-            :class="{'bg-sky-500 text-white': selectLanduse === val}">
-            {{ val }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Year slider -->
-      <el-slider
-        v-if="availableYears && availableYears.length > 0"
-        class="absolute top-[230px] left-[20px] z-[1001] max-w-[150px]"
-        v-model="yearIndex"
-        size="small"
-        :show-tooltip="false"
-        :min="0"
-        :max="availableYears.length - 1"
-        :step="1"
-        :format-tooltip="index => availableYears[index]"
-        :marks="availableYears.reduce((acc, year, index) => ({ ...acc, [index]: year }), {})"
-        @input="(index) => { yearIndex = index; selectYear = availableYears[index]; }"
-      />
       
-      <!-- Map container with drawer -->
+      <!-- Map container with slide-out chart drawer - Main visualization area -->
       <div style="position: relative; width: 100%; height: 100%;">
         <!-- Map component takes full space -->
         <regions-map 
@@ -308,6 +325,15 @@ window.AreaView = {
           </chart-container>
         </div>
       </div>
+
+      <!-- Legend - Shows map symbols and their meanings -->
+      <div class="absolute bottom-[60px] left-6 z-50 bg-white/70 rounded-lg shadow-lg p-2">
+        <div class="flex items-center gap-2">
+          <div class="w-4 h-4 border-2 border-blue-500 bg-blue-100"></div>
+          <span class="text-[0.8rem]">Bounding Box</span>
+        </div>
+      </div>
+
     </div>
   `
 };

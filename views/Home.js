@@ -2,11 +2,12 @@ window.HomeView = {
 
   setup(props, { emit }) {
 
-    const { ref, onMounted, watch, computed, inject } = Vue;
+    const { ref, onMounted, watch, computed, inject, nextTick } = Vue;
     const loadScript = window.loadScript;
 
 
     // Define reactive variables
+    const dataLoaded = ref(false);
     const selectRegion = inject('globalSelectedRegion');
     const selectDataType = inject('globalSelectedDataType');
     const selectYear = ref(2020);
@@ -64,13 +65,11 @@ window.HomeView = {
         // Load required data
         await loadScript("./data/Supporting_info.js", 'Supporting_info');
         await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
-
         await loadScript("./data/Biodiversity_ranking.js", 'Biodiversity_ranking');
         await loadScript("./data/GHG_ranking.js", 'GHG_ranking');
         await loadScript("./data/Water_ranking.js", 'Water_ranking');
         await loadScript("./data/Area_ranking.js", 'Area_ranking');
         await loadScript("./data/Economics_ranking.js", 'Economics_ranking');
-
         await loadScript("./services/DataService.js", 'DataService');
 
         // Set initial year to first available year
@@ -95,6 +94,9 @@ window.HomeView = {
         // Initialize the overview chart with the selected dataset
         await changeDataset(selectDataset.value);
 
+        // Mark data as loaded and use nextTick to ensure UI updates
+        dataLoaded.value = true;
+        await nextTick();
 
       } catch (error) {
         console.error("Error loading dependencies:", error);
@@ -126,6 +128,7 @@ window.HomeView = {
 
 
     return {
+      dataLoaded,
       availableYears,
       availableDatasets,
       DtypeSubCategories,
@@ -154,6 +157,7 @@ window.HomeView = {
         <p class="text-[#505051] font-bold p-1 pt-8"> SSP - {{ runScenario.SSP }} | GHG - {{ runScenario.GHG }} | Biodiversity - {{ runScenario.BIO_GBF2 }}</p>
         <div class="mb-4 mr-4">
           <ranking-cards 
+            v-if="dataLoaded"
             :selectRegion="selectRegion"
             :selectYear="selectYear">
           </ranking-cards>
@@ -222,6 +226,7 @@ window.HomeView = {
                 </div>
               </div>
               <map-geojson 
+                v-if="dataLoaded"
                 :height="'530px'" 
                 :selectDataType="selectDataType" 
                 :selectYear="selectYear" 
@@ -234,6 +239,7 @@ window.HomeView = {
 
           <!-- Statistics Chart -->
           <chart-container 
+          v-if="dataLoaded"
           class="flex-1 rounded-[10px] bg-white shadow-md"
           :chartData="chartOverview"></chart-container>
 

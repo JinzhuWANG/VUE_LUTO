@@ -1,4 +1,3 @@
-// Define the FilterableDropdown component
 window.FilterableDropdown = {
   setup() {
     const { ref, inject, onMounted } = Vue;
@@ -52,11 +51,11 @@ window.FilterableDropdown = {
     }
   },
   template: `
-    <div class="relative" ref="dropdownRef">
-      <!-- Main dropdown trigger -->
+    <div class="relative py-2 px-2" ref="dropdownRef">
+      <!-- Main dropdown trigger button - displays selected region or placeholder -->
       <button
         @click="toggleDropdown"
-        class="w-full px-2 py-1 text-left bg-white border border-gray-300 rounded-lg shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+        class="w-full py-1 px-1 text-left bg-white border border-gray-300 rounded-lg shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
       >
         <div class="flex items-center justify-between">
           <span class="text-[0.8rem]" :class="selectedItem ? 'text-gray-900' : 'text-gray-500'">
@@ -68,9 +67,9 @@ window.FilterableDropdown = {
         </div>
       </button>
 
-      <!-- Dropdown content -->
-      <div v-if="isOpen" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
-        <!-- Search input -->
+      <!-- Dropdown content - only visible when isOpen is true -->
+      <div v-if="isOpen" class="absolute mr-2 z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+        <!-- Search input field with search icon -->
         <div class="p-0.5 border-b border-gray-200 h-8">
           <div class="relative">
             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400">
@@ -82,12 +81,12 @@ window.FilterableDropdown = {
               type="text"
               placeholder="Search regions..."
               v-model="searchTerm"
-              class="w-full pl-10 pr-1 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="pl-10 pr-1 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
 
-        <!-- Items list -->
+        <!-- Scrollable list of filtered region items -->
         <div class="max-h-80 overflow-y-auto">
           <div class="py-0.5">
             <button
