@@ -178,10 +178,10 @@ window.RegionsMap = {
       }
 
       // Map data is already loaded in Area.js
-      const pathName = typeof props.mapPathName === 'string' ? 
-        props.mapPathName.replace('window.', '') : 
+      const pathName = typeof props.mapPathName === 'string' ?
+        props.mapPathName.replace('window.', '') :
         '';
-      
+
       if (pathName) {
         mapData.value = props.mapKey.reduce((acc, key) => acc && acc[key], window[pathName]);
       }
@@ -259,7 +259,7 @@ window.RegionsMap = {
       <!-- Map Container with Controls Overlay -->
       <div class="bg-white shadow-lg flex-1 relative">
         <!-- Controls Panel -->
-        <div class="absolute w-[270px] top-32 left-4 z-50 bg-white rounded-lg shadow-lg p-4 max-w-xs">
+        <div class="absolute w-[270px] top-32 left-4 z-50 bg-white rounded-lg shadow-lg p-4 max-w-xs z-[9999]">
           <filterable-dropdown></filterable-dropdown>
         </div>
 

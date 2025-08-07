@@ -1,6 +1,6 @@
 window.AreaView = {
   setup() {
-    const { ref, onMounted, inject, computed, watch } = Vue;
+    const { ref, onMounted, inject, computed, watch, nextTick } = Vue;
 
     const selectRegion = inject('globalSelectedRegion');
     const isDrawerOpen = ref(false);
@@ -18,6 +18,9 @@ window.AreaView = {
 
     const availableYears = ref([]);
     const availableCategories = ref([]);
+
+    // Flag to control UI rendering
+    const dataLoaded = ref(false);
 
     // Centralized function to navigate nested data structure based on current selections
     const getNestedData = (path = []) => {
@@ -121,6 +124,12 @@ window.AreaView = {
         series: window['Area_overview_2_Category']['AUSTRALIA'],
       };
 
+      // Use nextTick to ensure the data is processed before rendering the UI components
+      nextTick(() => {
+        // Set dataLoaded to true after all data has been processed and the DOM has updated
+        dataLoaded.value = true;
+      });
+
 
     });
 
@@ -170,6 +179,7 @@ window.AreaView = {
       yearIndex,
       isDrawerOpen,
       toggleDrawer,
+      dataLoaded,
 
       availableYears,
       availableCategories,
@@ -201,17 +211,6 @@ window.AreaView = {
       </button>
 
 
-      <div class="flex items-center justify-end absolute top-[250px] left-[20px] z-[1001]">
-        <div class="flex space-x-1">
-          <button v-for="(val, key) in availableCategories" :key="key"
-            @click="selectCategory = val"
-            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.8rem] px-1 py-1 rounded"
-            :class="{'bg-sky-500 text-white': selectCategory === val}">
-            {{ val }}
-          </button>
-        </div>
-      </div>
-
 
       <!-- Dynamic control panel with consistent styling -->
       <!-- Category buttons (always visible) -->
@@ -219,7 +218,7 @@ window.AreaView = {
         <div class="flex space-x-1">
           <button v-for="(val, key) in availableCategories" :key="key"
             @click="selectCategory = val"
-            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.8rem] px-1 py-1 rounded"
+            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded"
             :class="{'bg-sky-500 text-white': selectCategory === val}">
             {{ val }}
           </button>
@@ -228,11 +227,11 @@ window.AreaView = {
 
       <!-- Ag Mgt options (only for Ag Mgt category) -->
       <div v-if="availableAgMgt.length > 0" class="flex items-center justify-end absolute top-[280px] left-[20px] z-[1001]">
-        <div class="flex flex-wrap gap-1 max-w-[400px]">
+        <div class="flex flex-wrap gap-1 max-w-[300px]">
           <span class="text-[0.8rem] mr-1 font-medium">Ag Mgt:</span>
           <button v-for="(val, key) in availableAgMgt" :key="key"
             @click="selectAgMgt = val"
-            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.8rem] px-1 py-1 rounded mb-1"
+            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
             :class="{'bg-sky-500 text-white': selectAgMgt === val}">
             {{ val }}
           </button>
@@ -240,12 +239,12 @@ window.AreaView = {
       </div>
 
       <!-- Water options -->
-      <div v-if="availableWater.length > 0" class="flex items-center justify-end absolute top-[310px] left-[20px] z-[1001]">
-        <div class="flex flex-wrap gap-1 max-w-[400px]">
+      <div v-if="dataLoaded && availableWater.length > 0" class="flex items-center justify-end absolute top-[380px] left-[20px] z-[1001]">
+        <div class="flex flex-wrap gap-1 max-w-[300px]">
           <span class="text-[0.8rem] mr-1 font-medium">Water:</span>
           <button v-for="(val, key) in availableWater" :key="key"
             @click="selectWater = val"
-            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.8rem] px-1 py-1 rounded mb-1"
+            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
             :class="{'bg-sky-500 text-white': selectWater === val}">
             {{ val }}
           </button>
@@ -253,24 +252,19 @@ window.AreaView = {
       </div>
 
       <!-- Landuse options -->
-      <div v-if="availableLanduse.length > 0" class="flex items-center justify-end absolute top-[340px] left-[20px] z-[1001]">
-        <div class="flex flex-wrap gap-1 max-w-[400px]">
+      <div v-if="dataLoaded && availableLanduse.length > 0" class="flex items-center justify-end absolute top-[410px] left-[20px] z-[1001]">
+        <div class="flex flex-wrap gap-1 max-w-[300px]">
           <span class="text-[0.8rem] mr-1 font-medium">Landuse:</span>
           <button v-for="(val, key) in availableLanduse" :key="key"
             @click="selectLanduse = val"
-            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.8rem] px-1 py-1 rounded mb-1"
+            class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
             :class="{'bg-sky-500 text-white': selectLanduse === val}">
             {{ val }}
           </button>
         </div>
       </div>
 
-
-
-
-
-
-
+      <!-- Year slider -->
       <el-slider
         v-if="availableYears && availableYears.length > 0"
         class="absolute top-[230px] left-[20px] z-[1001] max-w-[150px]"
