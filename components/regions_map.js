@@ -14,12 +14,14 @@ window.RegionsMap = {
   setup(props) {
     const { ref, inject, onMounted, computed } = Vue;
     const selectedRegion = inject('globalSelectedRegion');
+    const globalMapViewpoint = inject('globalMapViewpoint');
 
     const map = ref(null);
     const boundingBox = ref(null);
     const loadScript = window.loadScript;
-    const selectedBaseMap = ref('OSM');
+    const selectedBaseMap = ref('OpenStreetMap');
     const tileLayers = ref({});
+    const baseMapOptions = ref(['OpenStreetMap', 'Satellite', 'None']);
 
     const mapData = ref({});
 
@@ -28,10 +30,16 @@ window.RegionsMap = {
     const getCurrentRegion = computed(() => window.NRM_AUS_centroid_bbox[selectedRegion.value]);
 
     const initMap = () => {
-      // Initialize the map centered on Australia
+      // Initialize the map with saved viewpoint
       map.value = L.map('map', {
         zoomControl: false
-      }).setView([-25.2744, 133.7751], 5);
+      }).setView(globalMapViewpoint.value.center, globalMapViewpoint.value.zoom);
+
+      // Save current view on map events
+      map.value.on('moveend zoomend', () => {
+        globalMapViewpoint.value.center = [map.value.getCenter().lat, map.value.getCenter().lng];
+        globalMapViewpoint.value.zoom = map.value.getZoom();
+      });
 
       // Create tile layers but don't add them yet
       tileLayers.value = {
@@ -46,13 +54,25 @@ window.RegionsMap = {
       };
 
       // Add initial base map
-      if (selectedBaseMap.value !== 'None') {
-        tileLayers.value[selectedBaseMap.value].addTo(map.value);
+      const initialMapType = selectedBaseMap.value === 'OpenStreetMap' ? 'OSM' : selectedBaseMap.value;
+      if (initialMapType !== 'None') {
+        tileLayers.value[initialMapType].addTo(map.value);
       }
     };
 
-    // Update map when region changes
-    const updateMap = () => {
+    // Update map when region changes - only animate if region actually changed
+    const updateMap = (forceAnimation = false) => {
+      // Check if this is a real region change or just a page navigation
+      const regionChanged = globalMapViewpoint.value.lastSelectedRegion !== selectedRegion.value;
+
+      if (!regionChanged && !forceAnimation) {
+        // Just update the region layer without animation
+        updateRegionLayerOnly();
+        return;
+      }
+
+      // Update the last selected region
+      globalMapViewpoint.value.lastSelectedRegion = selectedRegion.value;
 
       // Fade out existing elements first
       fadeOutExistingElements().then(() => {
@@ -80,6 +100,17 @@ window.RegionsMap = {
           addRegionLayer();
         }, 500);
       });
+    };
+
+    // Update only the region layer without map animation
+    const updateRegionLayerOnly = () => {
+      // Remove existing rectangles
+      if (boundingBox.value) {
+        map.value.removeLayer(boundingBox.value);
+      }
+
+      // Add new region layer immediately
+      addRegionLayer();
     };
 
     // Fade out existing map elements
@@ -170,18 +201,9 @@ window.RegionsMap = {
     });
 
     const loadMapData = async () => {
-      if (!props.mapPathName) {
-        return;
-      }
-
       // Map data is already loaded in Area.js
-      const pathName = typeof props.mapPathName === 'string' ?
-        props.mapPathName.replace('window.', '') :
-        '';
-
-      if (pathName) {
-        mapData.value = props.mapKey.reduce((acc, key) => acc && acc[key], window[pathName]);
-      }
+      const pathName = props.mapPathName.replace('window.', '');
+      mapData.value = props.mapKey.reduce((acc, key) => acc && acc[key], window[pathName]);
 
       // Update the image overlay if map is already initialized
       if (map.value && mapData.value && mapData.value.img_str && mapData.value.bounds) {
@@ -219,13 +241,24 @@ window.RegionsMap = {
 
     Vue.watch(selectedRegion, (newValue, oldValue) => {
       if (newValue && newValue !== 'AUSTRALIA') {
-        updateMap();
+        // Only trigger animation if this is a real region change (not a page navigation)
+        const forceAnimation = oldValue !== undefined && oldValue !== newValue;
+        updateMap(forceAnimation);
       }
     });
 
-    const changeBaseMap = (mapType) => {
+    const handleBaseMapChange = (mapType) => {
       selectedBaseMap.value = mapType;
+      // Map display names to internal values
+      const mapTypeMap = {
+        'OpenStreetMap': 'OSM',
+        'Satellite': 'Satellite',
+        'None': 'None'
+      };
+      changeBaseMap(mapTypeMap[mapType]);
+    };
 
+    const changeBaseMap = (mapType) => {
       // Remove all existing tile layers
       Object.values(tileLayers.value).forEach(layer => {
         if (map.value.hasLayer(layer)) {
@@ -244,7 +277,9 @@ window.RegionsMap = {
       getCurrentRegion,
       updateMap,
       selectedBaseMap,
-      changeBaseMap
+      changeBaseMap,
+      baseMapOptions,
+      handleBaseMapChange
     };
   },
   template: `
@@ -254,17 +289,16 @@ window.RegionsMap = {
       <div class="bg-white shadow-lg flex-1 relative">
 
         <!-- Base Map Selector - Dropdown to switch between map types -->
-        <div class="absolute top-[40px] left-[20px] z-50 bg-white/70 p-2 rounded-lg shadow-lg">
-          <label class="block text-[0.8rem] font-medium text-gray-700">Base Map:</label>
-          <select 
-            v-model="selectedBaseMap" 
-            @change="changeBaseMap(selectedBaseMap)"
-            class="block w-full px-1 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-          >
-            <option class="text-[0.8rem]" value="OSM">OpenStreetMap</option>
-            <option class="text-[0.8rem]" value="Satellite">Satellite</option>
-            <option class="text-[0.8rem]" value="None">None</option>
-          </select>
+        <div class="absolute top-[40px] left-[20px] z-50 bg-white/70 rounded-lg shadow-lg z-[9999]">
+          <div style="min-width: 150px;">
+            <filterable-dropdown
+              :use-search="false"
+              :items="baseMapOptions"
+              :selected-value="selectedBaseMap"
+              placeholder="Select base map"
+              @change="handleBaseMapChange"
+            />
+          </div>
         </div>
 
         <!-- Map Container - Leaflet map will be initialized here -->

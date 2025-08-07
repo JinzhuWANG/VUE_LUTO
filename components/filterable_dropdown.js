@@ -1,26 +1,70 @@
 window.FilterableDropdown = {
-  setup() {
-    const { ref, inject, onMounted } = Vue;
+  props: {
+    useSearch: {
+      type: Boolean,
+      default: true
+    },
+    items: {
+      type: Array,
+      default: () => []
+    },
+    selectedValue: {
+      type: String,
+      default: ''
+    },
+    placeholder: {
+      type: String,
+      default: 'Select item...'
+    },
+    searchPlaceholder: {
+      type: String,
+      default: 'Search...'
+    }
+  },
+  setup(props, { emit }) {
+    const { ref, inject, onMounted, watch } = Vue;
     const items = ref([]);
-    const selectedItem = inject('globalSelectedRegion');
+    const selectedItem = ref('');
     const isOpen = ref(false);
     const searchTerm = ref('');
 
+    // Use injected global region if no items prop provided (backwards compatibility)
+    const globalSelectedRegion = inject('globalSelectedRegion', null);
+    
     onMounted(async () => {
-      await window.loadScript("./data/geo/NRM_AUS.js", 'NRM_AUS');
-      items.value = window.NRM_AUS.features.map(feature => feature.properties.NHT2NAME).sort();
+      if (props.items && props.items.length > 0) {
+        items.value = [...props.items];
+        selectedItem.value = props.selectedValue;
+      } else {
+        // Legacy behavior for regions
+        await window.loadScript("./data/geo/NRM_AUS.js", 'NRM_AUS');
+        items.value = window.NRM_AUS.features.map(feature => feature.properties.NHT2NAME).sort();
+        selectedItem.value = globalSelectedRegion?.value || '';
+      }
     });
+
+    // Watch for prop changes
+    watch(() => props.selectedValue, (newValue) => {
+      selectedItem.value = newValue;
+    }, { immediate: true });
+
+    watch(() => props.items, (newItems) => {
+      if (newItems && newItems.length > 0) {
+        items.value = [...newItems];
+      }
+    }, { immediate: true, deep: true });
 
     return {
       selectedItem,
       isOpen,
       searchTerm,
-      items
+      items,
+      globalSelectedRegion
     };
   },
   computed: {
     filteredItems() {
-      if (!this.searchTerm) return this.items;
+      if (!this.useSearch || !this.searchTerm) return this.items;
       return this.items.filter(item =>
         item.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
@@ -42,6 +86,14 @@ window.FilterableDropdown = {
       this.selectedItem = item;
       this.isOpen = false;
       this.searchTerm = '';
+      
+      // Emit change event for parent components
+      this.$emit('change', item);
+      
+      // Legacy support: update global region if available
+      if (this.globalSelectedRegion) {
+        this.globalSelectedRegion = item;
+      }
     },
     toggleDropdown() {
       this.isOpen = !this.isOpen;
@@ -59,7 +111,7 @@ window.FilterableDropdown = {
       >
         <div class="flex items-center justify-between">
           <span class="text-[0.8rem]" :class="selectedItem ? 'text-gray-900' : 'text-gray-500'">
-            {{ selectedItem }}
+            {{ selectedItem || placeholder }}
           </span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-400 transition-transform" :class="isOpen ? 'rotate-180' : ''">
             <path d="m6 9 6 6 6-6"/>
@@ -70,7 +122,7 @@ window.FilterableDropdown = {
       <!-- Dropdown content - only visible when isOpen is true -->
       <div v-if="isOpen" class="absolute mr-2 z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
         <!-- Search input field with search icon -->
-        <div class="p-0.5 border-b border-gray-200 h-8">
+        <div v-if="useSearch" class="p-0.5 border-b border-gray-200 h-8">
           <div class="relative">
             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400">
               <circle cx="11" cy="11" r="8"/>
@@ -79,7 +131,7 @@ window.FilterableDropdown = {
             <input
               class="text-[0.75rem]"
               type="text"
-              placeholder="Search regions..."
+              :placeholder="searchPlaceholder"
               v-model="searchTerm"
               class="pl-10 pr-1 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
