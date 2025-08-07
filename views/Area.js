@@ -234,7 +234,7 @@ window.AreaView = {
 
 
       <!-- Data selection controls container - Categories, AgMgt, Water, Landuse selections -->
-      <div class="absolute top-[285px] left-[20px] w-[262px] z-[1001] flex flex-col space-y-3 bg-white/70 p-2 rounded-lg">
+      <div class="absolute top-[285px] left-[20px] w-[320px] z-[1001] flex flex-col space-y-3 bg-white/70 p-2 rounded-lg">
 
         <!-- Category buttons (always visible) -->
         <div class="flex items-center">
@@ -327,7 +327,7 @@ window.AreaView = {
       </div>
 
       <!-- Legend - Shows map symbols and their meanings -->
-      <div class="absolute bottom-[60px] left-6 z-50 bg-white/70 rounded-lg shadow-lg p-2">
+      <div class="absolute bottom-[60px] left-[500px] z-50 bg-white/70 rounded-lg shadow-lg p-2">
         <div class="flex items-center gap-2">
           <div class="w-4 h-4 border-2 border-blue-500 bg-blue-100"></div>
           <span class="text-[0.8rem]">Bounding Box</span>

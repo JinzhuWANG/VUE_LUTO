@@ -109,7 +109,10 @@ window.HomeView = {
     watch(
       selectRegion,
       (newValues) => {
-        changeDataset(selectDataset.value);
+        // Only reload dataset if we have a valid region selection (not 'AUSTRALIA')
+        if (newValues !== 'AUSTRALIA') {
+          changeDataset(selectDataset.value);
+        }
       }
     );
     watch(
