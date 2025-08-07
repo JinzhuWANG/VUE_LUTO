@@ -3,7 +3,7 @@ window.RegionsMap = {
 
   props: {
     mapPathName: {
-      type: Object,
+      type: String,
       required: true
     },
     mapKey: {
@@ -173,18 +173,18 @@ window.RegionsMap = {
 
     // Function to load map data
     const loadMapData = async () => {
-      if (!props.mapPathName || !props.mapPathName.path || !props.mapPathName.name) {
-        console.log('Waiting for mapPathName to be available...');
+      if (!props.mapPathName) {
         return;
       }
 
-      console.log('props.mapPathName:', props.mapPathName);
-
-      await loadScript(`${props.mapPathName['path']}`, `${props.mapPathName['name']}`);
-
-      mapData.value = props.mapKey.reduce((acc, key) => acc && acc[key], window[props.mapPathName['name']]);
-
-      console.log('Map data for overlay:', mapData.value);
+      // Map data is already loaded in Area.js
+      const pathName = typeof props.mapPathName === 'string' ? 
+        props.mapPathName.replace('window.', '') : 
+        '';
+      
+      if (pathName) {
+        mapData.value = props.mapKey.reduce((acc, key) => acc && acc[key], window[pathName]);
+      }
 
       // Update the image overlay if map is already initialized
       if (map.value && mapData.value && mapData.value.img_str && mapData.value.bounds) {
