@@ -9,6 +9,11 @@ window.MapService = {
       'Ag Mgt': 'data/map_area_Am.js',
       'Non-Ag': 'data/map_area_NonAg.js',
     },
+    'Production': {
+      'Ag': 'data/map_quantities_Ag.js',
+      'Ag Mgt': 'data/map_quantities_Am.js',
+      'Non-Ag': 'data/map_quantities_NonAg.js',
+    },
     'Biodiversity': {
       'overall': {
         'Ag': 'data/map_bio_overall_Ag.js',
@@ -23,27 +28,27 @@ window.MapService = {
     },
     'Economics': {
       'Cost': {
-        'Ag': 'data/map_bio_cost_Ag.js',
-        'Ag Mgt': 'data/map_bio_cost_Am.js',
-        'Non-Ag': 'data/map_bio_cost_NonAg.js',
+        'Ag': 'data/map_cost_Ag.js',
+        'Ag Mgt': 'data/map_cost_Am.js',
+        'Non-Ag': 'data/map_cost_NonAg.js',
       },
       'Revenue': {
-        'Ag': 'data/map_bio_revenue_Ag.js',
-        'Ag Mgt': 'data/map_bio_revenue_Am.js',
-        'Non-Ag': 'data/map_bio_revenue_NonAg.js',
+        'Ag': 'data/map_revenue_Ag.js',
+        'Ag Mgt': 'data/map_revenue_Am.js',
+        'Non-Ag': 'data/map_revenue_NonAg.js',
       },
-      'GHG': {
-        'Ag': 'data/map_bio_ghg_Ag.js',
-        'Ag Mgt': 'data/map_bio_ghg_Am.js',
-        'Non-Ag': 'data/map_bio_ghg_NonAg.js',
-      },
-      'Water': {
-        'Ag': 'data/map_bio_water_yield_Ag.js',
-        'Ag Mgt': 'data/map_bio_water_yield_Am.js',
-        'Non-Ag': 'data/map_bio_water_yield_NonAg.js',
-      }
+    },
+    'GHG': {
+      'Ag': 'data/map_GHG_Ag.js',
+      'Ag Mgt': 'data/map_GHG_Am.js',
+      'Non-Ag': 'data/map_GHG_NonAg.js',
+    },
+    'Water': {
+      'Ag': 'data/map_water_yield_Ag.js',
+      'Ag Mgt': 'data/map_water_yield_Am.js',
+      'Non-Ag': 'data/map_water_yield_NonAg.js',
     }
   }
+}
 
 
-};

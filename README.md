@@ -20,8 +20,9 @@ This dashboard provides an intuitive interface to explore model outputs and unde
 - **Frontend Framework**: Vue.js 3.5.18 with Composition API
 - **Routing**: Vue Router 4.5.1
 - **Styling**: Tailwind CSS 3.4.16
+- **UI Components**: Element Plus 2.10.4 for enhanced UI components
 - **Charts**: Highcharts 12.3.0 with accessibility features
-- **Maps**: Leaflet for interactive Australian region mapping
+- **Maps**: Leaflet 1.9.4 for interactive Australian region mapping
 - **Architecture**: Single Page Application (SPA) with no build process
 - **Dependencies**: All libraries are locally hosted in the `lib/` directory for offline use
 
@@ -33,7 +34,9 @@ VUE_LUTO/
 │   ├── chart_container.js              # Highcharts wrapper component
 │   ├── helpers.js                      # Utility functions for script/data loading
 │   ├── map_geojson.js                  # Interactive map component
-│   ├── ranking_card.js                 # Ranking cards component
+│   ├── ranking_cards.js                # Ranking cards component
+│   ├── filterable_dropdown.js          # Searchable dropdown component
+│   ├── regions_map.js                  # Region selection map component
 │   └── sidebar.js                      # Navigation sidebar
 ├── views/                              # Page components (routes)
 │   ├── Home.js                         # Main dashboard with overview
@@ -41,10 +44,12 @@ VUE_LUTO/
 │   ├── Economics.js                    # Economics analysis view
 │   ├── GHG.js                          # Greenhouse Gas analysis view
 │   ├── Water.js                        # Water usage analysis view
-│   ├── Biodiversity.js                 # Biodiversity analysis view
+│   ├── Production.js                   # Production analysis view
+│   ├── Settings.js                     # Application settings view
 │   └── NotFound.js                     # 404 error page
 ├── services/                           # Service modules
-│   └── DataService.js                  # Data handling service
+│   ├── DataService.js                  # Data handling service
+│   └── MapService.js                   # Map data and interactions service
 ├── routes/                             # Routing configuration
 │   └── route.js                        # Vue Router setup
 ├── data/                               # Data files and model outputs
@@ -226,11 +231,13 @@ This project is part of the LUTO (Land Use Trade-Offs) model system. Please refe
 ## Version History
 
 ### Latest Changes
+- Updated map UI components and views for improved visualization
+- Enhanced map integration with dynamic data loading capabilities
+- Optimized map data loading and UI controls for better performance
+- Improved responsive UI with better layout and spacing
+- Added Production analysis view for agricultural production data
+- Implemented filterable dropdown components for better data selection
 - Migrated from CDN dependencies to local libraries for offline use
-- Improved data handling with better organization by region
-- Enhanced responsive UI with better layout and spacing
-- Consolidated model settings into a single Supporting_info.js file
-- Standardized chart options in dedicated configuration files
 
 ### Future Enhancements
 - Add more detailed analysis views for each domain

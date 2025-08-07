@@ -4,9 +4,11 @@ const { createRouter, createWebHashHistory } = VueRouter;
 const routes = [
   { path: "/", component: window.HomeView },
   { path: "/area", component: window.AreaView },
+  { path: "/production", component: window.ProductionView },
+  { path: "/economics", component: window.EconomicsView },
+  { path: "/ghg", component: window.GHGView },
+  { path: "/water", component: window.WaterView },
   { path: "/settings", component: window.SettingsView },
-  { path: "/economy", component: window.NotFound },
-  { path: "/map", component: window.NotFound },
   { path: "/test", component: window.Test },
   { path: "/:pathMatch(.*)*", component: window.NotFound },
 ];

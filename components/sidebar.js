@@ -12,7 +12,7 @@ window.Sidebar = {
       { id: "home", label: "Home", path: "/", icon: standardizeIcon(window.NavIcons.home) },
       { id: "area", label: "Area Analysis", path: "/area", icon: standardizeIcon(window.NavIcons.area) },
       { id: "production", label: "Production Analysis", path: "/production", icon: standardizeIcon(window.NavIcons.production) },
-      { id: "economy", label: "Economy", path: "/economy", icon: standardizeIcon(window.NavIcons.economy) },
+      { id: "economy", label: "Economics", path: "/economics", icon: standardizeIcon(window.NavIcons.economy) },
       { id: "GHG", label: "GHG Analysis", path: "/ghg", icon: standardizeIcon(window.NavIcons.GHG) },
       { id: "water", label: "Water Analysis", path: "/water", icon: standardizeIcon(window.NavIcons.water) },
       { id: "biodiversity", label: "Biodiversity", path: "/biodiversity", icon: standardizeIcon(window.NavIcons.biodiversity) },
