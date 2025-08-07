@@ -253,7 +253,7 @@ window.ProductionView = {
 
       
       <!-- Map container with slide-out chart drawer - Main visualization area -->
-      <div style="position: relative; width: 100%; height: 100%;">
+      <div style="position: relative; width: 100%; height: 100%; overflow: hidden;">
         <!-- Map component takes full space -->
         <regions-map 
           :mapPathName="mapPathName"
@@ -267,7 +267,7 @@ window.ProductionView = {
             position: 'absolute',
             top: '10px',
             bottom: '10px',
-            right: isDrawerOpen ? '0px' : 'calc(-66.666% - 10px)',
+            right: isDrawerOpen ? '0px' : '-100%',
             width: '66.666%',
             background: 'transparent',
             transition: 'right 0.3s ease',
