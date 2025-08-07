@@ -5,7 +5,7 @@ from glob import glob
 from tqdm.auto import tqdm
 
 
-files = glob('assets/*.json')
+files = glob('assets/*.json') + glob('assets/map_metrics/*.json')
 
 # JSON files to JS files
 for f in tqdm(files, total=len(files)):
