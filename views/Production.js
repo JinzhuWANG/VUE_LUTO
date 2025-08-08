@@ -77,7 +77,7 @@ window.ProductionView = {
     onMounted(async () => {
       await loadScript("./data/Supporting_info.js", 'Supporting_info');
       await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
-      
+
       // Load Production chart data files
       await loadScript("./data/Production_LUTO_1_Agricultural.js", 'Production_LUTO_1_Agricultural');
       await loadScript("./data/Production_LUTO_2_Non-Agricultural.js", 'Production_LUTO_2_Non-Agricultural');
@@ -85,7 +85,7 @@ window.ProductionView = {
       await loadScript("./data/Production_achive_percent.js", 'Production_achive_percent');
       await loadScript("./data/Production_sum_1_Commodity.js", 'Production_sum_1_Commodity');
       await loadScript("./data/Production_sum_2_Type.js", 'Production_sum_2_Type');
-      
+
       // Load map data for all categories
       await loadScript(`${window.MapService.mapCategories['Production']['Ag']}`, 'map_quantities_Ag');
       await loadScript(`${window.MapService.mapCategories['Production']['Ag Mgt']}`, 'map_quantities_Am');
@@ -148,7 +148,7 @@ window.ProductionView = {
       // Force a redraw by creating a new array reference
       mapSelectKey.value = [...mapSelectKey.value];
     });
-    
+
     // Refresh chart when category/level/region change
     watch([selectCategory, selectChartLevel, selectRegion], () => {
       updateChartSeries();
@@ -179,7 +179,7 @@ window.ProductionView = {
       };
       return chartKeyMap[selectCategory.value]?.[selectChartLevel.value] || 'Production_LUTO_1_Agricultural';
     };
-    
+
     const getChartOptionsForLevel = (level) => {
       if (level === 'ag') {
         return ['Agricultural', 'Overview', 'Commodity', 'Type'];
@@ -192,20 +192,25 @@ window.ProductionView = {
       }
       return [];
     };
-    
+
     const availableChartAg = computed(() => getChartOptionsForLevel('ag'));
     const availableChartAgMgt = computed(() => getChartOptionsForLevel('agMgt'));
     const availableChartNonAg = computed(() => getChartOptionsForLevel('nonag'));
-    
+
     const updateChartSeries = () => {
       const dsKey = getChartData();
       selectDataset.value = {
         ...window.Chart_default_options,
         chart: { height: 500 },
+        yAxis: {
+          title: {
+            text: "tonnes/kilolitre",
+          },
+        },
         series: window[dsKey][selectRegion.value],
       };
     };
-    
+
     return {
       yearIndex,
       isDrawerOpen,
@@ -216,7 +221,7 @@ window.ProductionView = {
       availableCategories,
       availableAgMgt,
       availableCommodities,
-      
+
       availableChartAg,
       availableChartAgMgt,
       availableChartNonAg,

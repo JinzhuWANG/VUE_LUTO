@@ -133,6 +133,11 @@ window.AreaView = {
       selectChartData.value = {
         ...window.Chart_default_options,
         chart: { height: 500 },
+        yAxis: {
+          title: {
+            text: "Area (ha)",
+          },
+        },
         series: window[dsKey][selectRegion.value],
       };
     };

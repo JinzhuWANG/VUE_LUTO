@@ -92,24 +92,24 @@ window.WaterView = {
     onMounted(async () => {
       await loadScript("./data/Supporting_info.js", 'Supporting_info');
       await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
-      
+
       // Load Water chart data files
       await loadScript("./data/Water_overview_MRN_region_1_Landuse.js", 'Water_overview_MRN_region_1_Landuse');
       await loadScript("./data/Water_overview_MRN_region_2_Type.js", 'Water_overview_MRN_region_2_Type');
       await loadScript("./data/Water_ranking.js", 'Water_ranking');
-      
+
       // Load Water Ag split data
       await loadScript("./data/Water_split_Ag_MRN_region_1_Landuse.js", 'Water_split_Ag_MRN_region_1_Landuse');
       await loadScript("./data/Water_split_Ag_MRN_region_2_Water_Supply.js", 'Water_split_Ag_MRN_region_2_Water_Supply');
-      
+
       // Load Water Ag Mgt split data
       await loadScript("./data/Water_split_Am_MRN_region_1_Water_Supply.js", 'Water_split_Am_MRN_region_1_Water_Supply');
       await loadScript("./data/Water_split_Am_MRN_region_2_Landuse.js", 'Water_split_Am_MRN_region_2_Landuse');
       await loadScript("./data/Water_split_Am_MRN_region_3_Agri-Management.js", 'Water_split_Am_MRN_region_3_Agri-Management');
-      
+
       // Load Water Non-Ag split data
       await loadScript("./data/Water_split_NonAg_MRN_region_1_Landuse.js", 'Water_split_NonAg_MRN_region_1_Landuse');
-      
+
       // Load map data for all categories
       await loadScript(`${window.MapService.mapCategories['Water']['Ag']}`, 'map_water_yield_Ag');
       await loadScript(`${window.MapService.mapCategories['Water']['Ag Mgt']}`, 'map_water_yield_Am');
@@ -177,7 +177,7 @@ window.WaterView = {
       // Force a redraw by creating a new array reference
       mapSelectKey.value = [...mapSelectKey.value];
     });
-    
+
     // Refresh chart when category/level/region change
     watch([selectCategory, selectChartLevel, selectRegion], () => {
       updateChartSeries();
@@ -213,7 +213,7 @@ window.WaterView = {
       };
       return chartKeyMap[selectCategory.value]?.[selectChartLevel.value] || 'Water_overview_MRN_region_1_Landuse';
     };
-    
+
     const getChartOptionsForLevel = (level) => {
       if (level === 'ag') {
         // Ag options only available in 'Ag' category
@@ -232,20 +232,25 @@ window.WaterView = {
       }
       return [];
     };
-    
+
     const availableChartAg = computed(() => getChartOptionsForLevel('ag'));
     const availableChartAgMgt = computed(() => getChartOptionsForLevel('agMgt'));
     const availableChartNonAg = computed(() => getChartOptionsForLevel('nonag'));
-    
+
     const updateChartSeries = () => {
       const dsKey = getChartData();
       selectDataset.value = {
         ...window.Chart_default_options,
         chart: { height: 500 },
+        yAxis: {
+          title: {
+            text: "Megalitres",
+          },
+        },
         series: window[dsKey][selectRegion.value],
       };
     };
-    
+
     return {
       yearIndex,
       isDrawerOpen,
@@ -257,7 +262,7 @@ window.WaterView = {
       availableAgMgt,
       availableWater,
       availableLanduse,
-      
+
       availableChartAg,
       availableChartAgMgt,
       availableChartNonAg,

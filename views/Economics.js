@@ -112,21 +112,21 @@ window.EconomicsView = {
     onMounted(async () => {
       await loadScript("./data/Supporting_info.js", 'Supporting_info');
       await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
-      
+
       // Load Economics chart data files
       await loadScript("./data/Economics_overview.js", 'Economics_overview');
       await loadScript("./data/Economics_ranking.js", 'Economics_ranking');
-      
+
       // Load Economics Ag split data
       await loadScript("./data/Economics_split_Ag_1_Land-use.js", 'Economics_split_Ag_1_Land-use');
       await loadScript("./data/Economics_split_Ag_2_Type.js", 'Economics_split_Ag_2_Type');
       await loadScript("./data/Economics_split_Ag_3_Water_supply.js", 'Economics_split_Ag_3_Water_supply');
-      
+
       // Load Economics Ag Mgt split data
       await loadScript("./data/Economics_split_AM_1_Management_Type.js", 'Economics_split_AM_1_Management_Type');
       await loadScript("./data/Economics_split_AM_2_Water_supply.js", 'Economics_split_AM_2_Water_supply');
       await loadScript("./data/Economics_split_AM_3_Land-use.js", 'Economics_split_AM_3_Land-use');
-      
+
       // Load Economics Non-Ag split data
       await loadScript("./data/Economics_split_NonAg_1_Land-use.js", 'Economics_split_NonAg_1_Land-use');
 
@@ -143,7 +143,7 @@ window.EconomicsView = {
 
       // Set map configuration based on category
       updateMapConfiguration();
-      
+
       // Update chart with initial data
       updateChartSeries();
 
@@ -205,7 +205,7 @@ window.EconomicsView = {
       // Update map configuration
       updateMapConfiguration();
     });
-    
+
     // Refresh chart when category/level/region change
     watch([selectCategory, selectChartLevel, selectRegion, selectEconomicsType], () => {
       updateChartSeries();
@@ -237,7 +237,7 @@ window.EconomicsView = {
       };
       return chartKeyMap[selectCategory.value]?.[selectChartLevel.value] || 'Economics_overview';
     };
-    
+
     const getChartOptionsForLevel = (level) => {
       if (level === 'ag') {
         // Ag options only available in 'Ag' category
@@ -256,20 +256,25 @@ window.EconomicsView = {
       }
       return [];
     };
-    
+
     const availableChartAg = computed(() => getChartOptionsForLevel('ag'));
     const availableChartAgMgt = computed(() => getChartOptionsForLevel('agMgt'));
     const availableChartNonAg = computed(() => getChartOptionsForLevel('nonag'));
-    
+
     const updateChartSeries = () => {
       const dsKey = getChartData();
       selectDataset.value = {
         ...window.Chart_default_options,
         chart: { height: 500 },
+        yAxis: {
+          title: {
+            text: "AUD",
+          },
+        },
         series: window[dsKey][selectRegion.value],
       };
     };
-    
+
     return {
       yearIndex,
       isDrawerOpen,
@@ -283,7 +288,7 @@ window.EconomicsView = {
       availableWater,
       availableLanduse,
       availableCostRevenueType,
-      
+
       availableChartAg,
       availableChartAgMgt,
       availableChartNonAg,

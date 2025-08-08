@@ -104,27 +104,27 @@ window.GHGView = {
     onMounted(async () => {
       await loadScript("./data/Supporting_info.js", 'Supporting_info');
       await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
-      
+
       // Load GHG chart data files
       await loadScript("./data/GHG_overview.js", 'GHG_overview');
       await loadScript("./data/GHG_ranking.js", 'GHG_ranking');
-      
+
       // Load GHG Ag split data
       await loadScript("./data/GHG_split_Ag_1_GHG_Category.js", 'GHG_split_Ag_1_GHG_Category');
       await loadScript("./data/GHG_split_Ag_2_Land-use.js", 'GHG_split_Ag_2_Land-use');
       await loadScript("./data/GHG_split_Ag_3_Land-use_type.js", 'GHG_split_Ag_3_Land-use_type');
       await loadScript("./data/GHG_split_Ag_4_Source.js", 'GHG_split_Ag_4_Source');
       await loadScript("./data/GHG_split_Ag_5_Water_supply.js", 'GHG_split_Ag_5_Water_supply');
-      
+
       // Load GHG Ag Mgt split data
       await loadScript("./data/GHG_split_Am_1_Land-use.js", 'GHG_split_Am_1_Land-use');
       await loadScript("./data/GHG_split_Am_2_Land-use_type.js", 'GHG_split_Am_2_Land-use_type');
       await loadScript("./data/GHG_split_Am_3_Agricultural_Management_Type.js", 'GHG_split_Am_3_Agricultural_Management_Type');
       await loadScript("./data/GHG_split_Am_4_Water_supply.js", 'GHG_split_Am_4_Water_supply');
-      
+
       // Load GHG Non-Ag split data
       await loadScript("./data/GHG_split_NonAg_1_Land-use.js", 'GHG_split_NonAg_1_Land-use');
-      
+
       // Load map data for all categories
       await loadScript(`${window.MapService.mapCategories['GHG']['Ag']}`, 'map_GHG_Ag');
       await loadScript(`${window.MapService.mapCategories['GHG']['Ag Mgt']}`, 'map_GHG_Am');
@@ -207,7 +207,7 @@ window.GHGView = {
       // Force a redraw by creating a new array reference
       mapSelectKey.value = [...mapSelectKey.value];
     });
-    
+
     // Refresh chart when category/level/region change
     watch([selectCategory, selectChartLevel, selectRegion], () => {
       updateChartSeries();
@@ -244,7 +244,7 @@ window.GHGView = {
       };
       return chartKeyMap[selectCategory.value]?.[selectChartLevel.value] || 'GHG_overview';
     };
-    
+
     const getChartOptionsForLevel = (level) => {
       if (level === 'ag') {
         // Ag options only available in 'Ag' category
@@ -263,20 +263,25 @@ window.GHGView = {
       }
       return [];
     };
-    
+
     const availableChartAg = computed(() => getChartOptionsForLevel('ag'));
     const availableChartAgMgt = computed(() => getChartOptionsForLevel('agMgt'));
     const availableChartNonAg = computed(() => getChartOptionsForLevel('nonag'));
-    
+
     const updateChartSeries = () => {
       const dsKey = getChartData();
       selectDataset.value = {
         ...window.Chart_default_options,
         chart: { height: 500 },
+        yAxis: {
+          title: {
+            text: "tCO2e",
+          },
+        },
         series: window[dsKey][selectRegion.value],
       };
     };
-    
+
     return {
       yearIndex,
       isDrawerOpen,
@@ -289,7 +294,7 @@ window.GHGView = {
       availableAgMgt,
       availableWater,
       availableLanduse,
-      
+
       availableChartAg,
       availableChartAgMgt,
       availableChartNonAg,
