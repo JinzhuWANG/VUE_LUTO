@@ -11,6 +11,7 @@ files = glob('assets/*.json') + glob('assets/map_metrics/*.json')
 for f in tqdm(files, total=len(files)):
     with open(f, 'r', encoding='utf-8') as src_file:
         f_name = pathlib.Path(f).name.replace('.json', '')
+        f_name = f"map_{f_name}" if "map_metrics" in f else f_name
         data = json.load(src_file)
         
     with open(f'data/{f_name}.js', 'w', encoding='utf-8') as dest_file:
