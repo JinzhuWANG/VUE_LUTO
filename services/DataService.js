@@ -187,4 +187,151 @@ window.DataService = {
     return mapping[subcategory] || subcategory;
   },
 
+  ChartPaths: {
+    'Area': {
+      'Ag': {
+        'Landuse': 'data/Area_Ag_1_Land-use.js',
+        'Water': 'data/Area_Ag_2_Water_supply.js'
+      },
+      'Ag Mgt': {
+        'Mgt Type': 'data/Area_Am_1_Type.js',
+        'Water': 'data/Area_Am_2_Water_supply.js',
+        'Landuse': 'data/Area_Am_3_Land-use.js'
+      },
+      'Non-Ag': {
+        'Landuse': 'data/Area_NonAg_1_Land-use.js'
+      },
+      'Overview': {
+        'Landuse': 'data/Area_overview_1_Land-use.js',
+        'Category': 'data/Area_overview_2_Category.js',
+        'Source': 'data/Area_overview_3_Source.js'
+      },
+      'Ranking': 'data/Area_ranking.js',
+      'Transition': {
+        'Start-end': 'data/Area_transition_start_end.js',
+        'Year to Year': 'data/Area_transition_year_to_year.js'
+      }
+    },
+    'Biodiversity': {
+      'Overview': {
+        'Type': 'data/BIO_GBF2_overview_1_Type.js'
+      },
+      'Ag': {
+        'Landuse': 'data/BIO_GBF2_split_Ag_1_Landuse.js'
+      },
+      'Ag Mgt': {
+        'Landuse': 'data/BIO_GBF2_split_Am_1_Landuse.js',
+        'Agri-Management': 'data/BIO_GBF2_split_Am_2_Agri-Management.js'
+      },
+      'Non-Ag': {
+        'Landuse': 'data/BIO_GBF2_split_NonAg_1_Landuse.js'
+      },
+      'Ranking': 'data/Biodiversity_ranking.js'
+    },
+    'Economics': {
+      'Overview': 'data/Economics_overview.js',
+      'Ranking': 'data/Economics_ranking.js',
+      'Ag Mgt': {
+        'Management Type': 'data/Economics_split_AM_1_Management_Type.js',
+        'Water supply': 'data/Economics_split_AM_2_Water_supply.js',
+        'Landuse': 'data/Economics_split_AM_3_Land-use.js'
+      },
+      'Ag': {
+        'Landuse': 'data/Economics_split_Ag_1_Land-use.js',
+        'Type': 'data/Economics_split_Ag_2_Type.js',
+        'Water supply': 'data/Economics_split_Ag_3_Water_supply.js'
+      },
+      'Non-Ag': {
+        'Landuse': 'data/Economics_split_NonAg_1_Land-use.js'
+      },
+      'Transition': {
+        'Matrix': {
+          'Ag to Ag': 'data/Economics_transition_mat_ag2ag.js',
+          'Ag to Non-Ag': 'data/Economics_transition_mat_ag2nonag.js',
+          'Non-Ag to Ag': 'data/Economics_transition_mat_nonag2ag.js'
+        },
+        'Aggregated': {
+          'Ag to Non-Ag': {
+            'Cost type': 'data/Economics_transition_split_Ag2NonAg_1_Cost_type.js',
+            'From landuse': 'data/Economics_transition_split_Ag2NonAg_2_From_land-use.js',
+            'To landuse': 'data/Economics_transition_split_Ag2NonAg_3_To_land-use.js'
+          },
+          'Non-Ag to Ag': {
+            'Cost type': 'data/Economics_transition_split_NonAg2Ag_1_Cost_type.js',
+            'From landuse': 'data/Economics_transition_split_NonAg2Ag_2_From_land-use.js',
+            'To landuse': 'data/Economics_transition_split_NonAg2Ag_3_To_land-use.js'
+          },
+          'Ag to Ag': {
+            'Type': 'data/Economics_transition_split_ag2ag_1_Type.js',
+            'From landuse': 'data/Economics_transition_split_ag2ag_2_From_land-use.js',
+            'To landuse': 'data/Economics_transition_split_ag2ag_3_To_land-use.js'
+          }
+        }
+      }
+    },
+    'GHG': {
+      'Overview': 'data/GHG_overview.js',
+      'Ranking': 'data/GHG_ranking.js',
+      'Ag': {
+        'GHG Category': 'data/GHG_split_Ag_1_GHG_Category.js',
+        'Landuse': 'data/GHG_split_Ag_2_Land-use.js',
+        'Landuse type': 'data/GHG_split_Ag_3_Land-use_type.js',
+        'Source': 'data/GHG_split_Ag_4_Source.js',
+        'Water supply': 'data/GHG_split_Ag_5_Water_supply.js'
+      },
+      'Ag Mgt': {
+        'Landuse': 'data/GHG_split_Am_1_Land-use.js',
+        'Landuse type': 'data/GHG_split_Am_2_Land-use_type.js',
+        'Agricultural Management Type': 'data/GHG_split_Am_3_Agricultural_Management_Type.js',
+        'Water supply': 'data/GHG_split_Am_4_Water_supply.js'
+      },
+      'Non-Ag': {
+        'Landuse': 'data/GHG_split_NonAg_1_Land-use.js'
+      },
+      // Skip off land GHG because it is record of the whole Australia
+      // 'Off-land': {
+      //   'Emission Type': 'data/GHG_split_off_land_1_Emission_Type.js',
+      //   'Emission Source': 'data/GHG_split_off_land_2_Emission_Source.js',
+      //   'Commodity': 'data/GHG_split_off_land_3_Commodity.js'
+      // }
+    },
+    'Production': {
+      'Ag': 'data/Production_LUTO_1_Agricultural.js',
+      'Non-A': 'data/Production_LUTO_2_Non-Agricultural.js',
+      'Ag Mgt': 'data/Production_LUTO_3_Agricultural_Management.js',
+      'Overview': 'data/Production_achive_percent.js',
+      // Skip Demand because it is record of the whole Australia
+      // 'Demand': {
+      //   'Type': 'data/Production_demand_1_Type.js',
+      //   'On Off Land': 'data/Production_demand_2_on_off_land.js',
+      //   'Commodity': 'data/Production_demand_3_Commodity.js',
+      //   'Limit': 'data/Production_demand_4_Limit.js'
+      // },
+      'Sum': {
+        'Commodity': 'data/Production_sum_1_Commodity.js',
+        'Type': 'data/Production_sum_2_Type.js'
+      }
+    },
+    'Water': {
+      'Overview': {
+        'Landuse': 'data/Water_overview_MRN_region_1_Landuse.js',
+        'Type': 'data/Water_overview_MRN_region_2_Type.js'
+      },
+      'Ranking': 'data/Water_ranking.js',
+      'Ag': {
+        'Landuse': 'data/Water_split_Ag_MRN_region_1_Landuse.js',
+        'Water Supply': 'data/Water_split_Ag_MRN_region_2_Water_Supply.js'
+
+      },
+      'Ag Mgt': {
+        'Water Supply': 'data/Water_split_Am_MRN_region_1_Water_Supply.js',
+        'Landuse': 'data/Water_split_Am_MRN_region_2_Landuse.js',
+        'Agri-Management': 'data/Water_split_Am_MRN_region_3_Agri-Management.js'
+      },
+      'Non-Ag': {
+        'Landuse': 'data/Water_split_NonAg_MRN_region_1_Landuse.js'
+      }
+    }
+  }
+
 };

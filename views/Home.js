@@ -107,19 +107,16 @@ window.HomeView = {
 
     // Watch for changes and then make reactive updates
     watch(
-      selectRegion,
-      (newValues) => {
-        // Only reload dataset if we have a valid region selection (not 'AUSTRALIA')
-        if (newValues !== 'AUSTRALIA') {
-          changeDataset(selectDataset.value);
-        }
-      }
-    );
-    watch(
       selectDataset,
       (newDataset) => {
         selectDataType.value = availableDatasets.value[newDataset].type;
         selectSubcategory.value = DtypeSubCategories.value[0];
+      }
+    );
+    watch(
+      [selectRegion, selectDataType],
+      (newValue, oldValue) => {
+        changeDataset(selectDataset.value);
       }
     );
     watch(
@@ -184,7 +181,7 @@ window.HomeView = {
               <div class="flex items-center justify-end p-2">
                 <div class="flex space-x-1">
                   <button v-for="(data, key) in availableDatasets" :key="key"
-                    @click="selectDataset = key; changeDataset(key)"
+                    @click="selectDataset = key"
                     class="bg-[#e8eaed] text-[#1f1f1f] text-[0.8rem] px-1 py-1 rounded"
                     :class="{'bg-sky-500 text-white': selectDataset === key}">
                     {{ data.type }}

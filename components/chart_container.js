@@ -3,6 +3,14 @@ window.Highchart = {
     chartData: {
       type: Object,
       required: true,
+    },
+    draggable: {
+      type: Boolean,
+      default: false,
+    },
+    zoomable: {
+      type: Boolean,
+      default: false,
     }
   },
   setup(props) {
@@ -13,6 +21,11 @@ window.Highchart = {
     const chartElement = ref(null);
     const isLoading = ref(true);
     const ChartInstance = ref(null);
+    const position = ref({ x: 0, y: 0 });
+    const isDragging = ref(false);
+    const dragStartPos = ref({ x: 0, y: 0 });
+    const scale = ref(1);
+    const zoomStep = 0.1;
 
     // Function to handle dataset loading and chart creation
     const createChart = () => {
@@ -32,6 +45,52 @@ window.Highchart = {
 
     // Function to handle window resize
     const handleResize = () => { createChart(); };
+
+    // Dragging functionality
+    const startDrag = (event) => {
+      if (!props.draggable) return;
+      isDragging.value = true;
+      dragStartPos.value = {
+        x: event.clientX - position.value.x,
+        y: event.clientY - position.value.y
+      };
+    };
+
+    const onDrag = (event) => {
+      if (isDragging.value) {
+        position.value = {
+          x: event.clientX - dragStartPos.value.x,
+          y: event.clientY - dragStartPos.value.y
+        };
+      }
+    };
+
+    const stopDrag = () => {
+      isDragging.value = false;
+    };
+    
+    // Zoom functionality
+    const zoomIn = () => {
+      if (!props.zoomable) return;
+      scale.value += zoomStep;
+    };
+    
+    const zoomOut = () => {
+      if (!props.zoomable) return;
+      if (scale.value > zoomStep) {
+        scale.value -= zoomStep;
+      }
+    };
+    
+    const handleWheel = (event) => {
+      if (!props.zoomable) return;
+      event.preventDefault();
+      if (event.deltaY < 0) {
+        zoomIn();
+      } else {
+        zoomOut();
+      }
+    };
 
     // Function to update the chart with new series data
     const updateChart = (chart, newChartData) => {
@@ -86,10 +145,14 @@ window.Highchart = {
     onMounted(() => {
       createChart();
       window.addEventListener('resize', handleResize);
+      window.addEventListener('mousemove', onDrag);
+      window.addEventListener('mouseup', stopDrag);
     });
 
     onUnmounted(() => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', onDrag);
+      window.removeEventListener('mouseup', stopDrag);
     });
 
     // Watch for changes in chart data
@@ -106,12 +169,25 @@ window.Highchart = {
       chartElement,
       isLoading,
       ChartInstance,
+      position,
+      startDrag,
+      scale,
+      zoomIn,
+      zoomOut,
+      handleWheel
     };
   },
   template: `
-    <div class="m-2 ">
+    <div class="m-2 relative" 
+      :style="{ transform: 'translate(' + position.x + 'px, ' + position.y + 'px) scale(' + scale + ')', cursor: draggable ? 'move' : 'default' }" 
+      @mousedown="startDrag"
+      @wheel.prevent="handleWheel">
       <div v-if="isLoading" class="flex justify-center items-center text-lg">Loading data...</div>
       <div ref="chartElement" id="chart-container"></div>
+      <div v-if="zoomable" class="absolute top-2 right-2 flex flex-col space-y-1">
+        <button @click="zoomIn" class="bg-white/80 hover:bg-white text-gray-800 w-8 h-8 rounded-full shadow flex items-center justify-center">+</button>
+        <button @click="zoomOut" class="bg-white/80 hover:bg-white text-gray-800 w-8 h-8 rounded-full shadow flex items-center justify-center">-</button>
+      </div>
     </div>
   `
 }
