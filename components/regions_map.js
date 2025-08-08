@@ -188,9 +188,9 @@ window.RegionsMap = {
         // Initialize map first
         initMap();
 
-        // Load map data if props are available
-        await loadMapData();
-
+        // Skip initial map data load - will be loaded by the watcher when props are populated
+        // The watch handler will take care of loading map data when props are ready
+        
         // Update map if a region is already selected
         if (selectedRegion.value && selectedRegion.value !== 'AUSTRALIA') {
           updateMap();
@@ -202,6 +202,10 @@ window.RegionsMap = {
 
     const loadMapData = async () => {
       // Map data is already loaded in Area.js
+      if (!props.mapPathName || typeof props.mapPathName !== 'string') {
+        console.error('Invalid mapPathName:', props.mapPathName);
+        return;
+      }
       const pathName = props.mapPathName.replace('window.', '');
       mapData.value = props.mapKey.reduce((acc, key) => acc && acc[key], window[pathName]);
 
@@ -235,9 +239,12 @@ window.RegionsMap = {
       }
     };
 
-    Vue.watch(() => [props.mapPathName, props.mapKey], async () => {
-      await loadMapData();
-    }, { deep: true });
+    Vue.watch(() => [props.mapPathName, props.mapKey], async (newVal) => {
+      const [newMapPathName, newMapKey] = newVal;
+      if (newMapPathName && typeof newMapPathName === 'string' && newMapKey && Array.isArray(newMapKey) && newMapKey.length > 0) {
+        await loadMapData();
+      }
+    }, { deep: true, immediate: true });
 
     Vue.watch(selectedRegion, (newValue, oldValue) => {
       if (newValue && newValue !== 'AUSTRALIA') {

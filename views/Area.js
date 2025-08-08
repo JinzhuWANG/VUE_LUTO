@@ -8,8 +8,8 @@ window.AreaView = {
 
     // Data selection and visualization state
     const selectDataset = ref({});
-    const mapPathName = ref({});
-    const mapSelectKey = ref([]);
+    const mapPathName = ref('window.map_area_Ag'); // Initialize with default value
+    const mapSelectKey = ref(['dry', 'Beef - modified land', 2020]); // Initialize with default values
 
     // Category selection state
     const selectCategory = ref('Ag');
