@@ -8,6 +8,7 @@ window.GHGView = {
 
     // Data selection and visualization state
     const selectDataset = ref({});
+    const selectChartLevel = ref('Overview');
     const mapPathName = ref({});
     const mapSelectKey = ref([]);
 
@@ -101,15 +102,33 @@ window.GHGView = {
 
 
     onMounted(async () => {
-
       await loadScript("./data/Supporting_info.js", 'Supporting_info');
       await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
-      await loadScript("./data/Area_overview_2_Category.js", 'Area_overview_2_Category');
-      await loadScript("./data/Area_overview_2_Category.js", 'Area_overview_2_Category');
+      
+      // Load GHG chart data files
+      await loadScript("./data/GHG_overview.js", 'GHG_overview');
+      await loadScript("./data/GHG_ranking.js", 'GHG_ranking');
+      
+      // Load GHG Ag split data
+      await loadScript("./data/GHG_split_Ag_1_GHG_Category.js", 'GHG_split_Ag_1_GHG_Category');
+      await loadScript("./data/GHG_split_Ag_2_Land-use.js", 'GHG_split_Ag_2_Land-use');
+      await loadScript("./data/GHG_split_Ag_3_Land-use_type.js", 'GHG_split_Ag_3_Land-use_type');
+      await loadScript("./data/GHG_split_Ag_4_Source.js", 'GHG_split_Ag_4_Source');
+      await loadScript("./data/GHG_split_Ag_5_Water_supply.js", 'GHG_split_Ag_5_Water_supply');
+      
+      // Load GHG Ag Mgt split data
+      await loadScript("./data/GHG_split_Am_1_Land-use.js", 'GHG_split_Am_1_Land-use');
+      await loadScript("./data/GHG_split_Am_2_Land-use_type.js", 'GHG_split_Am_2_Land-use_type');
+      await loadScript("./data/GHG_split_Am_3_Agricultural_Management_Type.js", 'GHG_split_Am_3_Agricultural_Management_Type');
+      await loadScript("./data/GHG_split_Am_4_Water_supply.js", 'GHG_split_Am_4_Water_supply');
+      
+      // Load GHG Non-Ag split data
+      await loadScript("./data/GHG_split_NonAg_1_Land-use.js", 'GHG_split_NonAg_1_Land-use');
+      
+      // Load map data for all categories
       await loadScript(`${window.MapService.mapCategories['GHG']['Ag']}`, 'map_GHG_Ag');
       await loadScript(`${window.MapService.mapCategories['GHG']['Ag Mgt']}`, 'map_GHG_Am');
       await loadScript(`${window.MapService.mapCategories['GHG']['Non-Ag']}`, 'map_GHG_NonAg');
-
 
       availableYears.value = window.Supporting_info.years;
       availableCategories.value = Object.keys(window.MapService.mapCategories['GHG']);
@@ -133,16 +152,8 @@ window.GHGView = {
         mapSelectKey.value = [selectLanduse.value, selectYear.value];
       }
 
-      selectDataset.value = {
-        ...window.Chart_default_options,
-        chart: {
-          height: 300,
-        },
-        legend: {
-          width: 150,
-        },
-        series: window['Area_overview_2_Category']['AUSTRALIA'],
-      };
+      // Update chart with initial data
+      updateChartSeries();
 
       // Use nextTick to ensure the data is processed before rendering the UI components
       nextTick(() => {
@@ -196,9 +207,76 @@ window.GHGView = {
       // Force a redraw by creating a new array reference
       mapSelectKey.value = [...mapSelectKey.value];
     });
+    
+    // Refresh chart when category/level/region change
+    watch([selectCategory, selectChartLevel, selectRegion], () => {
+      updateChartSeries();
+    });
 
 
 
+    // Functions to get chart data and options
+    const getChartData = () => {
+      // Map the visible "Chart level" label to the loaded dataset key
+      const chartKeyMap = {
+        'Ag': {
+          'Overview': 'GHG_overview',
+          'Ranking': 'GHG_ranking',
+          'GHG Category': 'GHG_split_Ag_1_GHG_Category',
+          'Land-use': 'GHG_split_Ag_2_Land-use',
+          'Land-use type': 'GHG_split_Ag_3_Land-use_type',
+          'Source': 'GHG_split_Ag_4_Source',
+          'Water supply': 'GHG_split_Ag_5_Water_supply',
+        },
+        'Ag Mgt': {
+          'Overview': 'GHG_overview',
+          'Ranking': 'GHG_ranking',
+          'Land-use': 'GHG_split_Am_1_Land-use',
+          'Land-use type': 'GHG_split_Am_2_Land-use_type',
+          'Agricultural Management Type': 'GHG_split_Am_3_Agricultural_Management_Type',
+          'Water supply': 'GHG_split_Am_4_Water_supply',
+        },
+        'Non-Ag': {
+          'Overview': 'GHG_overview',
+          'Ranking': 'GHG_ranking',
+          'Land-use': 'GHG_split_NonAg_1_Land-use',
+        },
+      };
+      return chartKeyMap[selectCategory.value]?.[selectChartLevel.value] || 'GHG_overview';
+    };
+    
+    const getChartOptionsForLevel = (level) => {
+      if (level === 'ag') {
+        // Ag options only available in 'Ag' category
+        if (selectCategory.value !== 'Ag' || !window.DataService) return [];
+        return Object.keys(window.DataService.ChartPaths['GHG']['Ag']);
+      }
+      if (level === 'agMgt') {
+        // Ag Mgt options only available in 'Ag Mgt' category
+        if (selectCategory.value !== 'Ag Mgt' || !window.DataService) return [];
+        return Object.keys(window.DataService.ChartPaths['GHG']['Ag Mgt']);
+      }
+      if (level === 'nonag') {
+        // Non-Ag options only available in 'Non-Ag' category
+        if (selectCategory.value !== 'Non-Ag' || !window.DataService) return [];
+        return Object.keys(window.DataService.ChartPaths['GHG']['Non-Ag']);
+      }
+      return [];
+    };
+    
+    const availableChartAg = computed(() => getChartOptionsForLevel('ag'));
+    const availableChartAgMgt = computed(() => getChartOptionsForLevel('agMgt'));
+    const availableChartNonAg = computed(() => getChartOptionsForLevel('nonag'));
+    
+    const updateChartSeries = () => {
+      const dsKey = getChartData();
+      selectDataset.value = {
+        ...window.Chart_default_options,
+        chart: { height: 500 },
+        series: window[dsKey][selectRegion.value],
+      };
+    };
+    
     return {
       yearIndex,
       isDrawerOpen,
@@ -211,6 +289,11 @@ window.GHGView = {
       availableAgMgt,
       availableWater,
       availableLanduse,
+      
+      availableChartAg,
+      availableChartAgMgt,
+      availableChartNonAg,
+      selectChartLevel,
 
       selectRegion,
       selectDataset,
@@ -276,9 +359,9 @@ window.GHGView = {
           </div>
         </div>
 
-        <!-- GHG Source options (only for Ag category) -->
+        <!-- GHG Source options (only for Ag category when drawer is closed) -->
         <div 
-          v-if="dataLoaded && selectCategory === 'Ag' && availableGHGSource.length > 0" 
+          v-if="dataLoaded && !isDrawerOpen && selectCategory === 'Ag' && availableGHGSource.length > 0" 
           class="flex items-start border-t border-white/10 pt-1">
           <div class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">GHG Source:</span>
@@ -291,11 +374,9 @@ window.GHGView = {
           </div>
         </div>
 
-        <!-- Ag Mgt options (only for Ag Mgt category) -->
-        <div 
-          v-if="availableAgMgt.length > 0" 
-          class="flex items-start border-t border-white/10 pt-1">
-          <div class="flex flex-wrap gap-1 max-w-[300px]">
+        <!-- Ag Mgt options (only for Ag Mgt category when drawer is closed) -->
+        <div class="flex items-start border-t border-white/10 pt-1">
+          <div v-if="!isDrawerOpen && availableAgMgt.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">Ag Mgt:</span>
             <button v-for="(val, key) in availableAgMgt" :key="key"
               @click="selectAgMgt = val"
@@ -304,13 +385,20 @@ window.GHGView = {
               {{ val }}
             </button>
           </div>
+          <div v-else-if="isDrawerOpen && availableChartAgMgt.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Chart level:</span>
+            <button v-for="(val, key) in availableChartAgMgt" :key="key"
+              @click="selectChartLevel = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectChartLevel === val}">
+              {{ val }}
+            </button>
+          </div>
         </div>
 
         <!-- Water options -->
-        <div 
-          v-if="dataLoaded && availableWater.length > 0" 
-          class="flex items-start border-t border-white/10 pt-1">
-          <div class="flex flex-wrap gap-1 max-w-[300px]">
+        <div class="flex items-start border-t border-white/10 pt-1">
+          <div v-if="dataLoaded && !isDrawerOpen && availableWater.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">Water:</span>
             <button v-for="(val, key) in availableWater" :key="key"
               @click="selectWater = val"
@@ -319,18 +407,34 @@ window.GHGView = {
               {{ val }}
             </button>
           </div>
+          <div v-else-if="dataLoaded && isDrawerOpen && availableChartAg.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Chart level:</span>
+            <button v-for="(val, key) in availableChartAg" :key="key"
+              @click="selectChartLevel = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectChartLevel === val}">
+              {{ val }}
+            </button>
+          </div>
         </div>
 
         <!-- Landuse options -->
-        <div 
-          v-if="dataLoaded && availableLanduse.length > 0" 
-          class="flex items-start border-t border-white/10 pt-1">
-          <div class="flex flex-wrap gap-1 max-w-[300px]">
+        <div class="flex items-start border-t border-white/10 pt-1">
+          <div v-if="dataLoaded && !isDrawerOpen && availableLanduse.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">Landuse:</span>
             <button v-for="(val, key) in availableLanduse" :key="key"
               @click="selectLanduse = val"
               class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
               :class="{'bg-sky-500 text-white': selectLanduse === val}">
+              {{ val }}
+            </button>
+          </div>
+          <div v-else-if="dataLoaded && isDrawerOpen && availableChartNonAg.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Chart level:</span>
+            <button v-for="(val, key) in availableChartNonAg" :key="key"
+              @click="selectChartLevel = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectChartLevel === val}">
               {{ val }}
             </button>
           </div>
@@ -363,6 +467,8 @@ window.GHGView = {
           }">
           <chart-container 
             :chartData="selectDataset" 
+            :draggable="true"
+            :zoomable="true"
             style="width: 100%; height: 200px;">
           </chart-container>
         </div>

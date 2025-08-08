@@ -8,6 +8,7 @@ window.ProductionView = {
 
     // Data selection and visualization state
     const selectDataset = ref({});
+    const selectChartLevel = ref('Agricultural');
     const mapPathName = ref({});
     const mapSelectKey = ref([]);
 
@@ -76,7 +77,16 @@ window.ProductionView = {
     onMounted(async () => {
       await loadScript("./data/Supporting_info.js", 'Supporting_info');
       await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
+      
+      // Load Production chart data files
       await loadScript("./data/Production_LUTO_1_Agricultural.js", 'Production_LUTO_1_Agricultural');
+      await loadScript("./data/Production_LUTO_2_Non-Agricultural.js", 'Production_LUTO_2_Non-Agricultural');
+      await loadScript("./data/Production_LUTO_3_Agricultural_Management.js", 'Production_LUTO_3_Agricultural_Management');
+      await loadScript("./data/Production_achive_percent.js", 'Production_achive_percent');
+      await loadScript("./data/Production_sum_1_Commodity.js", 'Production_sum_1_Commodity');
+      await loadScript("./data/Production_sum_2_Type.js", 'Production_sum_2_Type');
+      
+      // Load map data for all categories
       await loadScript(`${window.MapService.mapCategories['Production']['Ag']}`, 'map_quantities_Ag');
       await loadScript(`${window.MapService.mapCategories['Production']['Ag Mgt']}`, 'map_quantities_Am');
       await loadScript(`${window.MapService.mapCategories['Production']['Non-Ag']}`, 'map_quantities_NonAg');
@@ -95,16 +105,8 @@ window.ProductionView = {
         mapSelectKey.value = [selectCommodity.value, selectYear.value];
       }
 
-      selectDataset.value = {
-        ...window.Chart_default_options,
-        chart: {
-          height: 300,
-        },
-        legend: {
-          width: 150,
-        },
-        series: window['Production_LUTO_1_Agricultural']['AUSTRALIA'],
-      };
+      // Update chart with initial data
+      updateChartSeries();
 
       // Use nextTick to ensure the data is processed before rendering the UI components
       nextTick(() => {
@@ -146,7 +148,64 @@ window.ProductionView = {
       // Force a redraw by creating a new array reference
       mapSelectKey.value = [...mapSelectKey.value];
     });
+    
+    // Refresh chart when category/level/region change
+    watch([selectCategory, selectChartLevel, selectRegion], () => {
+      updateChartSeries();
+    });
 
+    // Functions to get chart data and options
+    const getChartData = () => {
+      // Map the visible "Chart level" label to the loaded dataset key
+      const chartKeyMap = {
+        'Ag': {
+          'Agricultural': 'Production_LUTO_1_Agricultural',
+          'Overview': 'Production_achive_percent',
+          'Commodity': 'Production_sum_1_Commodity',
+          'Type': 'Production_sum_2_Type',
+        },
+        'Ag Mgt': {
+          'Agricultural Management': 'Production_LUTO_3_Agricultural_Management',
+          'Overview': 'Production_achive_percent',
+          'Commodity': 'Production_sum_1_Commodity',
+          'Type': 'Production_sum_2_Type',
+        },
+        'Non-Ag': {
+          'Non-Agricultural': 'Production_LUTO_2_Non-Agricultural',
+          'Overview': 'Production_achive_percent',
+          'Commodity': 'Production_sum_1_Commodity',
+          'Type': 'Production_sum_2_Type',
+        },
+      };
+      return chartKeyMap[selectCategory.value]?.[selectChartLevel.value] || 'Production_LUTO_1_Agricultural';
+    };
+    
+    const getChartOptionsForLevel = (level) => {
+      if (level === 'ag') {
+        return ['Agricultural', 'Overview', 'Commodity', 'Type'];
+      }
+      if (level === 'agMgt') {
+        return ['Agricultural Management', 'Overview', 'Commodity', 'Type'];
+      }
+      if (level === 'nonag') {
+        return ['Non-Agricultural', 'Overview', 'Commodity', 'Type'];
+      }
+      return [];
+    };
+    
+    const availableChartAg = computed(() => getChartOptionsForLevel('ag'));
+    const availableChartAgMgt = computed(() => getChartOptionsForLevel('agMgt'));
+    const availableChartNonAg = computed(() => getChartOptionsForLevel('nonag'));
+    
+    const updateChartSeries = () => {
+      const dsKey = getChartData();
+      selectDataset.value = {
+        ...window.Chart_default_options,
+        chart: { height: 500 },
+        series: window[dsKey][selectRegion.value],
+      };
+    };
+    
     return {
       yearIndex,
       isDrawerOpen,
@@ -157,6 +216,11 @@ window.ProductionView = {
       availableCategories,
       availableAgMgt,
       availableCommodities,
+      
+      availableChartAg,
+      availableChartAgMgt,
+      availableChartNonAg,
+      selectChartLevel,
 
       selectRegion,
       selectDataset,
@@ -220,11 +284,9 @@ window.ProductionView = {
           </div>
         </div>
 
-        <!-- Ag Mgt options (only for Ag Mgt category) -->
-        <div 
-          v-if="availableAgMgt.length > 0" 
-          class="flex items-start border-t border-white/10 pt-1">
-          <div class="flex flex-wrap gap-1 max-w-[300px]">
+        <!-- Ag Mgt options (only for Ag Mgt category when drawer is closed) -->
+        <div class="flex items-start border-t border-white/10 pt-1">
+          <div v-if="!isDrawerOpen && availableAgMgt.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">Ag Mgt:</span>
             <button v-for="(val, key) in availableAgMgt" :key="key"
               @click="selectAgMgt = val"
@@ -233,18 +295,40 @@ window.ProductionView = {
               {{ val }}
             </button>
           </div>
+          <div v-else-if="isDrawerOpen && availableChartAgMgt.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Chart level:</span>
+            <button v-for="(val, key) in availableChartAgMgt" :key="key"
+              @click="selectChartLevel = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectChartLevel === val}">
+              {{ val }}
+            </button>
+          </div>
         </div>
 
         <!-- Commodity options -->
-        <div 
-          v-if="dataLoaded && availableCommodities.length > 0" 
-          class="flex items-start border-t border-white/10 pt-1">
-          <div class="flex flex-wrap gap-1 max-w-[300px]">
+        <div class="flex items-start border-t border-white/10 pt-1">
+          <div v-if="dataLoaded && !isDrawerOpen && availableCommodities.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">Commodity:</span>
             <button v-for="(val, key) in availableCommodities" :key="key"
               @click="selectCommodity = val"
               class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
               :class="{'bg-sky-500 text-white': selectCommodity === val}">
+              {{ val }}
+            </button>
+          </div>
+          <div v-else-if="dataLoaded && isDrawerOpen && (selectCategory.value === 'Ag' || selectCategory.value === 'Non-Ag')" class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Chart level:</span>
+            <button v-if="selectCategory.value === 'Ag'" v-for="(val, key) in availableChartAg" :key="key"
+              @click="selectChartLevel = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectChartLevel === val}">
+              {{ val }}
+            </button>
+            <button v-if="selectCategory.value === 'Non-Ag'" v-for="(val, key) in availableChartNonAg" :key="key"
+              @click="selectChartLevel = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectChartLevel === val}">
               {{ val }}
             </button>
           </div>
@@ -277,6 +361,8 @@ window.ProductionView = {
           }">
           <chart-container 
             :chartData="selectDataset" 
+            :draggable="true"
+            :zoomable="true"
             style="width: 100%; height: 200px;">
           </chart-container>
         </div>

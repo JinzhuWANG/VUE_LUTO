@@ -68,20 +68,20 @@ window.Highchart = {
     const stopDrag = () => {
       isDragging.value = false;
     };
-    
+
     // Zoom functionality
     const zoomIn = () => {
       if (!props.zoomable) return;
       scale.value += zoomStep;
     };
-    
+
     const zoomOut = () => {
       if (!props.zoomable) return;
       if (scale.value > zoomStep) {
         scale.value -= zoomStep;
       }
     };
-    
+
     const handleWheel = (event) => {
       if (!props.zoomable) return;
       event.preventDefault();
@@ -184,7 +184,7 @@ window.Highchart = {
       @wheel.prevent="handleWheel">
       <div v-if="isLoading" class="flex justify-center items-center text-lg">Loading data...</div>
       <div ref="chartElement" id="chart-container"></div>
-      <div v-if="zoomable" class="absolute top-2 right-2 flex flex-col space-y-1">
+      <div v-if="zoomable" class="absolute top-[40px] right-2 flex flex-col space-y-1">
         <button @click="zoomIn" class="bg-white/80 hover:bg-white text-gray-800 w-8 h-8 rounded-full shadow flex items-center justify-center">+</button>
         <button @click="zoomOut" class="bg-white/80 hover:bg-white text-gray-800 w-8 h-8 rounded-full shadow flex items-center justify-center">-</button>
       </div>
