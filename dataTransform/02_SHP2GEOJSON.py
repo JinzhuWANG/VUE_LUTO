@@ -1,40 +1,27 @@
 import json
 import geopandas as gpd
+from io import BytesIO
 
+# Save NRM to JS object
+NRM_AUS = gpd.read_file('assets/NRM_SIMPLIFY_FILTER/NRM_AUS_SIMPLIFIED.shp')
 
-NRM_AUS = gpd.read_file('dataTransform/NRM_SIMPLIFY_FILTER/NRM_AUS_SIMPLIFIED.shp')
-
-# Save to GeoJSON file
-NRM_AUS.to_file('data/geo/NRM_AUS.geojson', driver='GeoJSON')
-
-
-
-# Load the GeoJSON as a Python dict using json.load
-with open('data/geo/NRM_AUS.geojson', 'r', encoding='utf-8') as f:
-    geojson_data = json.load(f)
+with BytesIO() as geojson_bytes:
+    NRM_AUS.to_file(geojson_bytes, driver='GeoJSON')
+    geojson_bytes.seek(0)
+    geojson_str = eval(geojson_bytes.getvalue().decode('utf-8'))
     
 with open('data/geo/NRM_AUS.js', 'w', encoding='utf-8') as f:
-    f.write(f'window.NRM_AUS = {json.dumps(geojson_data, indent=2)};\n')
+    f.write(f'window.NRM_AUS = {json.dumps(geojson_str, indent=2)};\n')
 
 
 
-# Calculate the centroid and bounding box for each feature
-region_centroid_bbox = {}
-for _, row in NRM_AUS.iterrows():
-    centroid_point = row.geometry.centroid.coords[0]
-    bounding_box = row.geometry.bounds
-    region_centroid_bbox[row['NHT2NAME']] = {
-        'centroid': centroid_point,
-        'bounding_box': bounding_box
-    }
+# Save AUSTRALIA STATE to JS object
+AUS_STATE = gpd.read_file('assets/AUS_STATE_SIMPLIFIED/STE11aAust_mercator_simplified.shp')
 
-with open('data/geo/NRM_AUS_centroid_bbox.js', 'w', encoding='utf-8') as f:
-    f.write(f'window.NRM_AUS_centroid_bbox = {json.dumps(region_centroid_bbox, indent=2)};\n')
+with BytesIO() as geojson_bytes:
+    AUS_STATE.to_file(geojson_bytes, driver='GeoJSON')
+    geojson_bytes.seek(0)
+    geojson_str = eval(geojson_bytes.getvalue().decode('utf-8'))
 
-
-
-
-
-
-
-
+with open('data/geo/AUS_STATE.js', 'w', encoding='utf-8') as f:
+    f.write(f'window.AUS_STATE = {json.dumps(geojson_str, indent=2)};\n')

@@ -1,4 +1,4 @@
 .vscode-upload.json
-assets/*
 data/*.js
+data/map_layers
 .vscode
