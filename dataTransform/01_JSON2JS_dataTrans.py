@@ -15,7 +15,9 @@ for f in tqdm(files, total=len(files)):
         data = json.load(src_file)
         
     with open(f'data/{f_name}.js', 'w', encoding='utf-8') as dest_file:
-        dest_file.write(f'window["{f_name}"] = {json.dumps(data, indent=2)};\n')
+        dest_file.write(f'window["{f_name}"] = ')
+        json.dump(data, dest_file, separators=(',', ':'))
+        dest_file.write(';\n')
 
 
 
