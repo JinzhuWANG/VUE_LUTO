@@ -169,7 +169,10 @@ If you need to update data from raw JSON files:
    ```bash
    python dataTransform/01_JSON2JS_dataTrans.py
    ```
-3. This will convert JSON files to JavaScript files in the `data/` directory with proper window object assignments
+3. This will convert JSON files to JavaScript files in the `data/` directory with the following features:
+   - Properly formatted with indentation for better readability
+   - Assigned to window objects with the same name as the source file
+   - Map-related files prefixed with "map_" for clearer identification
 
 ### Production Deployment
 The application is a static web application that can be deployed to any web server:
@@ -231,6 +234,8 @@ This project is part of the LUTO (Land Use Trade-Offs) model system. Please refe
 ## Version History
 
 ### Latest Changes
+- Refactored data structure with improved JS file formatting
+- Updated JSON to JS conversion process with better indentation
 - Updated map UI components and views for improved visualization
 - Enhanced map integration with dynamic data loading capabilities
 - Optimized map data loading and UI controls for better performance
