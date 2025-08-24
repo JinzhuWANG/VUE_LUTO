@@ -22,7 +22,7 @@ window.HomeView = {
       'Economics_overview': { 'type': 'Economics', 'unit': 'AUD' },
       'Area_overview_2_Category': { 'type': 'Area', 'unit': 'Hectares' },
       'GHG_overview': { 'type': 'GHG', 'unit': 'Mt CO2e' },
-      'Water_overview_MRN_region_2_Type': { 'type': 'Water', 'unit': 'ML' },
+      'Water_overview_NRM_region_2_Type': { 'type': 'Water', 'unit': 'ML' },
       'BIO_quality_overview_1_Type': { 'type': 'Biodiversity', 'unit': 'Weighted score (ha)' },
     });
     const selectDataset = ref('Area_overview_2_Category');
@@ -56,8 +56,6 @@ window.HomeView = {
         console.error(`Error loading dataset ${datasetName}:`, error);
       }
     };
-
-
     // Load scripts and data when the component is mounted
     onMounted(async () => {
       try {
@@ -125,8 +123,6 @@ window.HomeView = {
         selectYear.value = availableYears.value[newIndex];
       }
     );
-
-
     return {
       dataLoaded,
       availableYears,

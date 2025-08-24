@@ -9,15 +9,21 @@ window.GHGView = {
     // Data selection and visualization state
     const selectDataset = ref({});
     const selectChartLevel = ref('Overview');
-    const mapPathName = ref({});
-    const mapSelectKey = ref([]);
 
-    // Category selection state
-    const selectCategory = ref('Ag');
-    const selectGHGSource = ref('Chemical'); // GHG source (Chemical, fertiliser, etc.)
-    const selectAgMgt = ref('Environmental Plantings');
-    const selectWater = ref('dry');
-    const selectLanduse = ref('Beef - modified land');
+    // Base map selection state
+    const mapVarName = ref('');
+    const mapVarPath = ref([]);
+
+    // Data|Map service
+    const MapRegister = window.MapService.mapCategories['GHG'];     // MapService was registered in the index.html
+    const dataConstructor = new window.DataConstructor();
+
+    // Map selection state
+    const selectMapCategory = ref('Ag');
+    const selectMapGHGSource = ref('TCO2E_CHEM_APPL'); // GHG source (TCO2E_CHEM_APPL, TCO2E_CULTIV, etc.)
+    const selectMapAgMgt = ref('Precision Agriculture');
+    const selectMapWater = ref('dry');
+    const selectMapLanduse = ref('Beef - modified land');
     const selectYear = ref(2020);
 
     const availableYears = ref([]);
@@ -25,82 +31,53 @@ window.GHGView = {
 
     const dataLoaded = ref(false);
 
-    // Centralized function to navigate nested data structure based on current selections
-    const getNestedData = (path = []) => {
-      // Start with the appropriate data object based on category
-      let dataSource;
-      if (selectCategory.value === 'Ag') {
-        dataSource = window.map_GHG_Ag;
-      } else if (selectCategory.value === 'Ag Mgt') {
-        dataSource = window.map_GHG_Am;
-      } else if (selectCategory.value === 'Non-Ag') {
-        dataSource = window.map_GHG_NonAg;
-      }
-
-      if (!dataSource) return null;
-
-      // Ensure all path elements are valid and exist
-      if (path.some(key => key === undefined || key === null)) return null;
-
-      // Navigate through the nested structure using the provided path
-      for (const key of path) {
-        if (!dataSource || !dataSource[key]) return null;
-        dataSource = dataSource[key];
-      }
-
-      return dataSource;
+    // Function to load data for current category
+    const loadDataForCategory = (category) => {
+      if (!window[MapRegister[category]['name']]) return;
+      dataConstructor.loadData(window[MapRegister[category]['name']]);
     };
 
-    // Get options for a specific level in the hierarchy
-    const getOptionsForLevel = (level) => {
-      if (level === 'ghgSource') {
-        // GHG source options only available in 'Ag' category
-        if (selectCategory.value !== 'Ag' || !window.map_GHG_Ag) return [];
-        return Object.keys(window.map_GHG_Ag || {});
-      }
+    // Computed properties using DataConstructor
+    const availableGHGSource = computed(() => {
+      if (selectMapCategory.value !== 'Ag') return [];
+      return dataConstructor.getAvailableKeysAtNextLevel({});
+    });
 
-      if (level === 'agMgt') {
-        // Ag Mgt options only available in 'Ag Mgt' category
-        if (selectCategory.value !== 'Ag Mgt' || !window.map_GHG_Am) return [];
-        return Object.keys(window.map_GHG_Am);
-      }
+    const availableAgMgt = computed(() => {
+      if (selectMapCategory.value !== 'Ag Mgt') return [];
+      return dataConstructor.getAvailableKeysAtNextLevel({});
+    });
 
-      if (level === 'water') {
-        // Water options depend on category and possibly ghgSource or ag mgt selection
-        if (selectCategory.value === 'Ag') {
-          const ghgSourceData = getNestedData([selectGHGSource.value]);
-          return ghgSourceData ? Object.keys(ghgSourceData) : [];
-        } else if (selectCategory.value === 'Ag Mgt') {
-          const agMgtData = getNestedData([selectAgMgt.value]);
-          return agMgtData ? Object.keys(agMgtData) : [];
-        }
+    const availableWater = computed(() => {
+      // Non-Ag category has no water options
+      if (selectMapCategory.value === 'Non-Ag') {
         return [];
       }
 
-      if (level === 'landuse') {
-        // Landuse options depend on category and previous selections
-        if (selectCategory.value === 'Ag') {
-          const waterData = getNestedData([selectGHGSource.value, selectWater.value]);
-          return waterData ? Object.keys(waterData) : [];
-        } else if (selectCategory.value === 'Ag Mgt') {
-          const waterData = getNestedData([selectAgMgt.value, selectWater.value]);
-          return waterData ? Object.keys(waterData) : [];
-        } else if (selectCategory.value === 'Non-Ag') {
-          return Object.keys(window.map_GHG_NonAg || {});
-        }
-        return [];
+      const fixedLevels = {};
+
+      if (selectMapCategory.value === 'Ag' && selectMapGHGSource.value && selectMapLanduse.value) {
+        fixedLevels.level_1 = selectMapGHGSource.value;
+        fixedLevels.level_2 = selectMapLanduse.value;
+      } else if (selectMapCategory.value === 'Ag Mgt' && selectMapAgMgt.value && selectMapLanduse.value) {
+        fixedLevels.level_1 = selectMapAgMgt.value;
+        fixedLevels.level_2 = selectMapLanduse.value;
       }
 
-      return [];
-    };
+      return dataConstructor.getAvailableKeysAtNextLevel(fixedLevels);
+    });
 
-    // Computed properties using the centralized functions
-    const availableGHGSource = computed(() => getOptionsForLevel('ghgSource'));
-    const availableAgMgt = computed(() => getOptionsForLevel('agMgt'));
-    const availableWater = computed(() => getOptionsForLevel('water'));
-    const availableLanduse = computed(() => getOptionsForLevel('landuse'));
+    const availableLanduse = computed(() => {
+      const fixedLevels = {};
 
+      if (selectMapCategory.value === 'Ag' && selectMapGHGSource.value) {
+        fixedLevels.level_1 = selectMapGHGSource.value;
+      } else if (selectMapCategory.value === 'Ag Mgt' && selectMapAgMgt.value) {
+        fixedLevels.level_1 = selectMapAgMgt.value;
+      }
 
+      return dataConstructor.getAvailableKeysAtNextLevel(fixedLevels);
+    });
     onMounted(async () => {
       await loadScript("./data/Supporting_info.js", 'Supporting_info');
       await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
@@ -126,92 +103,88 @@ window.GHGView = {
       await loadScript("./data/GHG_split_NonAg_1_Land-use.js", 'GHG_split_NonAg_1_Land-use');
 
       // Load map data for all categories
-      await loadScript(`${window.MapService.mapCategories['GHG']['Ag']}`, 'map_GHG_Ag');
-      await loadScript(`${window.MapService.mapCategories['GHG']['Ag Mgt']}`, 'map_GHG_Am');
-      await loadScript(`${window.MapService.mapCategories['GHG']['Non-Ag']}`, 'map_GHG_NonAg');
+      await loadScript(MapRegister['Ag']['path'], MapRegister['Ag']['name']);
+      await loadScript(MapRegister['Ag Mgt']['path'], MapRegister['Ag Mgt']['name']);
+      await loadScript(MapRegister['Non-Ag']['path'], MapRegister['Non-Ag']['name']);
 
       availableYears.value = window.Supporting_info.years;
       availableCategories.value = Object.keys(window.MapService.mapCategories['GHG']);
 
-      // Initialize GHG source with first available option if current value is not valid
-      if (selectCategory.value === 'Ag' && window.map_GHG_Ag) {
-        const ghgSourceOptions = Object.keys(window.map_GHG_Ag);
-        if (ghgSourceOptions.length > 0 && !ghgSourceOptions.includes(selectGHGSource.value)) {
-          selectGHGSource.value = ghgSourceOptions[0];
-        }
-      }
+      // Load initial data for the default category
+      loadDataForCategory(selectMapCategory.value);
 
-      if (selectCategory.value === 'Ag') {
-        mapPathName.value = 'window.map_GHG_Ag';
-        mapSelectKey.value = [selectGHGSource.value, selectWater.value, selectLanduse.value, selectYear.value];
-      } else if (selectCategory.value === 'Ag Mgt') {
-        mapPathName.value = 'window.map_GHG_Am';
-        mapSelectKey.value = [selectAgMgt.value, selectWater.value, selectLanduse.value, selectYear.value];
-      } else if (selectCategory.value === 'Non-Ag') {
-        mapPathName.value = 'window.map_GHG_NonAg';
-        mapSelectKey.value = [selectLanduse.value, selectYear.value];
-      }
-
-      // Update chart with initial data
+      // Update chart and map after initial data load
       updateChartSeries();
+      updateMapOverlay();
 
       // Use nextTick to ensure the data is processed before rendering the UI components
       nextTick(() => {
-        // Set dataLoaded to true after all data has been processed and the DOM has updated
         dataLoaded.value = true;
       });
+    });
 
+    // Watch for category changes to reload data
+    watch(selectMapCategory, (newCategory) => {
+      loadDataForCategory(newCategory);
+    });
 
+    // Watch for changes to validate selections using DataConstructor
+    watch([selectMapCategory, selectMapGHGSource, selectMapAgMgt, selectMapWater, selectMapLanduse, selectYear], () => {
+      // Reset values if they're no longer valid options using DataConstructor
+      if (selectMapCategory.value === 'Ag') {
+        const validGHGSourceOptions = dataConstructor.getAvailableKeysAtNextLevel({});
+        if (validGHGSourceOptions.length > 0 && !validGHGSourceOptions.includes(selectMapGHGSource.value)) {
+          selectMapGHGSource.value = validGHGSourceOptions[0];
+        }
+      }
+
+      if (selectMapCategory.value === 'Ag Mgt') {
+        const validAgMgtOptions = dataConstructor.getAvailableKeysAtNextLevel({});
+        if (validAgMgtOptions.length > 0 && !validAgMgtOptions.includes(selectMapAgMgt.value)) {
+          selectMapAgMgt.value = validAgMgtOptions[0];
+        }
+      }
+
+      // Validate landuse options
+      const landuseFixedLevels = {};
+      if (selectMapCategory.value === 'Ag' && selectMapGHGSource.value) {
+        landuseFixedLevels.level_1 = selectMapGHGSource.value;
+      } else if (selectMapCategory.value === 'Ag Mgt' && selectMapAgMgt.value) {
+        landuseFixedLevels.level_1 = selectMapAgMgt.value;
+      }
+      const validLanduseOptions = dataConstructor.getAvailableKeysAtNextLevel(landuseFixedLevels);
+      if (validLanduseOptions.length > 0 && !validLanduseOptions.includes(selectMapLanduse.value)) {
+        selectMapLanduse.value = validLanduseOptions[0];
+      }
+
+      // Validate water options (only for Ag and Ag Mgt categories)
+      if (selectMapCategory.value !== 'Non-Ag') {
+        const waterFixedLevels = {};
+        if (selectMapCategory.value === 'Ag' && selectMapGHGSource.value && selectMapLanduse.value) {
+          waterFixedLevels.level_1 = selectMapGHGSource.value;
+          waterFixedLevels.level_2 = selectMapLanduse.value;
+        } else if (selectMapCategory.value === 'Ag Mgt' && selectMapAgMgt.value && selectMapLanduse.value) {
+          waterFixedLevels.level_1 = selectMapAgMgt.value;
+          waterFixedLevels.level_2 = selectMapLanduse.value;
+        }
+        const validWaterOptions = dataConstructor.getAvailableKeysAtNextLevel(waterFixedLevels);
+        if (validWaterOptions.length > 0 && !validWaterOptions.includes(selectMapWater.value)) {
+          selectMapWater.value = validWaterOptions[0];
+        }
+      }
+
+      // Set map configuration based on category
+      updateMapOverlay();
+    });
+
+    // Refresh chart when category/level/region change
+    watch([selectMapCategory, selectChartLevel, selectRegion], () => {
+      updateChartSeries();
     });
 
     const toggleDrawer = () => {
       isDrawerOpen.value = !isDrawerOpen.value;
     };
-
-    watch([selectCategory, selectGHGSource, selectAgMgt, selectWater, selectLanduse, selectYear], () => {
-      // Reset values if they're no longer valid options
-      if (selectCategory.value === 'Ag') {
-        const validGHGSourceOptions = getOptionsForLevel('ghgSource');
-        if (validGHGSourceOptions.length > 0 && !validGHGSourceOptions.includes(selectGHGSource.value)) {
-          selectGHGSource.value = validGHGSourceOptions[0];
-        }
-      } else if (selectCategory.value === 'Ag Mgt') {
-        const validAgMgtOptions = getOptionsForLevel('agMgt');
-        if (validAgMgtOptions.length > 0 && !validAgMgtOptions.includes(selectAgMgt.value)) {
-          selectAgMgt.value = validAgMgtOptions[0];
-        }
-      }
-
-      const validWaterOptions = getOptionsForLevel('water');
-      if (validWaterOptions.length > 0 && !validWaterOptions.includes(selectWater.value)) {
-        selectWater.value = validWaterOptions[0];
-      }
-
-      const validLanduseOptions = getOptionsForLevel('landuse');
-      if (validLanduseOptions.length > 0 && !validLanduseOptions.includes(selectLanduse.value)) {
-        selectLanduse.value = validLanduseOptions[0];
-      }
-
-      // Set map configuration based on category
-      if (selectCategory.value === 'Ag') {
-        mapPathName.value = 'window.map_GHG_Ag';
-        mapSelectKey.value = [selectGHGSource.value, selectWater.value, selectLanduse.value, selectYear.value];
-      } else if (selectCategory.value === 'Ag Mgt') {
-        mapPathName.value = 'window.map_GHG_Am';
-        mapSelectKey.value = [selectAgMgt.value, selectWater.value, selectLanduse.value, selectYear.value];
-      } else if (selectCategory.value === 'Non-Ag') {
-        mapPathName.value = 'window.map_GHG_NonAg';
-        mapSelectKey.value = [selectLanduse.value, selectYear.value];
-      }
-
-      // Force a redraw by creating a new array reference
-      mapSelectKey.value = [...mapSelectKey.value];
-    });
-
-    // Refresh chart when category/level/region change
-    watch([selectCategory, selectChartLevel, selectRegion], () => {
-      updateChartSeries();
-    });
 
 
 
@@ -242,23 +215,23 @@ window.GHGView = {
           'Land-use': 'GHG_split_NonAg_1_Land-use',
         },
       };
-      return chartKeyMap[selectCategory.value]?.[selectChartLevel.value] || 'GHG_overview';
+      return chartKeyMap[selectMapCategory.value]?.[selectChartLevel.value] || 'GHG_overview';
     };
 
     const getChartOptionsForLevel = (level) => {
       if (level === 'ag') {
         // Ag options only available in 'Ag' category
-        if (selectCategory.value !== 'Ag' || !window.DataService) return [];
+        if (selectMapCategory.value !== 'Ag' || !window.DataService) return [];
         return Object.keys(window.DataService.ChartPaths['GHG']['Ag']);
       }
       if (level === 'agMgt') {
         // Ag Mgt options only available in 'Ag Mgt' category
-        if (selectCategory.value !== 'Ag Mgt' || !window.DataService) return [];
+        if (selectMapCategory.value !== 'Ag Mgt' || !window.DataService) return [];
         return Object.keys(window.DataService.ChartPaths['GHG']['Ag Mgt']);
       }
       if (level === 'nonag') {
         // Non-Ag options only available in 'Non-Ag' category
-        if (selectCategory.value !== 'Non-Ag' || !window.DataService) return [];
+        if (selectMapCategory.value !== 'Non-Ag' || !window.DataService) return [];
         return Object.keys(window.DataService.ChartPaths['GHG']['Non-Ag']);
       }
       return [];
@@ -269,17 +242,42 @@ window.GHGView = {
     const availableChartNonAg = computed(() => getChartOptionsForLevel('nonag'));
 
     const updateChartSeries = () => {
-      const dsKey = getChartData();
-      selectDataset.value = {
-        ...window.Chart_default_options,
-        chart: { height: 500 },
-        yAxis: {
-          title: {
-            text: "tCO2e",
+      try {
+        const dsKey = getChartData();
+
+        // Check if the required data exists
+        if (!window[dsKey] || !window[dsKey][selectRegion.value]) {
+          console.warn(`Chart data not found for key: ${dsKey}, region: ${selectRegion.value}`);
+          return;
+        }
+
+        selectDataset.value = {
+          ...window.Chart_default_options,
+          chart: { height: 500 },
+          yAxis: {
+            title: {
+              text: "tCO2e",
+            },
           },
-        },
-        series: window[dsKey][selectRegion.value],
-      };
+          series: window[dsKey][selectRegion.value],
+        };
+      } catch (error) {
+        console.error('Error updating chart series:', error);
+      }
+    };
+
+    const updateMapOverlay = () => {
+      // Set map configuration based on category
+      if (selectMapCategory.value === 'Ag') {
+        mapVarName.value = MapRegister["Ag"]["name"];
+        mapVarPath.value = [selectMapGHGSource.value, selectMapLanduse.value, selectMapWater.value, selectYear.value];
+      } else if (selectMapCategory.value === 'Ag Mgt') {
+        mapVarName.value = MapRegister["Ag Mgt"]["name"];
+        mapVarPath.value = [selectMapAgMgt.value, selectMapLanduse.value, selectMapWater.value, selectYear.value];
+      } else if (selectMapCategory.value === 'Non-Ag') {
+        mapVarName.value = MapRegister["Non-Ag"]["name"];
+        mapVarPath.value = [selectMapLanduse.value, selectYear.value];
+      }
     };
 
     return {
@@ -303,15 +301,15 @@ window.GHGView = {
       selectRegion,
       selectDataset,
 
-      selectCategory,
-      selectGHGSource,
-      selectAgMgt,
-      selectWater,
-      selectLanduse,
+      selectMapCategory,
+      selectMapGHGSource,
+      selectMapAgMgt,
+      selectMapWater,
+      selectMapLanduse,
       selectYear,
 
-      mapSelectKey,
-      mapPathName,
+      mapVarPath,
+      mapVarName,
     };
   },
   template: `
@@ -356,9 +354,9 @@ window.GHGView = {
           <div class="flex space-x-1">
             <span class="text-[0.8rem] mr-1 font-medium">Category:</span>
             <button v-for="(val, key) in availableCategories" :key="key"
-              @click="selectCategory = val"
+              @click="selectMapCategory = val"
               class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded"
-              :class="{'bg-sky-500 text-white': selectCategory === val}">
+              :class="{'bg-sky-500 text-white': selectMapCategory === val}">
               {{ val }}
             </button>
           </div>
@@ -366,53 +364,64 @@ window.GHGView = {
 
         <!-- GHG Source options (only for Ag category when drawer is closed) -->
         <div 
-          v-if="dataLoaded && !isDrawerOpen && selectCategory === 'Ag' && availableGHGSource.length > 0" 
+          v-if="dataLoaded && !isDrawerOpen && selectMapCategory === 'Ag' && availableGHGSource.length > 0" 
           class="flex items-start border-t border-white/10 pt-1">
           <div class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">GHG Source:</span>
             <button v-for="(val, key) in availableGHGSource" :key="key"
-              @click="selectGHGSource = val"
+              @click="selectMapGHGSource = val"
               class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
-              :class="{'bg-sky-500 text-white': selectGHGSource === val}">
+              :class="{'bg-sky-500 text-white': selectMapGHGSource === val}">
               {{ val }}
             </button>
           </div>
         </div>
 
         <!-- Ag Mgt options (only for Ag Mgt category when drawer is closed) -->
-        <div class="flex items-start border-t border-white/10 pt-1">
-          <div v-if="!isDrawerOpen && availableAgMgt.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
+        <div v-if="dataLoaded && !isDrawerOpen && selectMapCategory === 'Ag Mgt' && availableAgMgt.length > 0" 
+             class="flex items-start border-t border-white/10 pt-1">
+          <div class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">Ag Mgt:</span>
             <button v-for="(val, key) in availableAgMgt" :key="key"
-              @click="selectAgMgt = val"
+              @click="selectMapAgMgt = val"
               class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
-              :class="{'bg-sky-500 text-white': selectAgMgt === val}">
-              {{ val }}
-            </button>
-          </div>
-          <div v-else-if="isDrawerOpen && availableChartAgMgt.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
-            <span class="text-[0.8rem] mr-1 font-medium">Chart level:</span>
-            <button v-for="(val, key) in availableChartAgMgt" :key="key"
-              @click="selectChartLevel = val"
-              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
-              :class="{'bg-sky-500 text-white': selectChartLevel === val}">
+              :class="{'bg-sky-500 text-white': selectMapAgMgt === val}">
               {{ val }}
             </button>
           </div>
         </div>
 
-        <!-- Water options -->
-        <div class="flex items-start border-t border-white/10 pt-1">
-          <div v-if="dataLoaded && !isDrawerOpen && availableWater.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
+        <!-- Water options (for map categories when drawer is closed) -->
+        <div v-if="dataLoaded && !isDrawerOpen && availableWater.length > 0" 
+             class="flex items-start border-t border-white/10 pt-1">
+          <div class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">Water:</span>
             <button v-for="(val, key) in availableWater" :key="key"
-              @click="selectWater = val"
+              @click="selectMapWater = val"
               class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
-              :class="{'bg-sky-500 text-white': selectWater === val}">
+              :class="{'bg-sky-500 text-white': selectMapWater === val}">
               {{ val }}
             </button>
           </div>
-          <div v-else-if="dataLoaded && isDrawerOpen && availableChartAg.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
+        </div>
+
+        <!-- Landuse options (for map categories when drawer is closed) -->
+        <div v-if="dataLoaded && !isDrawerOpen && availableLanduse.length > 0" 
+             class="flex items-start border-t border-white/10 pt-1">
+          <div class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Landuse:</span>
+            <button v-for="(val, key) in availableLanduse" :key="key"
+              @click="selectMapLanduse = val"
+              class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
+              :class="{'bg-sky-500 text-white': selectMapLanduse === val}">
+              {{ val }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Chart level options (when drawer is open) -->
+        <div v-if="dataLoaded && isDrawerOpen" class="flex items-start border-t border-white/10 pt-1">
+          <div v-if="selectMapCategory === 'Ag' && availableChartAg.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">Chart level:</span>
             <button v-for="(val, key) in availableChartAg" :key="key"
               @click="selectChartLevel = val"
@@ -421,20 +430,16 @@ window.GHGView = {
               {{ val }}
             </button>
           </div>
-        </div>
-
-        <!-- Landuse options -->
-        <div class="flex items-start border-t border-white/10 pt-1">
-          <div v-if="dataLoaded && !isDrawerOpen && availableLanduse.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
-            <span class="text-[0.8rem] mr-1 font-medium">Landuse:</span>
-            <button v-for="(val, key) in availableLanduse" :key="key"
-              @click="selectLanduse = val"
+          <div v-else-if="selectMapCategory === 'Ag Mgt' && availableChartAgMgt.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
+            <span class="text-[0.8rem] mr-1 font-medium">Chart level:</span>
+            <button v-for="(val, key) in availableChartAgMgt" :key="key"
+              @click="selectChartLevel = val"
               class="bg-white text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded mb-1"
-              :class="{'bg-sky-500 text-white': selectLanduse === val}">
+              :class="{'bg-sky-500 text-white': selectChartLevel === val}">
               {{ val }}
             </button>
           </div>
-          <div v-else-if="dataLoaded && isDrawerOpen && availableChartNonAg.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
+          <div v-else-if="selectMapCategory === 'Non-Ag' && availableChartNonAg.length > 0" class="flex flex-wrap gap-1 max-w-[300px]">
             <span class="text-[0.8rem] mr-1 font-medium">Chart level:</span>
             <button v-for="(val, key) in availableChartNonAg" :key="key"
               @click="selectChartLevel = val"
@@ -451,8 +456,8 @@ window.GHGView = {
       <div style="position: relative; width: 100%; height: 100%; overflow: hidden;">
         <!-- Map component takes full space -->
         <regions-map 
-          :mapPathName="mapPathName"
-          :mapKey="mapSelectKey"
+          :mapName="mapVarName"
+          :mapPath="mapVarPath"
           style="width: 100%; height: 100%;">
         </regions-map>
         
