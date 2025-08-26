@@ -20,7 +20,10 @@ window.map_geojson = {
         },
     },
     setup(props, { emit }) {
-        const { ref, onMounted, watch, inject } = Vue;
+        const { ref, onMounted, watch, inject, nextTick } = Vue;
+
+        const rankingData = ref({});
+        const dataLoaded = ref(false);
 
         const mapElement = ref(null);
         const activeRegionName = inject('globalSelectedRegion');
@@ -102,9 +105,6 @@ window.map_geojson = {
         });
 
         onMounted(async () => {
-
-            // Load data
-            await window.loadScript("./data/geo/NRM_AUS.js", 'NRM_AUS');
 
             // Initialize map
             const map = L.map(mapElement.value, {
@@ -251,16 +251,21 @@ window.map_geojson = {
                 },
             }).addTo(map);
 
+            nextTick(() => {
+                dataLoaded.value = true;
+            });
+
         });
 
         return {
             mapElement,
             activeRegionName,
+            rankingData,
             props
         };
     },
     template: `
-      <div>
+      <div v-if="dataLoaded">
         <div ref="mapElement" :style="{ background: 'transparent', height: props.height }"></div>
         <div v-if="props.legendObj" class="absolute bottom-[30px] left-[35px]">
           <div class="font-bold text-sm mb-2 text-gray-600">Ranking</div>

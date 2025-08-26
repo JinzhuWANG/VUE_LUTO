@@ -218,7 +218,6 @@ window.AreaView = {
       // Set map configuration based on category
       updateMapOverlay();
 
-
     });
 
     // Refresh chart when category/level/region change
