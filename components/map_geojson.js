@@ -4,26 +4,12 @@ window.map_geojson = {
             type: String,
             default: '500px',
         },
-        selectDataType: {
-            type: String,
-        },
-        selectYear: {
-            type: [Number, String],
-            default: 2020,
-        },
-        selectSubcategory: {
-            type: String,
-        },
-        legendObj: {
+        selectRankingData: {
             type: Object,
-            default: () => ({}),
         },
     },
-    setup(props, { emit }) {
-        const { ref, onMounted, watch, inject, nextTick } = Vue;
-
-        const rankingData = ref({});
-        const dataLoaded = ref(false);
+    setup(props) {
+        const { ref, onMounted, watch, inject } = Vue;
 
         const mapElement = ref(null);
         const activeRegionName = inject('globalSelectedRegion');
@@ -46,9 +32,6 @@ window.map_geojson = {
             weight: 0.1,
         };
 
-        const updateRegionName = (newRegionName) => {
-            activeRegionName.value = newRegionName;
-        };
 
         // Function to update styles based on data type and year
         const updateMapStyles = () => {
@@ -91,18 +74,6 @@ window.map_geojson = {
             });
         };
 
-        // Watch for changes in data type or year
-        watch(() => props.selectDataType, (newValue) => {
-            updateMapStyles();
-        });
-
-        watch(() => props.selectYear, (newValue) => {
-            updateMapStyles();
-        });
-
-        watch(() => props.selectSubcategory, (newValue) => {
-            updateMapStyles();
-        });
 
         onMounted(async () => {
 
@@ -127,19 +98,10 @@ window.map_geojson = {
             const getFeatureStyle = (feature) => {
                 const regionName = feature.properties.NHT2NAME;
 
-
-                const dataType = props.selectDataType;
-                const currentYear = props.selectYear;
-                const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
-                const rankingKey = `${dataType}_ranking`;
-
                 // Need a check to access a deep property safely
                 let style = { ...defaultStyle };
-                if (window[rankingKey]?.[regionName]?.[subcategory]?.color?.[currentYear]) {
-                    style.fillColor = window[rankingKey][regionName][subcategory].color[currentYear];
-                } else {
-                    style.fillColor = defaultStyle.fillColor; // Fallback to default color
-                }
+                style.fillColor = window[rankingKey][regionName][subcategory].color[currentYear];
+
 
                 // Store the style for later reference
                 featureStyles.value[regionName] = style;
@@ -210,13 +172,6 @@ window.map_geojson = {
                                 } else {
                                     // As a fallback, try to get color from current data
                                     try {
-                                        const dataType = props.selectDataType || 'Area';
-                                        const currentYear = props.selectYear;
-                                        const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
-
-                                        // Special handling for Water data type
-                                        const rankingKey = `${dataType}_ranking`;
-
 
                                         // Create a new style object using the region's color
                                         const style = { ...defaultStyle };
@@ -228,7 +183,6 @@ window.map_geojson = {
                                         layer_e.setStyle(defaultStyle);
                                     }
                                 }
-                                updateRegionName('AUSTRALIA');
                                 return;
                             }
 
@@ -243,7 +197,6 @@ window.map_geojson = {
                             });
 
                             // Set new selection
-                            updateRegionName(layer_e.options.regionName);
                             layer_e.setStyle(highlightStyle);
 
                         },
@@ -251,31 +204,19 @@ window.map_geojson = {
                 },
             }).addTo(map);
 
-            nextTick(() => {
-                dataLoaded.value = true;
-            });
+
 
         });
 
         return {
             mapElement,
             activeRegionName,
-            rankingData,
             props
         };
     },
     template: `
-      <div v-if="dataLoaded">
+      <div>
         <div ref="mapElement" :style="{ background: 'transparent', height: props.height }"></div>
-        <div v-if="props.legendObj" class="absolute bottom-[30px] left-[35px]">
-          <div class="font-bold text-sm mb-2 text-gray-600">Ranking</div>
-          <div class="flex flex-row items-center">
-            <div v-for="(color, label) in props.legendObj" :key="label" class="flex items-center mr-4 mb-1">
-                <span class="inline-block w-[12px] h-[12px] mr-[3px]" :style="{ backgroundColor: color }"></span>
-                <span class="text-sm text-gray-600">{{ label }}</span>
-            </div>
-          </div>
-        </div>
       </div>
     `,
 };

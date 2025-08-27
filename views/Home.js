@@ -27,9 +27,16 @@ window.HomeView = {
       'Water': 'ML',
       'Biodiversity': 'Relative Percentage (Pre-1750 = 100%)',
     };
+    const RankSubcategoriesRename = {
+      'Agricultural Landuse': 'Ag',
+      'Agricultural Management': 'Ag Mgt',
+      'Non-Agricultural Landuse': 'Non-Ag',
+      'Non-Agricultural land-use': 'Non-Ag',
+    };
     const availableRankSubcategories = computed(() => {
-      return (rankingData.value[selectChartCategory.value]) ?
-        Object.keys(rankingData.value[selectChartCategory.value]) : [];
+      return rankingData.value[selectChartCategory.value][selectRegion.value]
+        ? Object.keys(rankingData.value[selectChartCategory.value][selectRegion.value]).filter(key => key !== "Total")
+        : [];
     });
 
     // Default selections
@@ -41,7 +48,7 @@ window.HomeView = {
     const selectChartSubCategory = ref('');
     const selectRankingSubCategory = ref('');
     const selectRankingData = computed(() => {
-      return rankingData.value[selectChartCategory.value][selectRegion.value][selectRankingSubCategory.value] || [];
+      return rankingData.value[selectChartCategory.value]?.[selectRankingSubCategory.value] || [];
     });
 
 
@@ -51,14 +58,14 @@ window.HomeView = {
         return {
           ...window['Chart_default_options'],
           chart: {
-            height: 550,
+            height: 440,
           },
           yAxis: {
             title: {
               text: availableUnit[selectChartCategory.value]
             }
           },
-          series: ChartData.value[selectChartCategory.value][selectChartSubCategory.value],
+          series: ChartData.value[selectChartCategory.value][selectChartSubCategory.value][selectRegion.value],
           colors: window['Supporting_info'].colors,
         };
       }
@@ -159,35 +166,35 @@ window.HomeView = {
       };
 
       rankingData.value = {
-        'Area': window[rankingArea['name']][selectRegion.value],
-        'Economics': window[rankingEconomics['name']][selectRegion.value],
-        'GHG': window[rankingGHG['name']][selectRegion.value],
-        'Water': window[rankingWater['name']][selectRegion.value],
-        'Biodiversity': window[rankingBiodiversity['name']][selectRegion.value],
+        'Area': window[rankingArea['name']],
+        'Economics': window[rankingEconomics['name']],
+        'GHG': window[rankingGHG['name']],
+        'Water': window[rankingWater['name']],
+        'Biodiversity': window[rankingBiodiversity['name']],
       };
 
-      //  Set initial values
+
+
+      //  Set initial values AFTER dataLoaded = true
       availableYears.value = window['Supporting_info']['years'];
       selectYear.value = availableYears.value[0];
 
       availableChartCategories.value = Object.keys(ChartData.value);
       selectChartCategory.value = availableChartCategories.value[0];
 
-      availableChartSubCategories.value = Object.keys(ChartData.value[selectChartCategory.value]);
-      selectChartSubCategory.value = availableChartSubCategories.value[0];
+      selectChartSubCategory.value = Object.keys(ChartData.value[selectChartCategory.value])[0];
+      selectRankingSubCategory.value = Object.keys(rankingData.value[selectChartCategory.value])[0];
 
-      selectRankingSubCategory.value = availableRankSubcategories.value[0];
+      dataLoaded.value = true;
 
-      // Mark data as loaded and use nextTick to ensure UI updates
-      await nextTick(() => {
-        dataLoaded.value = true;
-      });
+      console.log(rankingData.value)
 
     });
 
-
-
-
+    watch(selectChartCategory, (newCategory) => {
+      selectChartSubCategory.value = availableChartSubCategories.value[0];
+      selectRankingSubCategory.value = availableRankSubcategories.value[0];
+    });
 
 
     return {
@@ -198,6 +205,7 @@ window.HomeView = {
       ChartData,
       rankingData,
       rankingColors,
+      RankSubcategoriesRename,
 
       availableYears,
       availableChartCategories,
@@ -225,6 +233,7 @@ window.HomeView = {
         <div class="mb-4 mr-4">
           <ranking-cards 
             :rankingData="rankingData"
+            :selectRegion="selectRegion"
             :selectYear="selectYear">
           </ranking-cards>
         </div>
@@ -259,6 +268,16 @@ window.HomeView = {
             <!-- Horizontal Divider -->
             <hr class="border-gray-300">
 
+            <!-- Ranking Subcategory Buttons -->
+            <div class="flex items-center space-x-1 justify-end absolute top-[60px] left-[220px]">
+              <button v-for="(data, key) in availableRankSubcategories" :key="key"
+                @click="selectRankingSubCategory = data"
+                class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded"
+                :class="{'bg-sky-500 text-white': selectRankingSubCategory === data}">
+                {{ RankSubcategoriesRename[data] || data }}
+              </button>
+            </div>
+
             <!-- Year scroll -->
             <div class="flex flex-col absolute top-[50px] left-[10px] w-[200px]">
               <p class="text-[0.8rem]">Year: <strong>{{ selectYear }}</strong></p>
@@ -276,22 +295,28 @@ window.HomeView = {
                 @input="(index) => { yearIndex = index; }"
               />
             </div>
+            
 
-            <!-- Year scroll -->
-            <div class="flex space-x-1 mr-4">
+          </div>
+
+
+          <div class="relative flex flex-1 rounded-[10px] bg-white shadow-md h-[500px]">
+
+            <!-- Chart subcategory buttons -->
+            <div class="absolute flex flex-row space-x-1 mr-4 top-[9px] left-[10px] z-10">
               <button v-for="cat in availableChartSubCategories" :key="cat"
                 @click="selectChartSubCategory = cat"
-                class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 rounded"
+                class="bg-[#e8eaed] text-[#1f1f1f] text-[0.8rem] px-1 py-1 rounded"
                 :class="{'bg-sky-500 text-white': selectChartSubCategory === cat}">
                 {{ cat }}
               </button>
             </div>
 
+            <chart-container
+              class="w-full h-full pt-[50px]"
+              :chartData="selectChartData">
+            </chart-container>
 
-          </div>
-
-
-          <div class="flex flex-1 rounded-[10px] bg-white shadow-md h-[500px] relative">
           </div>
 
 
