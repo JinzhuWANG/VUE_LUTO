@@ -12,6 +12,7 @@ window.HomeView = {
     const selectRegion = inject('globalSelectedRegion');
     const ChartData = ref({});
     const rankingData = ref({});
+    const colorsRanking = ref({});
 
     // Available selections
     const availableYears = ref([]);
@@ -84,6 +85,7 @@ window.HomeView = {
       // Load required data
       await loadScript("./data/Supporting_info.js", 'Supporting_info');
       await loadScript("./data/chart_option/Chart_default_options.js", 'Chart_default_options');
+      await loadScript("./data/geo/NRM_AUS.js", 'NRM_AUS');
 
       // Overview chart data
       const chartOverview_area = chartRegister['Area']['overview'];
@@ -170,6 +172,7 @@ window.HomeView = {
 
       selectChartSubCategory.value = Object.keys(ChartData.value[selectChartCategory.value])[0];
       selectRankingSubCategory.value = Object.keys(rankingData.value[selectChartCategory.value][selectRegion.value])[0];
+      colorsRanking.value = window.Supporting_info.colors_ranking;
 
       await nextTick(() => {
         dataLoaded.value = true;
@@ -187,16 +190,17 @@ window.HomeView = {
       availableRankSubcategories.value = Object.keys(rankingData.value[selectChartCategory.value][selectRegion.value]).filter(key => key !== "Total");
       selectChartSubCategory.value = availableChartSubCategories.value[0];
       selectRankingSubCategory.value = availableRankSubcategories.value[0];
+    });
+
+    watch([selectYear, selectRankingSubCategory], (newValues, oldValues) => {
+      const [newYear, newSubCategory] = newValues;
       selectRankingColors.value = Object.fromEntries(
         Object.entries(rankingData.value[selectChartCategory.value] || {}).map(([region, values]) => [
           region,
-          values[selectRankingSubCategory.value]?.['color']?.[selectYear.value] || {}
+          values[newSubCategory]?.['color']?.[newYear] || {}
         ])
       );
-
-      console.log(selectRankingColors.value)
     });
-
 
     return {
       yearIndex,
@@ -206,6 +210,7 @@ window.HomeView = {
       ChartData,
       rankingData,
       RankSubcategoriesRename,
+      colorsRanking,
 
       availableYears,
       availableChartCategories,
@@ -266,10 +271,10 @@ window.HomeView = {
             </div>
 
             <!-- Horizontal Divider -->
-            <hr class="border-gray-300">
+            <hr class="border-gray-300 z-[100]">
 
             <!-- Ranking Subcategory Buttons -->
-            <div class="flex items-center space-x-1 justify-end absolute top-[60px] left-[220px]">
+            <div class="flex items-center space-x-1 justify-end absolute top-[55px] left-[220px] z-[100]">
               <button v-for="(data, key) in availableRankSubcategories" :key="key"
                 @click="selectRankingSubCategory = data"
                 class="bg-[#e8eaed] text-[#1f1f1f] text-[0.6rem] px-1 py-1 rounded"
@@ -279,7 +284,7 @@ window.HomeView = {
             </div>
 
             <!-- Year scroll -->
-            <div class="flex flex-col absolute top-[50px] left-[10px] w-[200px]">
+            <div class="flex flex-col absolute top-[50px] left-[10px] w-[200px] z-[100]">
               <p class="text-[0.8rem]">Year: <strong>{{ selectYear }}</strong></p>
               <el-slider
                 v-if="availableYears.length > 0"
@@ -298,10 +303,21 @@ window.HomeView = {
 
             <!-- Map -->
             <map-geojson 
-              class="absolute top-[80px] left-0 w-full h-full"
-              :height="'530px'"
+              class="absolute top-[50px] left-0 w-full z-[10]"
+              :height="'430px'"
               :selectRankingColors="selectRankingColors">
             </map-geojson>
+
+            <!-- Legend -->
+            <div v-if="colorsRanking" class="absolute bottom-[20px] left-[35px] z-[100]">
+              <div class="font-bold text-sm mb-2 text-gray-600">Ranking</div>
+              <div class="flex flex-row items-center">
+                <div v-for="(color, label) in colorsRanking" :key="label" class="flex items-center mr-4 mb-1">
+                    <span class="inline-block w-[12px] h-[12px] mr-[3px]" :style="{ backgroundColor: color }"></span>
+                    <span class="text-sm text-gray-600">{{ label }}</span>
+                </div>
+              </div>
+            </div>
 
           </div>
 

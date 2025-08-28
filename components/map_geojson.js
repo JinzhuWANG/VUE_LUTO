@@ -9,14 +9,15 @@ window.map_geojson = {
         },
     },
     setup(props) {
-        const { ref, onMounted, watch, inject } = Vue;
+        const { ref, onMounted, watch, nextTick, inject } = Vue;
 
         const mapElement = ref(null);
+        const mapInstance = ref(null);
         const activeRegionName = inject('globalSelectedRegion');
         const hoverTooltip = ref(null);
         const geoJSONLayer = ref(null);
         const featureStyles = ref({});
-        const australiaBounds = L.latLngBounds([-43, 113], [-12, 154]);
+        const australiaBounds = L.latLngBounds([-42, 113], [-12, 154]);
 
         const defaultStyle = {
             color: "#fefefe",
@@ -32,43 +33,9 @@ window.map_geojson = {
             weight: 0.1,
         };
 
+        onMounted(() => {
 
-        // Function to update styles based on data type and year
-        const updateMapStyles = () => {
-            if (!geoJSONLayer.value) return;
-
-            // Update styles for all layers
-            geoJSONLayer.value.eachLayer(function (layer) {
-                const regionName = layer.options.regionName;
-
-                // Skip the currently selected region (which should keep highlight style)
-                if (regionName === activeRegionName.value) return;
-
-                try {
-                    // Get data type from props (Area by default)
-                    const dataType = props.selectDataType;
-                    // Get current year from props
-                    const currentYear = props.selectYear;
-
-                    // Create a new style object starting with default
-                    let style = { ...defaultStyle };
-                    style.fillColor = selectRankingColors[regionName];
-
-                    // Store the style for later reference
-                    featureStyles.value[regionName] = style;
-
-                    // Apply the style
-                    layer.setStyle(style);
-                } catch (error) {
-                    console.error(`Error updating style for region ${regionName}:`, error);
-                }
-            });
-        };
-
-
-        onMounted(async () => {
-
-            // Initialize map
+            // Initialize basic map with disabled controls
             const map = L.map(mapElement.value, {
                 zoomControl: false,
                 attributionControl: false,
@@ -78,40 +45,37 @@ window.map_geojson = {
                 doubleClickZoom: false,
             });
 
+            // Set view to Australia
+            map.setView(australiaBounds.getCenter(), 3.9, { animate: false });
 
-            map.setView(
-                australiaBounds.getCenter(),
-                map.getBoundsZoom(australiaBounds),
-                { animate: false }
-            );
+            // Store map instance for later use
+            mapInstance.value = map;
 
-            // Get custom style function for each feature
+            // Get style function for each feature
             const getFeatureStyle = (feature) => {
                 const regionName = feature.properties.NHT2NAME;
-
-                // Need a check to access a deep property safely
                 let style = { ...defaultStyle };
-                style.fillColor = window[rankingKey][regionName][subcategory].color[currentYear];
 
+                if (props.selectRankingColors && props.selectRankingColors[regionName]) {
+                    style.fillColor = props.selectRankingColors[regionName];
+                }
 
-                // Store the style for later reference
                 featureStyles.value[regionName] = style;
-
                 return style;
             };
 
+            // Add GeoJSON layer with mouse effects
             geoJSONLayer.value = L.geoJSON(window['NRM_AUS'], {
                 style: getFeatureStyle,
                 onEachFeature: (feature, layer) => {
-                    // Store region name in layer options for easier access later
                     layer.options.regionName = feature.properties.NHT2NAME;
-                    // Set the initial style for the layer
+
+                    // Set initial style
                     if (activeRegionName.value === feature.properties.NHT2NAME) {
                         layer.setStyle(highlightStyle);
-                    } else {
-                        layer.setStyle(featureStyles.value[feature.properties.NHT2NAME] || defaultStyle);
                     }
-                    // Add hover and click events
+
+                    // Mouse events
                     layer.on({
                         mousemove: (e) => {
                             const layer_e = e.target;
@@ -120,13 +84,13 @@ window.map_geojson = {
                                 layer_e._path.style.cursor = 'default';
                             }
 
-                            // Remove previous hover tooltip
+                            // Remove previous tooltip
                             if (hoverTooltip.value) {
                                 map.removeLayer(hoverTooltip.value);
                                 hoverTooltip.value = null;
                             }
 
-                            // Create new hover tooltip
+                            // Create hover tooltip
                             hoverTooltip.value = L.tooltip({
                                 permanent: false,
                                 direction: "top",
@@ -134,12 +98,11 @@ window.map_geojson = {
                             hoverTooltip.value.setContent(feature.properties.NHT2NAME);
                             hoverTooltip.value.setLatLng(e.latlng);
                             hoverTooltip.value.addTo(map);
-
                         },
                         mouseout: (e) => {
                             const layer_e = e.target;
 
-                            // Remove hover tooltip if it exists
+                            // Remove tooltip
                             if (hoverTooltip.value) {
                                 map.removeLayer(hoverTooltip.value);
                                 hoverTooltip.value = null;
@@ -148,36 +111,24 @@ window.map_geojson = {
                             if (layer_e.options.regionName === activeRegionName.value) {
                                 layer_e.setStyle(highlightStyle);
                             }
-
                         },
                         click: (e) => {
                             const layer_e = e.target;
 
-                            // Check if the clicked region is already the active region
+                            // Toggle selection
                             if (layer_e.options.regionName === activeRegionName.value) {
-                                // Restore the custom style for this region when deselecting
+                                // Deselect - restore original style
                                 const regionName = layer_e.options.regionName;
-                                // Always use the region's color attributes (featureStyles) when deselecting
                                 if (featureStyles.value[regionName]) {
                                     layer_e.setStyle(featureStyles.value[regionName]);
                                 } else {
-                                    // As a fallback, try to get color from current data
-                                    try {
-
-                                        // Create a new style object using the region's color
-                                        const style = { ...defaultStyle };
-                                        style.fillColor = window[rankingKey][regionName][subcategory]['color'][currentYear];
-                                        layer_e.setStyle(style);
-
-                                    } catch (error) {
-                                        console.error(`Error getting color for region ${regionName}:`, error);
-                                        layer_e.setStyle(defaultStyle);
-                                    }
+                                    layer_e.setStyle(defaultStyle);
                                 }
+                                activeRegionName.value = 'AUSTRALIA';
                                 return;
                             }
 
-                            // Remove highlight style from all regions and restore their custom styles
+                            // Remove highlight from all regions
                             geoJSONLayer.value.eachLayer(function (layer) {
                                 const regionName = layer.options.regionName;
                                 if (featureStyles.value[regionName]) {
@@ -187,29 +138,70 @@ window.map_geojson = {
                                 }
                             });
 
-                            // Set new selection
+                            // Highlight new selection
                             layer_e.setStyle(highlightStyle);
-
+                            activeRegionName.value = layer_e.options.regionName;
                         },
                     });
                 },
             }).addTo(map);
 
 
+            // Ensure map size is correct after initialization
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
 
         });
+
+
+        // Function to update map colors when selectRankingColors changes
+        const updateMapStyles = () => {
+            if (!geoJSONLayer.value) return;
+
+            geoJSONLayer.value.eachLayer(function (layer) {
+                const regionName = layer.options.regionName;
+
+                // Skip currently selected region
+                if (regionName === activeRegionName.value) return;
+
+                // Update style with new colors
+                let style = { ...defaultStyle };
+                if (props.selectRankingColors && props.selectRankingColors[regionName]) {
+                    style.fillColor = props.selectRankingColors[regionName];
+                }
+
+                featureStyles.value[regionName] = style;
+                layer.setStyle(style);
+            });
+        };
+
+        // Watch for ranking color changes
+        watch(() => props.selectRankingColors, updateMapStyles, { deep: true });
+
+        // Watch for height changes and update map size
+        watch(
+            () => props.height,
+            async (newHeight) => {
+                if (mapInstance.value) {
+                    await nextTick();
+                    setTimeout(() => {
+                        mapInstance.value.invalidateSize();
+                    }, 50);
+                }
+            },
+            { immediate: false }
+        );
 
         return {
             mapElement,
             activeRegionName,
-            props
+            props,
         };
     },
     template: `
       <div>
-        <div ref="mapElement" :style="{ background: 'transparent', height: props.height }"></div>
+        <div ref="mapElement" :style="{ background: 'transparent', height: props.height + ' !important', width: '100%' }"></div>
       </div>
     `,
 };
-
-
