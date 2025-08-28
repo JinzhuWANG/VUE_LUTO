@@ -4,7 +4,7 @@ window.map_geojson = {
             type: String,
             default: '500px',
         },
-        selectRankingData: {
+        selectRankingColors: {
             type: Object,
         },
     },
@@ -52,16 +52,7 @@ window.map_geojson = {
 
                     // Create a new style object starting with default
                     let style = { ...defaultStyle };
-                    // Get subcategory from props and map it to the actual data structure key
-                    const subcategory = window.DataService.mapSubcategory(dataType, props.selectSubcategory);
-
-                    // Access color from ranking data
-                    // Special handling for Water data type
-                    const rankingKey = `${dataType}_ranking`;
-
-                    if (window[rankingKey]?.[regionName]?.[subcategory]?.color?.[currentYear]) {
-                        style.fillColor = window[rankingKey][regionName][subcategory].color[currentYear];
-                    }
+                    style.fillColor = selectRankingColors[regionName];
 
                     // Store the style for later reference
                     featureStyles.value[regionName] = style;

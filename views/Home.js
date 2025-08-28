@@ -16,10 +16,7 @@ window.HomeView = {
     // Available selections
     const availableYears = ref([]);
     const availableChartCategories = ref([]);
-    const availableChartSubCategories = computed(() => {
-      return (ChartData.value[selectChartCategory.value]) ?
-        Object.keys(ChartData.value[selectChartCategory.value]) : [];
-    });
+    const availableChartSubCategories = ref([]);
     const availableUnit = {
       'Area': 'Hectares',
       'Economics': 'AUD',
@@ -33,23 +30,15 @@ window.HomeView = {
       'Non-Agricultural Landuse': 'Non-Ag',
       'Non-Agricultural land-use': 'Non-Ag',
     };
-    const availableRankSubcategories = computed(() => {
-      return rankingData.value[selectChartCategory.value][selectRegion.value]
-        ? Object.keys(rankingData.value[selectChartCategory.value][selectRegion.value]).filter(key => key !== "Total")
-        : [];
-    });
+    const availableRankSubcategories = ref([]);
 
     // Default selections
     const yearIndex = ref(0);
-    const selectYear = computed(() => {
-      return availableYears.value ? availableYears.value[yearIndex.value] : [];
-    });
+    const selectYear = ref(2020);
     const selectChartCategory = ref('');
     const selectChartSubCategory = ref('');
     const selectRankingSubCategory = ref('');
-    const selectRankingData = computed(() => {
-      return rankingData.value[selectChartCategory.value]?.[selectRankingSubCategory.value] || [];
-    });
+    const selectRankingColors = ref({});
 
 
     //  Reactive data
@@ -71,9 +60,6 @@ window.HomeView = {
       }
     });
 
-    const rankingColors = computed(() => {
-      return window.Supporting_info.colors_ranking || [];
-    });
 
     const runScenario = computed(() => {
       return !window.Supporting_info ? {} : {
@@ -183,17 +169,32 @@ window.HomeView = {
       selectChartCategory.value = availableChartCategories.value[0];
 
       selectChartSubCategory.value = Object.keys(ChartData.value[selectChartCategory.value])[0];
-      selectRankingSubCategory.value = Object.keys(rankingData.value[selectChartCategory.value])[0];
+      selectRankingSubCategory.value = Object.keys(rankingData.value[selectChartCategory.value][selectRegion.value])[0];
 
-      dataLoaded.value = true;
+      await nextTick(() => {
+        dataLoaded.value = true;
+      });
 
-      console.log(rankingData.value)
 
     });
 
+    watch(yearIndex, (newIndex) => {
+      selectYear.value = availableYears.value[newIndex];
+    });
+
     watch(selectChartCategory, (newCategory) => {
+      availableChartSubCategories.value = Object.keys(ChartData.value[selectChartCategory.value])
+      availableRankSubcategories.value = Object.keys(rankingData.value[selectChartCategory.value][selectRegion.value]).filter(key => key !== "Total");
       selectChartSubCategory.value = availableChartSubCategories.value[0];
       selectRankingSubCategory.value = availableRankSubcategories.value[0];
+      selectRankingColors.value = Object.fromEntries(
+        Object.entries(rankingData.value[selectChartCategory.value] || {}).map(([region, values]) => [
+          region,
+          values[selectRankingSubCategory.value]?.['color']?.[selectYear.value] || {}
+        ])
+      );
+
+      console.log(selectRankingColors.value)
     });
 
 
@@ -204,7 +205,6 @@ window.HomeView = {
 
       ChartData,
       rankingData,
-      rankingColors,
       RankSubcategoriesRename,
 
       availableYears,
@@ -218,7 +218,7 @@ window.HomeView = {
       selectChartSubCategory,
       selectRankingSubCategory,
       selectChartData,
-      selectRankingData,
+      selectRankingColors,
     };
   },
 
@@ -295,7 +295,13 @@ window.HomeView = {
                 @input="(index) => { yearIndex = index; }"
               />
             </div>
-            
+
+            <!-- Map -->
+            <map-geojson 
+              class="absolute top-[80px] left-0 w-full h-full"
+              :height="'530px'"
+              :selectRankingColors="selectRankingColors">
+            </map-geojson>
 
           </div>
 
