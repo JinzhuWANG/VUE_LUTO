@@ -12,6 +12,8 @@ The LUTO model is designed to analyze trade-offs between different land uses in 
 - **Greenhouse Gas (GHG) Emissions**: Carbon footprint and climate impacts
 - **Water Usage**: Water consumption and management
 - **Biodiversity**: Environmental conservation metrics
+- **Production**: Agricultural and land productivity analysis
+- **Interactive Mapping**: Comprehensive geospatial visualization and analysis
 
 This dashboard provides an intuitive interface to explore model outputs and understand the implications of different policy scenarios.
 
@@ -45,6 +47,8 @@ VUE_LUTO/
 │   ├── GHG.js                          # Greenhouse Gas analysis view
 │   ├── Water.js                        # Water usage analysis view
 │   ├── Production.js                   # Production analysis view
+│   ├── Biodiversity.js                 # Biodiversity analysis view
+│   ├── Map.js                          # Dedicated map view
 │   ├── Settings.js                     # Application settings view
 │   └── NotFound.js                     # 404 error page
 ├── services/                           # Service modules
@@ -63,7 +67,9 @@ VUE_LUTO/
 │   ├── vue.global.prod_3.5.18.js       # Vue.js library
 │   ├── vue-router.global_4.5.1.js      # Vue Router library
 │   └── tailwind_3.4.16.js              # Tailwind CSS library
-├── assets/                             # Raw data assets (JSON format)
+├── assets/                             # Raw data assets and color scheme CSV files
+│   ├── *.csv                           # Color scheme files (ammap, lm, lumap, non_ag colors)
+│   └── NRM_SIMPLIFY_FILTER/            # Updated NRM shapefile data with Web Mercator CRS
 ├── dataTransform/                      # Data transformation scripts
 │   ├── 01_JSON2JS_dataTrans.py         # JSON to JS conversion utility
 │   └── NRM_SIMPLIFY_FILTER/            # Geographic data processing tools
@@ -234,15 +240,16 @@ This project is part of the LUTO (Land Use Trade-Offs) model system. Please refe
 ## Version History
 
 ### Latest Changes
-- Refactored data structure with improved JS file formatting
-- Updated JSON to JS conversion process with better indentation
-- Updated map UI components and views for improved visualization
-- Enhanced map integration with dynamic data loading capabilities
-- Optimized map data loading and UI controls for better performance
-- Improved responsive UI with better layout and spacing
-- Added Production analysis view for agricultural production data
-- Implemented filterable dropdown components for better data selection
-- Migrated from CDN dependencies to local libraries for offline use
+- **Major Geospatial Data Update**: Updated NRM_AUS_SIMPLIFIED shapefile data with new Web Mercator coordinate reference system for improved mapping accuracy
+- **Enhanced Color Schemes**: Standardized color schemes across all visualization CSV files (ammap_colors, lm_colors, lumap_colors, non_ag_colors) for consistent visual representation
+- **Advanced Chart Interactivity**: Added landuse highlighting functionality to chart_container.js with selectedLanduse prop support for interactive data exploration
+- **Improved Region Handling**: Updated components to use NRM_REGION property instead of NHT2NAME, providing better consistency across the application
+- **New View Components**: Added dedicated Biodiversity.js and Map.js view components for specialized analysis capabilities
+- **Enhanced Map Components**: Updated map_geojson.js and regions_map.js with improved AUSTRALIA region handling and responsive design
+- **Geospatial Data Modernization**: Updated AUS_STATE.js with new CRS84 coordinate system and enhanced state boundary definitions
+- **Service Layer Improvements**: Enhanced DataService.js and MapService.js to support the new data architecture and improved performance
+- **Navigation Updates**: Refined sidebar.js with updated navigation structure and removed deprecated elements
+- **Data Architecture Standardization**: Standardized region property references throughout the application for better maintainability
 
 ### Future Enhancements
 - Add more detailed analysis views for each domain
