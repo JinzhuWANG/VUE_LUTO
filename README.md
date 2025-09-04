@@ -250,6 +250,7 @@ This project is part of the LUTO (Land Use Trade-Offs) model system. Please refe
 - **Service Layer Improvements**: Enhanced DataService.js and MapService.js to support the new data architecture and improved performance
 - **Navigation Updates**: Refined sidebar.js with updated navigation structure and removed deprecated elements
 - **Data Architecture Standardization**: Standardized region property references throughout the application for better maintainability
+- **Project Cleanup**: Removed outdated shapefile data from dataTransform directory, maintaining clean project structure with current geospatial assets
 
 ### Future Enhancements
 - Add more detailed analysis views for each domain
